@@ -204,3 +204,230 @@ fn validate(text: &str) -> Result<(), LexiconError> {
     }
     Ok(())
 }
+
+/// Resultado da composição de duas relações tipadas, com evidências fornecidas.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ConceptOutcome {
+    Supported {
+        text: String,
+        concept: u32,
+        sense: String,
+        source_evidence: EngramId,
+        target_evidence: EngramId,
+    },
+    Unknown,
+    Ambiguous,
+    Conflict,
+    LimitExceeded,
+    Inconclusive,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConceptError {
+    InvalidInput,
+    Capacity,
+    Duplicate,
+    UnknownConcept,
+}
+struct Concept {
+    id: u32,
+    sense: String,
+}
+/// Associa apenas forma→conceito; nunca registra forma→forma.
+pub struct ConceptLexicon {
+    forms: Vec<Form>,
+    concepts: Vec<Concept>,
+    links: EngramStore,
+}
+impl Default for ConceptLexicon {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl ConceptLexicon {
+    pub fn new() -> Self {
+        Self {
+            forms: Vec::new(),
+            concepts: Vec::new(),
+            links: EngramStore::new(MAX_ASSOCIATIONS).expect("capacidade fixa"),
+        }
+    }
+    pub fn add_concept(&mut self, id: u32, sense: &str) -> Result<(), ConceptError> {
+        if id == 0
+            || id > i32::MAX as u32
+            || sense.is_empty()
+            || sense.len() > MAX_INPUT_BYTES
+            || sense.chars().any(char::is_control)
+        {
+            return Err(ConceptError::InvalidInput);
+        }
+        if self.concepts.iter().any(|c| c.id == id) {
+            return Err(ConceptError::Duplicate);
+        }
+        if self.concepts.len() == 64 {
+            return Err(ConceptError::Capacity);
+        }
+        self.concepts.push(Concept {
+            id,
+            sense: sense.to_owned(),
+        });
+        Ok(())
+    }
+    /// `positive=false` registra evidência contrária à mesma associação.
+    pub fn associate(
+        &mut self,
+        language: Language,
+        text: &str,
+        concept: u32,
+        positive: bool,
+    ) -> Result<(), ConceptError> {
+        validate(text).map_err(|_| ConceptError::InvalidInput)?;
+        if !self.concepts.iter().any(|c| c.id == concept) {
+            return Err(ConceptError::UnknownConcept);
+        }
+        let existing = self
+            .forms
+            .iter()
+            .find(|f| f.language == language && f.text == text)
+            .map(|f| f.id);
+        let context = match language {
+            Language::PtBr => 1201,
+            Language::En => 1202,
+        };
+        let value = if positive { 1 } else { -1 };
+        if let Some(id) = existing {
+            if self.links.iter().any(|r| {
+                r.cue().context() == context
+                    && r.cue().source() == id
+                    && r.cue().pattern() == concept as i32
+                    && r.value() == value
+            }) {
+                return Err(ConceptError::Duplicate);
+            }
+        }
+        if self.links.len() == MAX_ASSOCIATIONS
+            || (existing.is_none() && self.forms.len() == MAX_FORMS)
+        {
+            return Err(ConceptError::Capacity);
+        }
+        let id = if let Some(id) = existing {
+            id
+        } else {
+            let id = NodeId::new((self.forms.len() + 1) as u32).expect("id limitado");
+            self.forms.push(Form {
+                id,
+                language,
+                text: text.to_owned(),
+            });
+            id
+        };
+        let record = Engram::new(
+            EngramId::new((self.links.len() + 1) as u32).expect("id limitado"),
+            Cue::new(context, id, concept as i32).expect("pista válida"),
+            value,
+            Some(id),
+            0,
+            None,
+            RecordStatus::Observed,
+        )
+        .expect("observação válida");
+        self.links
+            .record(record)
+            .expect("capacidade e id verificados");
+        Ok(())
+    }
+    pub fn compose(
+        &self,
+        direction: Direction,
+        text: &str,
+        budget: usize,
+    ) -> Result<ConceptOutcome, ConceptError> {
+        validate(text).map_err(|_| ConceptError::InvalidInput)?;
+        if budget > 2 {
+            return Err(ConceptError::InvalidInput);
+        }
+        if budget < 2 {
+            return Ok(ConceptOutcome::Inconclusive);
+        }
+        let (source_lang, target_lang) = direction.languages();
+        let Some(source) = self
+            .forms
+            .iter()
+            .find(|f| f.language == source_lang && f.text == text)
+        else {
+            return Ok(ConceptOutcome::Unknown);
+        };
+        let src_context = match source_lang {
+            Language::PtBr => 1201,
+            Language::En => 1202,
+        };
+        let dst_context = match target_lang {
+            Language::PtBr => 1201,
+            Language::En => 1202,
+        };
+        let mut chosen = None;
+        let mut ambiguous = false;
+        let mut count = 0;
+        for first in self.links.iter().filter(|r| {
+            r.cue().context() == src_context && r.cue().source() == source.id && r.value() == 1
+        }) {
+            let concept = first.cue().pattern();
+            if self
+                .links
+                .iter()
+                .any(|r| r.cue() == first.cue() && r.value() == -1)
+            {
+                return Ok(ConceptOutcome::Conflict);
+            }
+            for second in self.links.iter().filter(|r| {
+                r.cue().context() == dst_context && r.cue().pattern() == concept && r.value() == 1
+            }) {
+                count += 1;
+                if count > MAX_CANDIDATES {
+                    return Ok(ConceptOutcome::LimitExceeded);
+                }
+                if self
+                    .links
+                    .iter()
+                    .any(|r| r.cue() == second.cue() && r.value() == -1)
+                {
+                    return Ok(ConceptOutcome::Conflict);
+                }
+                if chosen.is_some() {
+                    ambiguous = true;
+                } else {
+                    chosen = Some((first, second));
+                }
+            }
+        }
+        if ambiguous {
+            return Ok(ConceptOutcome::Ambiguous);
+        }
+        let Some((first, second)) = chosen else {
+            return Ok(ConceptOutcome::Unknown);
+        };
+        let Some(form) = self
+            .forms
+            .iter()
+            .find(|f| f.id == second.cue().source() && f.language == target_lang)
+        else {
+            return Ok(ConceptOutcome::Inconclusive);
+        };
+        let Some(concept) = self
+            .concepts
+            .iter()
+            .find(|c| c.id == first.cue().pattern() as u32)
+        else {
+            return Ok(ConceptOutcome::Inconclusive);
+        };
+        Ok(ConceptOutcome::Supported {
+            text: form.text.clone(),
+            concept: concept.id,
+            sense: concept.sense.clone(),
+            source_evidence: first.id(),
+            target_evidence: second.id(),
+        })
+    }
+    pub fn association_count(&self) -> usize {
+        self.links.len()
+    }
+}
