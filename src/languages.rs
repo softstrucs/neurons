@@ -1,0 +1,206 @@
+//! Associações lexicais fornecidas, com comparação UTF-8 exata.
+use crate::engram::{Cue, Engram, EngramId, EngramStore, RecordStatus};
+use crate::event::NodeId;
+
+pub const MAX_FORMS: usize = 128;
+pub const MAX_ASSOCIATIONS: usize = 256;
+pub const MAX_INPUT_BYTES: usize = 256;
+pub const MAX_CANDIDATES: usize = 8;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Language {
+    PtBr,
+    En,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Direction {
+    PtToEn,
+    EnToPt,
+}
+impl Direction {
+    fn languages(self) -> (Language, Language) {
+        match self {
+            Self::PtToEn => (Language::PtBr, Language::En),
+            Self::EnToPt => (Language::En, Language::PtBr),
+        }
+    }
+    fn context(self) -> u32 {
+        match self {
+            Self::PtToEn => 1101,
+            Self::EnToPt => 1102,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Identification {
+    Identified(Language),
+    Unknown,
+    Ambiguous,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Outcome {
+    Supported { text: String, evidence: EngramId },
+    Unknown,
+    Ambiguous,
+    Inconclusive,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LexiconError {
+    InvalidInput,
+    Capacity,
+    DuplicateAssociation,
+}
+struct Form {
+    id: NodeId,
+    language: Language,
+    text: String,
+}
+
+/// Armazena associações direcionais como engramas; conteúdo é fornecido pelo chamador.
+pub struct Lexicon {
+    forms: Vec<Form>,
+    records: EngramStore,
+}
+impl Lexicon {
+    pub fn new() -> Self {
+        Self {
+            forms: Vec::new(),
+            records: EngramStore::new(MAX_ASSOCIATIONS).expect("capacidade constante válida"),
+        }
+    }
+    /// Um par adiciona duas associações. Não altera estado se a entrada for inválida ou não couber.
+    pub fn add_pair(&mut self, pt: &str, en: &str) -> Result<(), LexiconError> {
+        validate(pt)?;
+        validate(en)?;
+        let p = self.find(Language::PtBr, pt);
+        let e = self.find(Language::En, en);
+        if let (Some(p), Some(e)) = (p, e) {
+            if self.records.iter().any(|r| {
+                r.cue().context() == Direction::PtToEn.context()
+                    && r.cue().source() == p
+                    && r.value() == e.get() as i32
+            }) {
+                return Err(LexiconError::DuplicateAssociation);
+            }
+        }
+        let needed = usize::from(p.is_none()) + usize::from(e.is_none());
+        if self.forms.len() + needed > MAX_FORMS || self.records.len() + 2 > MAX_ASSOCIATIONS {
+            return Err(LexiconError::Capacity);
+        }
+        let p = match p {
+            Some(id) => id,
+            None => self.insert_form(Language::PtBr, pt),
+        };
+        let e = match e {
+            Some(id) => id,
+            None => self.insert_form(Language::En, en),
+        };
+        for (source, target, direction) in [(p, e, Direction::PtToEn), (e, p, Direction::EnToPt)] {
+            let id =
+                EngramId::new((self.records.len() + 1) as u32).expect("id limitado e não nulo");
+            let cue = Cue::new(direction.context(), source, 1).expect("pista constante válida");
+            let record = Engram::new(
+                id,
+                cue,
+                target.get() as i32,
+                Some(source),
+                0,
+                None,
+                RecordStatus::Observed,
+            )
+            .expect("registro observado válido");
+            self.records
+                .record(record)
+                .expect("capacidade e identidade verificadas");
+        }
+        Ok(())
+    }
+    fn insert_form(&mut self, language: Language, text: &str) -> NodeId {
+        let id = NodeId::new((self.forms.len() + 1) as u32).expect("id limitado e não nulo");
+        self.forms.push(Form {
+            id,
+            language,
+            text: text.to_owned(),
+        });
+        id
+    }
+    fn find(&self, language: Language, text: &str) -> Option<NodeId> {
+        self.forms
+            .iter()
+            .find(|f| f.language == language && f.text == text)
+            .map(|f| f.id)
+    }
+    pub fn identify(&self, text: &str) -> Result<Identification, LexiconError> {
+        validate(text)?;
+        Ok(
+            match (
+                self.find(Language::PtBr, text),
+                self.find(Language::En, text),
+            ) {
+                (Some(_), Some(_)) => Identification::Ambiguous,
+                (Some(_), None) => Identification::Identified(Language::PtBr),
+                (None, Some(_)) => Identification::Identified(Language::En),
+                (None, None) => Identification::Unknown,
+            },
+        )
+    }
+    /// Um orçamento zero resulta em avaliação inconclusiva; no máximo uma tentativa.
+    pub fn translate(
+        &self,
+        direction: Direction,
+        text: &str,
+        attempts: usize,
+    ) -> Result<Outcome, LexiconError> {
+        validate(text)?;
+        if attempts > 2 {
+            return Err(LexiconError::InvalidInput);
+        }
+        if attempts == 0 {
+            return Ok(Outcome::Inconclusive);
+        }
+        let (source_language, target_language) = direction.languages();
+        let Some(source) = self.find(source_language, text) else {
+            return Ok(Outcome::Unknown);
+        };
+        let mut matches = self
+            .records
+            .iter()
+            .filter(|r| r.cue().context() == direction.context() && r.cue().source() == source);
+        let Some(first) = matches.next() else {
+            return Ok(Outcome::Unknown);
+        };
+        if matches.next().is_some() {
+            return Ok(Outcome::Ambiguous);
+        }
+        let target = self
+            .forms
+            .iter()
+            .find(|f| f.id.get() == first.value() as u32 && f.language == target_language)
+            .ok_or(LexiconError::InvalidInput)?;
+        Ok(Outcome::Supported {
+            text: target.text.clone(),
+            evidence: first.id(),
+        })
+    }
+    pub fn form_count(&self) -> usize {
+        self.forms.len()
+    }
+    pub fn association_count(&self) -> usize {
+        self.records.len()
+    }
+}
+impl Default for Lexicon {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+fn validate(text: &str) -> Result<(), LexiconError> {
+    if text.is_empty()
+        || text.len() > MAX_INPUT_BYTES
+        || text.chars().any(char::is_whitespace)
+        || text.chars().any(char::is_control)
+    {
+        return Err(LexiconError::InvalidInput);
+    }
+    Ok(())
+}
