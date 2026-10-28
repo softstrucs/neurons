@@ -243,4 +243,9 @@ impl EngramStore {
     pub const fn capacity(&self) -> usize {
         self.capacity
     }
+
+    /// Percorre registros em ordem de inserção, sem alocar ou alterar estado.
+    pub fn iter(&self) -> impl Iterator<Item = Engram> + '_ {
+        self.records.iter().copied()
+    }
 }

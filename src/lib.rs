@@ -1,6 +1,7 @@
 //! Núcleo da Neurons. Componentes são adicionados conforme cada etapa.
 
 pub mod circuit;
+pub mod cognition;
 pub mod engine;
 pub mod engram;
 pub mod event;
