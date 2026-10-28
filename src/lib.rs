@@ -1,1 +1,4 @@
-//! Núcleo da Neurons. Componentes serão adicionados em etapas futuras.
+//! Núcleo da Neurons. Componentes são adicionados conforme cada etapa.
+
+pub mod engine;
+pub mod event;
