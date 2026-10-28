@@ -431,3 +431,6 @@ impl ConceptLexicon {
         self.links.len()
     }
 }
+
+/// Experimentos contextuais e de feedback, independentes da CLI.
+pub mod contextual;
