@@ -1,0 +1,36 @@
+// Inventário e casos finais congelados antes de executar a avaliação.
+pub const FORMS: [&str; 28] = [
+    "banco treino",
+    "assento treino",
+    "validacao um",
+    "validacao dois",
+    "banco claro",
+    "banco escuro",
+    "banco longo",
+    "banco curto",
+    "banco antigo",
+    "banco novo",
+    "banco central",
+    "banco lateral",
+    "banco aberto",
+    "banco fechado",
+    "banco urbano",
+    "banco rural",
+    "banco baixo",
+    "banco alto",
+    "banco azul",
+    "banco verde",
+    "banco leve",
+    "banco firme",
+    "banco pronto",
+    "banco amplo",
+    "banco simples",
+    "banco duplo",
+    "banco externo",
+    "banco interno",
+];
+// Contextos e expectativas são usados pelo avaliador após as decisões.
+pub const EXPECTED_FIRST: [bool; 24] = [
+    true, false, true, false, true, false, true, false, true, false, true, false, true, false,
+    true, false, true, false, true, false, true, false, true, false,
+];
