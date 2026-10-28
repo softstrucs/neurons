@@ -8,4 +8,6 @@ pub mod event;
 pub mod learning;
 pub mod metacognition;
 pub mod neuron;
+pub mod personality;
+pub mod session;
 pub mod synapse;

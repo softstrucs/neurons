@@ -5,7 +5,7 @@ use std::thread;
 const HELP: &str = concat!(
     "Neurons ",
     env!("CARGO_PKG_VERSION"),
-    "\n\nUso: neurons [--help | doctor]\n\nComandos:\n  --help, -h  Mostra esta ajuda\n  doctor      Mostra informações básicas do ambiente\n"
+    "\n\nUso: neurons [--help | doctor | session | session-explain]\n\nComandos:\n  --help, -h  Mostra esta ajuda\n  doctor      Mostra informações básicas do ambiente\n  session     Sessão curta de gramática restrita, estilo conciso\n  session-explain  Mesma sessão, estilo explicativo\n"
 );
 
 fn main() -> ExitCode {
@@ -25,6 +25,20 @@ fn main() -> ExitCode {
             }
             println!("Estado: inicialização mínima; núcleo ainda não implementado");
             ExitCode::SUCCESS
+        }
+        (Some(command @ ("session" | "session-explain")), None) => {
+            let style = if command == "session" {
+                neurons::personality::Style::Concise
+            } else {
+                neurons::personality::Style::Explanatory
+            };
+            match neurons::session::run(std::io::stdin().lock(), std::io::stdout().lock(), style) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(error) => {
+                    eprintln!("Erro de sessão: {error}");
+                    ExitCode::FAILURE
+                }
+            }
         }
         _ => {
             eprint!("Argumentos inválidos.\n\n{HELP}");
