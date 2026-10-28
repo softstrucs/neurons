@@ -2,6 +2,7 @@
 
 pub mod circuit;
 pub mod cognition;
+pub mod curriculum;
 pub mod engine;
 pub mod engram;
 pub mod event;
