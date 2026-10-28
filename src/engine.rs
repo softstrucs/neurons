@@ -178,3 +178,7 @@ impl Engine {
         self.metrics
     }
 }
+
+/// Checkpoints locais opcionais do motor e da memória associativa.
+#[path = "persistence.rs"]
+pub mod persistence;
