@@ -434,3 +434,6 @@ impl ConceptLexicon {
 
 /// Experimentos contextuais e de feedback, independentes da CLI.
 pub mod contextual;
+
+/// Composição experimental de frases com gramática restrita.
+pub mod sentences;
