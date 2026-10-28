@@ -67,7 +67,7 @@ impl Circuit {
         Ok(())
     }
 
-    /// Alteração de peso explícita, sem regra de aprendizagem.
+    /// Alteração de peso explícita, sem atualização implícita durante o despacho.
     pub fn set_weight(&mut self, id: SynapseId, weight: i32) -> Result<(), CircuitError> {
         let synapse = self
             .synapses
@@ -76,6 +76,15 @@ impl Circuit {
             .ok_or(CircuitError::UnknownSynapse(id))?;
         synapse.set_weight(weight);
         Ok(())
+    }
+
+    /// Consulta o peso atual para regras externas de atualização.
+    pub fn synapse_weight(&self, id: SynapseId) -> Result<i32, CircuitError> {
+        self.synapses
+            .iter()
+            .find(|item| item.id() == id)
+            .map(Synapse::weight)
+            .ok_or(CircuitError::UnknownSynapse(id))
     }
 
     pub fn stimulate(

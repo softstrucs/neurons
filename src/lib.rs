@@ -4,5 +4,6 @@ pub mod circuit;
 pub mod engine;
 pub mod engram;
 pub mod event;
+pub mod learning;
 pub mod neuron;
 pub mod synapse;
