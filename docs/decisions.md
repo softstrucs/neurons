@@ -1,4 +1,6 @@
-# Decisões experimentais — Etapa 03
+# Decisões experimentais
+
+## Etapa 03 — Neurônios e sinapses mínimos
 
 - **Implementado:** cada neurônio tem `NodeId`, potencial `i32`, limiar positivo, limite de estado e contadores de eventos recebidos e ativações. Aceita apenas `Stimulus` ou `Signal` endereçado a ele. Soma a carga com saturação em `[-limite, limite]`; ao atingir o limiar, zera o potencial e produz uma emissão unitária. Há no máximo uma emissão por evento.
 - **Implementado:** cada sinapse tem `SynapseId`, origem, destino, peso `i32` e atraso lógico positivo. Peso zero bloqueia a transmissão; peso negativo produz carga inibitória. O produto satura em `i32`; overflow do tempo retorna erro. Alterar o peso exige chamada explícita, sem adaptação automática.
@@ -6,3 +8,11 @@
 - **Invariantes do experimento:** destinos e conexões devem existir; IDs não podem ser zero; atraso não pode ser zero; entradas inválidas não modificam o estado do neurônio; mesmas configurações e entradas produzem a mesma sequência de estados e métricas.
 - **Escolhas provisórias:** potencial inteiro com reset e emissão unitária são mecanismos de teste, sem alegação de fidelidade biológica. A lista de sinapses é percorrida por ativação, custo linear no número de conexões, aceitável apenas para o circuito pequeno desta etapa. Há espaço conceitual para memória local, aprendizagem e monitoramento, mas nenhum desses mecanismos foi implementado.
 - **Ainda não demonstrado:** engramas, aprendizagem, generalização, cognição, metacognição, personalidade ou consciência. Ativação e propagação são observações funcionais delimitadas.
+
+## Etapa 04 — Associação recuperável em memória volátil
+
+- **Representação:** `Engram` guarda ID, pista exata `(contexto, origem da pista, padrão numérico)`, valor `i32`, origem do registro, tempo lógico, referência opcional de evidência e estado declarado `Observed`, `Hypothesis` ou `Validated`. É uma hipótese operacional de engrama, não uma célula biológica nem um fato comprovado.
+- **Escolha de armazenamento:** `EngramStore` usa um `Vec` compartilhado, com capacidade configurável e busca linear. Para os poucos registros desta etapa, evita estado permanente em cada neurônio e alocações por consulta. Armazenamento local limitado poderá ser comparado apenas se um experimento futuro exigir.
+- **Registro e consulta:** a chamada `record` é explícita; não há gravação automática ao ativar neurônios. `recall` exige correspondência exata e um único registro; ausência e ambiguidade retornam erros distintos. Registros conflitantes ou repetidos não são mesclados nem elevados a `Validated`. A referência de evidência exigida para esse estado não verifica a qualidade da evidência.
+- **Integração:** `Cue::from_activation_counts` transforma uma nova ativação observada pelo contador de `Circuit::neuron_state` em pista estável. O circuito e o motor não armazenam engramas nem consultam registros durante o despacho. Potencial neuronal é temporário; associação vive no `EngramStore` enquanto ele existir. Nenhuma persistência em disco foi implementada.
+- **Limites:** capacidade é contada em registros; IDs, contexto e padrão zero são inválidos. Consulta é linear no número de registros. A pista de ativação distingue unidade e contexto, mas não discrimina diferentes formas de atividade da mesma unidade. O experimento demonstra recuperação de uma associação fornecida, não aprendizagem, generalização ou cognição.
