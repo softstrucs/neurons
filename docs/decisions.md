@@ -281,3 +281,16 @@ Segunda subetapa literal concluída documentalmente em 2026-10-29, base `ef22bc5
 Partições exigidas separadas; nenhum conjunto final concreto foi gerado ou cadastrado. Controles de memória literal, respostas fixas, sem atualização, regra simbólica fixa e indução simbólica independente são definidos em nível de tarefa, com oráculo exclusivo do avaliador. Métricas por classe/cobertura e critérios exploratórios propostos distinguem êxito, resultado negativo e inconclusão; nenhum foi executado. A família conceitual é viés fornecido, não semântica aprendida autonomamente.
 
 Próxima subetapa: **protocolo com controles de memorização**, ainda não iniciada; deverá fechar alvos, dados, mecanismos, sequência, custódia e orçamento antes de qualquer implementação. Não se presume arquitetura definitiva nem autorização de execução. Somente documentação criada/atualizada; planos, protocolos históricos, produção e testes preservados. Verificações documentais e whitespace, sem execução experimental.
+
+
+# EC-04 — Protocolo com controles de memorização
+
+Subetapa documental concluída em 2026-10-29, base `d4fb08ddcffee38a0e21b3800817345498eb5d68`: [protocolo integral T-R/T-C/T-A/T-V](protocolos/EC-04_protocolo_controles_memorizacao.md). Congelados estados, quatro blocos finais com dois contextos, família de 576 critérios, professor exclusivo do avaliador, seleção determinística futura e partições, atualização por maior sufixo consistente, consulta por unanimidade, controles independentes e sequência de aquisição/avaliação/revisão. Candidato conceitual simbólico experimental, sem decisão de arquitetura definitiva.
+
+Preservados os tamanhos e limiares da definição de tarefas. Previsões documentais: 14560 consultas finais +3120 validações associadas =17680 em duas repetições; T-R sete condições, T-C oito e conceituais nove. T-C prevê 280 eventos de Circuit no painel, sem atribuir eventos neuronais aos controles simbólicos. Contagens, limiares e família foram conferidos aritmeticamente, sem executar indução ou experimento.
+
+Nenhum conjunto final foi gerado ou cadastrado. O procedimento de materialização/custódia/hashes foi especificado para execução posterior autorizada; manifesta viabilidade concreta e orçamento da construção continuam pré-condições verificáveis, sem relaxamento automático. Critérios e alvos conhecidos ao autor não constituem avaliação cega de autoria. Novidade é por contexto/conceito; transferência estrutural permanece não avaliada.
+
+Controles incluem literal, respostas fixas, sem aquisição, sem atualização, indução/execução simbólica independente e regra previamente programada. Aprendizagem simbólica delimitada, composição pronta e recuperação têm conclusões separadas; não se presume aprendizagem neural ou formação autônoma de significado. Limites: dados/fixtures vivos 256 KiB por condição, RSS <256 MiB, painel <=30 s e /home >=3 GiB; contagem uniforme de trabalho incluindo rejeições exigida na futura execução.
+
+Produção, testes, planos e protocolos históricos preservados; somente documentação alterada. Verificações documentais de consistência e whitespace. Próxima subetapa literal: **implementação isolada**, não iniciada e dependente de autorização explícita; a avaliação posterior também não foi iniciada.
