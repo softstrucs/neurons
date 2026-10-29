@@ -225,3 +225,12 @@ Permanecem ressalvas de cobertura preparatória, pré-congelamento histórico n�
 EC-03.1 concluída por inspeção estática: inventário, limites e dependências em [Auditoria de Representações e Memória](EC-03.1_auditoria_representacoes_memoria.md). Foram distinguidos eventos, estado neuronal, parâmetros sinápticos, engramas, relações/provas, monitoramento, representações linguísticas, episódios/resumos experimentais e checkpoint. Lacunas centrais: revisão e validade semântica, proveniência verificável, continuidade parcial do estado e ausência de competência ou representação distribuída adquirida demonstradas. Preservar os componentes modulares existentes.
 
 Próxima atividade prevista: EC-03.2, comparação analítica das representações, ainda não iniciada e dependente de autorização. Nenhum código de produção, teste ou plano foi alterado; nenhum novo experimento foi executado. Os números de testes são da R3.2, não de nova execução. Etapa 12 permanece adiada.
+
+
+# EC-03.2 — Comparação de representações
+
+Comparação analítica concluída em 2026-10-29 sobre `7339c907e5950e1c0a99ea22abef48ea8904a036`. Relatório: [EC-03.2 — Comparação de Representações](EC-03.2_comparacao_representacoes.md), com matrizes de episódio, contraste, expectativa contextual, relação, competência e representação distribuída. Episódios/resumos experimentais e relações têm mecanismos delimitados; competência operacional e representação distribuída adquirida com validade revisável permanecem hipóteses.
+
+Recomendação: investigar múltiplas representações interoperáveis, preservando fontes e distinguindo estado transitório, parâmetros, fatos fornecidos e inferências. Não impor unidade universal, promoção automática a competência ou projeção destrutiva. Manter recuperação literal como controle forte: sua superioridade em P4 de EC-02.4 permanece preservada, assim como o resultado nulo A02.5. Nenhuma arquitetura definitiva foi escolhida.
+
+Foram comparadas opções isoladas, combinadas e progressivamente especializadas; alternativas para EC-03.3 incluem projeções recalculáveis, versões com substituição/retratação e estado atual com diário limitado. São propostas, não mecanismos implementados. EC-03.3 não foi iniciada e exige autorização; nela deverão ser especificados proveniência, contexto, versões, validade, dependências e critérios de revisão sem perda silenciosa. Nenhum código, teste, plano ou protocolo foi modificado; nenhum experimento executado. Verificações documentais e whitespace aplicadas à entrega.
