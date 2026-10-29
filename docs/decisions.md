@@ -243,3 +243,14 @@ Especificação documental concluída em 2026-10-29, base `918c687b6412f5316c138
 Painel proposto: oito cenários, 32 consultas principais por condição, 16 históricas, duas sondas pré-Refresh e 12 negativos; três condições principais, duas repetições e duas ablações totalizam 500 verificações previstas. Controles: recuperação literal forte e resumo simbólico com implementação independente inclusive da validação. Limites de dados, trabalho, RSS, tempo e disco estão no protocolo; zero eventos neuronais previstos. Previsões não são resultados observados.
 
 Escolha de veículo experimental reversível (histórico conservado e projeções) não determina arquitetura de produção. Alternativas de organização continuam abertas. EC-03.4 exige aprovação explícita do protocolo e autorização de implementação, congelamento por hash e preparação antes da avaliação. Nenhum protótipo, teste novo ou experimento foi executado; produção, protocolos anteriores, planos e Fundamento preservados. EC-03.4 e EC-03.5 não iniciadas.
+
+
+# EC-03.3-R1 e EC-03.4 — Proveniência, revisão e retratação
+
+Revisão prospectiva aprovada na delegação: [EC-03.3-R1](protocolos/EC-03.3-R1_protocolo_proveniencia_revisao_retratacao.md), preservando integralmente o original. Literal recompõe de evidência válida sem depender de Refresh; N7 recebe somente a fonte ativa mínima para registrar hipótese sem confirmação.
+
+Protótipo isolado em testes/suportes, sem produção alterada. [Relatório EC-03.4](EC-03.4_resultados_proveniencia.md) registra congelamento por hashes após desenvolvimento/validação e antes do final. Painel final: 500 verificações, oito cenários e 12 negativos, três condições com duas repetições e duas ablações. Candidato/simbólico: 62/62 por repetição; literal: 60/62, com duas diferenças aprovadas (Supported contra Stale/Expired antes de Refresh). Cada condição teve 18 respostas sustentadas e 14 abstenções principais; histórico 16/16 e negativos 12/12. Sem ajustes após observar o final.
+
+Suíte: 124 testes aprovados, zero falhos/ignorados, preservando 121 anteriores; fmt/check/check all-targets/test/diff passaram. Zero eventos neuronais. Painel isolado ~0,182 s, RSS reportado pelo lançador 15.808 KiB, dados contabilizados até 188.393 bytes e disco acima de 3 GiB. Ressalvas: contagens conservadoras e não uniformes de trabalho, ausência de Work exportado nas rejeições, memória com reservas e RSS sujeito ao lançador/amostragem; não alegar contabilização exaustiva ou superioridade de eficiência.
+
+Conclusão **AJUSTAR**: conformidade funcional no painel, sem aprendizagem neural ou compreensão geral demonstradas; controle literal independente iguala resultados principais e responde antes da materialização nas duas sondas. Produção, testes anteriores, planos e protocolos históricos preservados. EC-03.5 não iniciada.
