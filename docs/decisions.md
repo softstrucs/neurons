@@ -328,3 +328,13 @@ Mapeados Cue/EngramStore, TwoHopTask/Proof, Monitor, contexto lexical, protótip
 Primeira subetapa concluída documentalmente, sem experimento, critério quantitativo novo, política operacional de revisão/abstenção ou alteração de código/testes. Os 132 testes são evidência histórica da EC-04, não nova execução. Verificações documentais, referências, integridade e whitespace; target sem crescimento e /home acima de 3 GiB. Somente relatório e este acréscimo versionados.
 
 Próxima subetapa literal: **testar mudança ambiental e conflito**, não iniciada e dependente de autorização e protocolo operacional completo. Aceite experimental da EC-05 completa permanece pendente. Não se demonstraram aprendizagem neural, formação autônoma de conceitos, transferência estrutural ou competência contextual geral.
+
+## EC-05 — Testar mudança ambiental e conflito: preparação e suficiência
+
+Base af42f9c3de1fb8ec2c0eab992a2bf779d8fde718, devs inicialmente limpa/sincronizada. [Cenários e decisão pendente](EC-05_cenarios_mudanca_ambiental_conflito.md). Definidos sete temas de sondagem: mudança recebida, contextos distintos, oposição, validade temporal, revisão/suspensão, conservação em contexto não afetado e replay histórico. Controles e métricas documentados como propostas, sem dados finais ou critérios quantitativos improvisados.
+
+Verificada insuficiência de adoção de contrato para a nova avaliação: EC-03.3-R1 possui política local de Conflict/validade/Refresh; EC-04 usa indução por maior sufixo consistente; a modelagem EC-05 não promove nenhuma delas à política geral. Não são algoritmos contraditórios, mas contratos diferentes. Tratar nova evidência como oposição ativa, substituição versionada ou episódio de indução altera gabarito e informação fornecida.
+
+Recomendação submetida, não aprovada: usar EC-03.3-R1 como contrato diagnóstico local das novas sondas, sem criar resolução de conflito, sem exigir vitória sobre literal forte e sem alegar aprendizagem autônoma. Adoção e painel operacional completo devem preceder implementação; integração com revisão EC-04 não foi autorizada. Ressalvas EC-03/04 preservadas, incluindo proveniência, controles, instrumentação, motivos e ordem de repetições.
+
+Concluída somente preparação documental; implementação/execução interrompidas antes de começar, conforme a condição expressa da delegação. Nenhum teste, regressão cognitiva, novo mecanismo, política, dado final ou alteração de protocolo/código foi realizado. Os 132 testes citados são históricos. Verificações de integridade, referências e whitespace; documentação versionada por autorização explícita. Próximo passo é resolver a decisão científica e retomar a mesma subetapa; etapas posteriores não iniciadas.
