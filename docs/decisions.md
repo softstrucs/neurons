@@ -596,3 +596,9 @@ A regressão teve 181 aprovados, zero falhos e um ignorado. A falha inicial da p
 Base `a138ae1cc7ff28f9db03d4bf549d5b60ea623830`. [Consolidação documental](EC-10_consolidacao_terceira_subetapa.md): diagnóstico inicial sem partições independentes; R1 sem testemunhas discriminantes; R2 com abstenção→acerto, sem substituição de respostas antigas corretas; R3 inconclusiva com painel final não executado por quota de invariantes positivas inviável. Resultados e instrumentos históricos preservados; nenhum experimento novo ou R4.
 
 Terceira subetapa concluída como investigação experimental delimitada, **AJUSTAR**, conformidade metodológica parcial; critério global EC-10 não homologado e EC-10 permanece aberta. Retenção após reinício, interferência compartilhada, transferência genuína e cumulatividade não demonstradas. A1–A8 preservadas. O plano não lista outra subetapa nominal EC-10; a etapa seguinte é EC-11, não iniciada.
+
+## EC-10 — Auditoria científica final e encerramento delimitado
+
+Base `cef80d6ca5bae249440a2c597ebdc2a229ec9a46`. [Auditoria final](EC-10_auditoria_cientifica_final.md): EC-10 encerrada como investigação técnico-científica delimitada, **AJUSTAR**, conformidade metodológica parcial; critério global **não homologado**. Diagnóstico inicial sem avaliação independente; R1 sem testemunhas discriminantes; R2 com abstenção→acerto e controle parcialmente compartilhado; R3 com pré-verificação de quota falha e painel final não executado. Ausência de transferência genuína, retenção após reinício, interferência compartilhada e cumulatividade demonstradas não prova impossibilidade geral.
+
+Os resultados históricos, instrumentos, produção e A1–A8 permanecem preservados. Nenhum novo experimento ou R4; a próxima etapa nominal EC-11 — Integração longitudinal e confiabilidade — não foi iniciada.
