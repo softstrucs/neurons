@@ -452,3 +452,9 @@ Permanecem limitações: quatro topologias comuns entre partições, pressuposto
 Base `132844254b37b0730d5d36f7a92d51cc081ae17d`, devs inicialmente limpa e sincronizada. [Levantamento rastreável](EC-07_detectar_lacunas.md): o núcleo distingue insuficiência, conflito e limites para consultas fornecidas; registra tentativas e pode avaliar contextos alternativos fornecidos. Isso não demonstra seleção autônoma de lacunas, perguntas, investigação real ou ganho causal de aprendizagem. `Investigate` no experimento de expectativa é decisão simbólica, não execução de busca. Reproduzidos 24 testes existentes de cognição, metacognição e microcurrículo, sem falhas ou ignorados; nenhum experimento novo.
 
 Preservadas limitações EC-03/04/05/06 e diretrizes A1–A8. Primeira subetapa concluída como levantamento delimitado; o aceite global EC-07 continua não avaliado. Próxima subetapa nominal: **formular hipóteses operacionais**, não iniciada.
+
+## EC-07 — Formular hipóteses operacionais
+
+Base `dd1f998f48c6737336bf8e592e2e5e74496e8335`, devs inicialmente limpa e sincronizada. [Especificação documental](EC-07_hipoteses_operacionais.md) distingue lacuna, pergunta, candidata, evidências, previsões, método, critérios, resultado e incerteza; inclui origens, rastreabilidade, casos conceituais e limites. `Hypothesis` é consulta fornecida e a enumeração EC-04 usa família fornecida: nenhuma das duas, isoladamente, demonstra formulação autônoma de hipótese investigável ou descoberta. Exemplos não foram executados e não há protocolo experimental novo.
+
+Diretrizes A1–A8 e conclusões anteriores preservadas. Subetapa documental delimitada concluída; aceitação global EC-07 não avaliada. Próxima subetapa nominal: **selecionar intervenções sob orçamento**, não iniciada.
