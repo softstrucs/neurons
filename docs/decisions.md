@@ -602,3 +602,9 @@ Terceira subetapa concluída como investigação experimental delimitada, **AJUS
 Base `cef80d6ca5bae249440a2c597ebdc2a229ec9a46`. [Auditoria final](EC-10_auditoria_cientifica_final.md): EC-10 encerrada como investigação técnico-científica delimitada, **AJUSTAR**, conformidade metodológica parcial; critério global **não homologado**. Diagnóstico inicial sem avaliação independente; R1 sem testemunhas discriminantes; R2 com abstenção→acerto e controle parcialmente compartilhado; R3 com pré-verificação de quota falha e painel final não executado. Ausência de transferência genuína, retenção após reinício, interferência compartilhada e cumulatividade demonstradas não prova impossibilidade geral.
 
 Os resultados históricos, instrumentos, produção e A1–A8 permanecem preservados. Nenhum novo experimento ou R4; a próxima etapa nominal EC-11 — Integração longitudinal e confiabilidade — não foi iniciada.
+
+## EC-11 — Mapear interfaces e dependências
+
+Base `a59d6361bd75b48fb6501f5af943d40dd79c7998`. [Mapa documental](EC-11_mapear_interfaces_dependencias.md): levantamento delimitado, **AJUSTAR**, sem integração nova; EC-11 permanece aberta e aceite global não homologado. Fila/circuito, memória, inferência, monitoramento, feedback e checkpoint têm interfaces e limites distintos; o checkpoint cobre Engine e EngramStore, não Circuit/pesos ou ciclo cognitivo integrado. EC-08, EC-09 e EC-10 e as diretrizes A1–A8 permanecem preservadas.
+
+Próxima subetapa nominal: **integrar apenas mecanismos validados**, não iniciada.
