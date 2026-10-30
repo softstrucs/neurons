@@ -548,3 +548,9 @@ Nenhum teste ou experimento novo; A1–A8 e produção preservadas. Subetapa doc
 Base `6401ed8cd4b08907508b830fad16e0cd2fb57b1f`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_progressao_competencia.md) distingue evidências, estados de progressão, retenção e transferência, com caminhos alternativos, reavaliação e controles prospectivos. Progressão pedagógica não amplia permissões operacionais; atividade ou memorização isoladas não demonstram competência. Nenhuma política integrada foi implementada ou executada.
 
 A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Última subetapa nominal concluída documentalmente; EC-09 não encerrada nem aceite global demonstrado. Eventual auditoria de encerramento requer autorização; EC-10 não iniciada.
+
+## EC-09 — Auditoria científica final e encerramento documental delimitado
+
+Base `09ea050052d6936e749db3f8aeba74b057972f89`, devs inicialmente limpa e sincronizada. [Parecer final](EC-09_auditoria_cientifica_final.md): cinco modelos conceitualmente coerentes, porém sem ciclo integrado, contratos executáveis, referências independentes ou controles EC-09 executados. **EC-09 encerrada como especificação técnico-científica delimitada, AJUSTAR, conformidade metodológica parcial**; critério global de melhora sustentada e adaptação às lacunas **não homologado**. EC-04 permanece evidência simbólica delimitada, não ciclo pedagógico autônomo.
+
+Regressão 162 testes aprovados, com três testes históricos duplicados por inclusão; nenhum experimento novo EC-09. A1–A8, produção e resultados históricos preservados. Próxima etapa nominal EC-10 — Generalização, transferência e cumulatividade, não iniciada.
