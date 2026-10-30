@@ -542,3 +542,9 @@ A1–A8, produção e resultados históricos preservados; nenhum experimento nov
 Base `6fdf47053722a75bb7d635b5d9d09e0e4b75e589`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_acompanhar_pratica_avaliacao.md) distingue execução, desempenho, revisão, persistência, retenção e transferência; propõe rastreabilidade, controles e hipóteses prospectivas sem alegar ciclo autônomo ou consolidação funcional demonstrada. Exemplos não executados; evidências históricas e ressalvas preservadas.
 
 Nenhum teste ou experimento novo; A1–A8 e produção preservadas. Subetapa documental concluída; próxima nominal **permitir progressão somente por competência demonstrada**, não iniciada; EC-09 não encerrada.
+
+## EC-09 — Progressão somente por competência demonstrada
+
+Base `6401ed8cd4b08907508b830fad16e0cd2fb57b1f`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_progressao_competencia.md) distingue evidências, estados de progressão, retenção e transferência, com caminhos alternativos, reavaliação e controles prospectivos. Progressão pedagógica não amplia permissões operacionais; atividade ou memorização isoladas não demonstram competência. Nenhuma política integrada foi implementada ou executada.
+
+A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Última subetapa nominal concluída documentalmente; EC-09 não encerrada nem aceite global demonstrado. Eventual auditoria de encerramento requer autorização; EC-10 não iniciada.
