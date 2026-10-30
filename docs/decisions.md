@@ -500,3 +500,9 @@ Primeira subetapa concluída como levantamento documental; aceitação global EC
 Base `734332164173444abe3d4d9008a80957890aeafc`, devs inicialmente limpa e sincronizada. [Especificação](EC-08_estimativas_incerteza_erro.md) distingue insuficiência, ambiguidade, conflito, erro verificável, falha operacional, limites e ausência de referência; separa qualidade da evidência e correção, indicadores e escores de probabilidades calibradas. Requisitos prospectivos de calibração e controles de informação equivalente não atribuem confiança numérica ao monitor atual. Exemplos conceituais não são resultados novos.
 
 A1–A8 e conclusões anteriores preservadas; nenhum teste, implementação ou experimento novo. Subetapa documental concluída; próxima nominal **testar decisões de revisar, investigar e abster-se**, não iniciada.
+
+## EC-08 — Testar decisões de revisar, investigar e abster-se
+
+Base `40c63847aa12963079de5841ebd8c07807339b62`. [Protocolo](protocolos/EC-08_decisoes_revisao_investigacao.md) e [resultados](EC-08_resultados_decisoes.md): 12 sondas, 14 consultas por repetição, duas repetições e duas condições, 56 decisões; Monitor e controle simbólico concordaram 28/28, com 4 respostas originais, 2 revisadas e 22 abstenções por condição. Referências e contextos sintéticos fornecidos; S8–S10 não demonstram decisão de investigar, permissão ou suspeita no núcleo. Sem ação externa nem aprendizado persistente. **AJUSTAR**; controles compartilham pressupostos, custos não uniformizados e dados por condição parcialmente medidos.
+
+Regressão 156 testes aprovados; A1–A8, produção e protocolos históricos preservados. Próxima subetapa nominal **medir calibração e custo-benefício**, não iniciada.
