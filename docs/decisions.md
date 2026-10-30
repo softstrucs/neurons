@@ -648,3 +648,7 @@ Base `ca8b915a7e7599430b5c7feb03913cc45328c07b`. [Reconciliação](Plano_v0_2_re
 ## Plano Executivo de Evolução Cognitiva v0.3 — proposta documental
 
 Base `1f950dbcb4d35746b44e969e9ed22ee1bdf9ea8d`. Autorizada a elaboração documental de [proposta v0.3](planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md). A proposta permanece **NÃO APROVADA**, sem autorização ou execução de qualquer etapa; não altera resultados históricos nem declara o v0.2 integralmente homologado.
+
+## Plano v0.3 — Revisão científica pré-aprovação
+
+Base `378551e285481f2941af994c693f7c2fe4a387d1`. [Revisão documental](planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md): parecer **B — APTO COM AJUSTES NÃO BLOQUEANTES para decisão humana**, com portões por alegação e condições científicas a resolver antes dos experimentos afetados. A proposta permanece **NÃO APROVADA e NÃO INICIADA**; nenhum protocolo, arquitetura ou frente foi autorizado.
