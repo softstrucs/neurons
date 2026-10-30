@@ -554,3 +554,9 @@ A1–A8, produção e resultados históricos preservados; nenhum experimento nov
 Base `09ea050052d6936e749db3f8aeba74b057972f89`, devs inicialmente limpa e sincronizada. [Parecer final](EC-09_auditoria_cientifica_final.md): cinco modelos conceitualmente coerentes, porém sem ciclo integrado, contratos executáveis, referências independentes ou controles EC-09 executados. **EC-09 encerrada como especificação técnico-científica delimitada, AJUSTAR, conformidade metodológica parcial**; critério global de melhora sustentada e adaptação às lacunas **não homologado**. EC-04 permanece evidência simbólica delimitada, não ciclo pedagógico autônomo.
 
 Regressão 162 testes aprovados, com três testes históricos duplicados por inclusão; nenhum experimento novo EC-09. A1–A8, produção e resultados históricos preservados. Próxima etapa nominal EC-10 — Generalização, transferência e cumulatividade, não iniciada.
+
+## EC-10 — Primeira subetapa: definir novos contextos e tarefas
+
+Base `180ce67e2cced3615e77c359e5cf142382fd7ff5`, devs inicialmente limpa e sincronizada. [Definição documental](EC-10_contextos_tarefas.md) distingue recuperação, composição fornecida, generalização em família, transferência entre tarefas/domínios, retenção e cumulatividade; propõe T10-R/C/F/T/D/L/K/N com negativas e limites. Renomeação não demonstra transferência estrutural; aquisição persistente e efeito comparativo exigem mecanismo e evidência futuros.
+
+A1–A8, produção e resultados anteriores preservados; nenhum experimento novo. Primeira subetapa concluída documentalmente; próxima nominal **estabelecer controles de renomeação e recuperação**, não iniciada. EC-10 permanece aberta.
