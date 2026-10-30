@@ -608,3 +608,7 @@ Os resultados históricos, instrumentos, produção e A1–A8 permanecem preserv
 Base `a59d6361bd75b48fb6501f5af943d40dd79c7998`. [Mapa documental](EC-11_mapear_interfaces_dependencias.md): levantamento delimitado, **AJUSTAR**, sem integração nova; EC-11 permanece aberta e aceite global não homologado. Fila/circuito, memória, inferência, monitoramento, feedback e checkpoint têm interfaces e limites distintos; o checkpoint cobre Engine e EngramStore, não Circuit/pesos ou ciclo cognitivo integrado. EC-08, EC-09 e EC-10 e as diretrizes A1–A8 permanecem preservadas.
 
 Próxima subetapa nominal: **integrar apenas mecanismos validados**, não iniciada.
+
+## EC-11 — Integrar apenas mecanismos validados
+
+Base `c324f779b8fe0dd1104c1e2d933c2bd8a31d2920`. [Matriz e relatório](EC-11_integracao_mecanismos_validados.md): adaptador delimitado conecta `Engine`, `EngramStore`, `Monitor` e checkpoint existente; configuração do monitor é fornecida pelo chamador e não serializada. Dois testes focais verificam ordem, evidências, contexto, abstenção, consultas sem mutação e corrupção. Sem persistência de circuito ou pesos nem alegações de autonomia, transferência ou aprendizagem geral. **AJUSTAR**; EC-11 permanece aberta e A1–A8 preservadas. Próxima subetapa nominal: **executar testes de regressão, recursos, rastreabilidade, segurança, retenção e autonomia limitada**, não iniciada.

@@ -14,3 +14,4 @@ pub mod personality;
 pub mod session;
 pub mod synapse;
 pub use engine::persistence;
+pub mod integration;
