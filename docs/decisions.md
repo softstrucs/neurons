@@ -530,3 +530,9 @@ Nenhum experimento novo, alteração de produção ou ciclo pedagógico autônom
 Base `b048dc200233ebbf7f834e25ee5c500e931b5ca7`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_mapear_pre_requisitos.md) distingue dependências necessárias, facilitadoras, complementares, hipotéticas e sequências por conveniência; propõe proveniência, contexto, alternativas, ciclos e critérios falsificáveis. Relações de exemplo são fornecidas, não descobertas ou validadas pelo núcleo. Nenhuma arquitetura universal ou planejador foi adotado.
 
 A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Subetapa documental concluída; próxima nominal **selecionar experiências**, não iniciada.
+
+## EC-09 — Selecionar experiências
+
+Base `6e8ce200e9ed9fe50a488c982ad8ae3512183ec5`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_selecionar_experiencias.md) distingue candidatas, critérios, autorização, abstenção e execução de aprendizagem verificável; define modalidades e exemplos conceituais, controles prospectivos e limites. Seleção adaptativa pedagógica e ganho causal persistente não foram demonstrados; experiências e hipóteses do documento não foram executadas.
+
+A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Subetapa documental concluída; próxima nominal **acompanhar prática, avaliação, revisão e consolidação**, não iniciada.
