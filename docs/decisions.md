@@ -494,3 +494,9 @@ Preservadas ressalvas: controle histórico não aleatório, sementes e observaç
 Base `f2b9ca80584c41b7359c36a01580ac270aa5f125`, devs inicialmente limpa e sincronizada. [Auditoria](EC-08_auditoria_monitores_existentes.md): `Monitor` examina resultados efetivos de inferência delimitada, conflitos, limites e contextos alternativos fornecidos, com abstenções e registros de tentativa; regras são programadas e não demonstram aprendizagem metacognitiva, autorregulação adaptativa ou incerteza calibrada. Controle histórico 7/7 versus 5/7 não tem informação equivalente no caso de revisão. Resultados EC-03–07 e diretrizes A1–A8 preservados; nenhum teste ou experimento novo.
 
 Primeira subetapa concluída como levantamento documental; aceitação global EC-08 não avaliada. Próxima subetapa nominal: **definir estimativas de incerteza e erro**, não iniciada.
+
+## EC-08 — Definir estimativas de incerteza e erro
+
+Base `734332164173444abe3d4d9008a80957890aeafc`, devs inicialmente limpa e sincronizada. [Especificação](EC-08_estimativas_incerteza_erro.md) distingue insuficiência, ambiguidade, conflito, erro verificável, falha operacional, limites e ausência de referência; separa qualidade da evidência e correção, indicadores e escores de probabilidades calibradas. Requisitos prospectivos de calibração e controles de informação equivalente não atribuem confiança numérica ao monitor atual. Exemplos conceituais não são resultados novos.
+
+A1–A8 e conclusões anteriores preservadas; nenhum teste, implementação ou experimento novo. Subetapa documental concluída; próxima nominal **testar decisões de revisar, investigar e abster-se**, não iniciada.
