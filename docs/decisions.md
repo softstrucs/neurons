@@ -628,3 +628,7 @@ Base `35c10b7503aea3b360228b08b353ecf1faa63962`. [Inventário documental](EC-12_
 ## EC-12 — Avaliar lacunas
 
 Base `5db7d3ef77f4b2572e09bfb464cb4ffbd9aabb05`. [Avaliação documental](EC-12_avaliacao_lacunas.md): 17 lacunas de implementação, validação e ciência, com evidências, dependências, condições de avaliação e priorização recomendada, sem decisão arquitetural ou autorização de desenvolvimento. Preservados R3 EC-10 não executado, H1 EC-11 parcialmente verificada e diretrizes A1–A8. **AJUSTAR**, subetapa documental delimitada concluída; EC-12 permanece aberta. Próxima nominal: **definir pré-requisitos de especialização**, não iniciada.
+
+## EC-12 — Definir pré-requisitos de especialização
+
+Base `f3c6cccf9b53f050966e8016efa6148971cc0d89`. [Especificação documental](EC-12_pre_requisitos_especializacao.md): modalidades configurada, funcional, adquirida e transferível; papéis multiagentes e contratos condicionais, rastreados às 17 lacunas. Nenhum agente, mecanismo cognitivo ou experimento novo; autonomia e transferência não presumidas. **AJUSTAR**, subetapa documental concluída, EC-12 aberta e A1–A8 preservadas. Próxima nominal: **registrar questões abertas**, não iniciada.
