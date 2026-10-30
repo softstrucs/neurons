@@ -1,0 +1,35 @@
+# EC-09 — Diagnosticar competências: linha de base
+
+## Escopo e critério
+
+Base `0f9c60e6b088c1d392a8b5d14af98f54888d76d4`, devs inicialmente limpa e sincronizada. O plano v0.2 chama a primeira subetapa **diagnosticar competências**; não define seu inventário, instrumento ou limiar experimental. O aceite global EC-09 exige melhora sustentada em ciclos sucessivos e adaptação verificável de experiências às lacunas identificadas. Esta linha de base documental diagnostica o que as evidências existentes permitem afirmar; não realiza avaliação pedagógica nova nem comprova o aceite global.
+
+Competência, neste diagnóstico, é desempenho demonstrado numa tarefa e condições identificáveis, com evidência e referência adequadas. Um nome de domínio, conteúdo fornecido, recuperação isolada ou resposta plausível não bastam para afirmar competência adquirida ou generalização. Os estados abaixo são julgamento sobre evidências do projeto, não pontuações geradas pelo Neurons.
+
+## Matriz de competências e evidências
+
+| Capacidade examinada | Evidência existente | Diagnóstico delimitado e limitações |
+|---|---|---|
+| Registrar e recuperar observações | [`Microcurriculum::observe/evaluate`](../src/curriculum.rs), `EngramStore` e testes em [`curriculum.rs`](../tests/curriculum.rs); domínios são IDs externos, memória limitada a 32 registros. | Registro de fatos fornecidos e consulta são implementados; não existe treino implícito, gravação da conclusão ou promoção automática a conhecimento validado. Persistir tipos em outro mecanismo não demonstra consolidação pedagógica autônoma. |
+| Compor relações com suporte | `TwoHopTask` e `Monitor`; [EC-06](EC-06_auditoria_cientifica_final.md) reproduziu 48/48 concordâncias, com 24 respostas sustentadas e 24 abstenções. | Recuperação e dois passos com fatos/regra fornecidos em quatro topologias. Não demonstra domínio semântico, aprendizagem da regra ou transferência estrutural. |
+| Adquirir e rever critério simbólico | [Auditoria EC-04](EC-04_auditoria_cientifica_final.md): em cada contexto T-A, estado inicial com 32 abstenções e após aquisição 8/8 positivos e 24/24 negativos; T-V revisado 2/2 positivos e 14/14 negativos. | Evidência de aquisição e revisão simbólica delimitada em protótipo de testes, família fornecida e exemplos rotulados; não é competência pedagógica integrada ou aprendizagem neural. Preservar não conformidades de controle literal T-C, proveniência/contextos e custos. |
+| Retenção e interferência | EC-04 conservou 16/16 sondas B em estados separados; [EC-05](EC-05_auditoria_cientifica_final.md) estudou manutenção/recomposição e versões. | Retenção delimitada não demonstra resistência de pesos compartilhados ou persistência pedagógica após reinício; EC-05 mantém ressalvas e divergências P1/P2. |
+| Reconhecer suporte insuficiente e conflito | `Monitor` devolve categorias, tentativas e abstenções; [EC-08](EC-08_auditoria_cientifica_final.md) reproduziu 28/28 decisões avaliáveis por condição, com dois casos sem referência. | Critérios e candidatos externos; controle simbólico empatou, calibração probabilística não mensurável. Não diagnostica automaticamente competências de domínio. |
+| Investigação e escolha pedagógica | [EC-07](EC-07_auditoria_cientifica_final.md) compara políticas sintéticas com previsões fornecidas; controle PRNG e ganho informacional externo. | Não demonstra que investigação escolhida cause aprendizagem posterior nem ciclo pedagógico adaptativo. A decisão de investigar não existe na interface de Monitor examinada. |
+| Linguagem pt-BR e bilíngue | `src/languages.rs`, módulos e testes A01 documentam recuperação, composição e gramática controladas; `docs/decisions.md`. | Evidência restrita a vocabulário, estruturas, regras e contextos fornecidos; não é domínio de português, leitura, interpretação ou conversação geral. Revisão linguística independente permanece relevante. |
+| Planejamento e progressão pedagógica | O plano e A1–A8 estabelecem objetivos futuros; `Domain` e `Microcurriculum` organizam contextos simbólicos. | Não foi identificado diagnóstico de competência integrado, currículo adaptativo, seleção de exercícios por lacuna, domínio de pré-requisitos ou progressão baseada em competência demonstrada. Objetivos documentais não são comportamento implementado. |
+| Transferência multidomínio | `tests/curriculum.rs::transfer_probe_requires_new_domain_observations_not_training_credit` avalia antes/depois de fatos no domínio alvo. | Sem fatos no alvo 0/3 suportados e com fatos 3/3, segundo teste histórico; não demonstra transferência aprendida. Rótulos de domínios não provam compreensão dos domínios. |
+
+Evidência de uso de `PlasticityRule` em [`learning.rs`](../src/learning.rs) indica alteração limitada de pesos por feedback fornecido, não avaliação pedagógica autônoma. A02.4 depende de exploração e elegibilidade externas; A02.5 registra bloqueio de elegibilidade com pesos zero. Não inferir ganho de competência neural a partir de uma alteração isolada de peso.
+
+## Diagnóstico, dependências e evidências necessárias
+
+O sistema possui peças reutilizáveis de registro, inferência com referências, monitoramento e feedback local, além de protótipos simbólicos de aquisição/revisão. O diagnóstico de competência automatizado não foi demonstrado: faltam evidências de um ciclo integrado que formule objetivos, avalie desempenho sob referência válida, identifique lacunas, selecione experiências autorizadas, registre consequências e reavalie retenção e revisão. Essas dependências são inventariadas aqui; o mapeamento detalhado de pré-requisitos e a seleção de experiências pertencem às subetapas seguintes e não são iniciados.
+
+Para distinguir exposição de aquisição, futura avaliação precisará de estado anterior, experiência identificável, mudança rastreável, casos não usados no treino, referência válida, controles de recuperação/memorização e persistência/retenção conforme o objetivo. Generalização exige especificar o que é novo: IDs, combinação, estrutura ou domínio. Custos, referências, permissões e proveniência devem ser auditáveis; exemplos e critérios exatos exigem protocolo prospectivo próprio. Falha em demonstrar competência é distinta de prova de incapacidade universal.
+
+## Fundamentos e continuidade
+
+A1/A2 orientam memória evolutiva, contexto e revisão sem presumir formação autônoma de engramas. A3/A4 estabelecem inicialização pedagógica e comunicação honesta como objetivos futuros; não há evidência de ciclo autônomo em execução. A5 prioriza pt-BR progressivo e aplicação a inéditos; A6 expansão multilíngue posterior; os testes linguísticos atuais não demonstram domínio geral. A7 requer referências, controles e resultados negativos preservados. A8 orienta competência cognitiva generalizável futura, ainda não demonstrada. Fundamento e A1–A8 preservados.
+
+Levantamento de código, testes e auditorias históricas; nenhuma nova execução experimental ou alteração de produção. Primeira subetapa concluída como diagnóstico documental delimitado; aceitação global EC-09 não avaliada. Próxima subetapa nominal: **mapear pré-requisitos**, não iniciada.

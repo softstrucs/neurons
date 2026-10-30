@@ -518,3 +518,9 @@ Suíte 162 testes aprovados, incluindo três duplicados por `include!` e três n
 Base `64bdfc35ca9daff0a8da3b4f8a33e5f804d12804`, devs inicialmente limpa e sincronizada. [Parecer final](EC-08_auditoria_cientifica_final.md): EC-08 encerrada como investigação delimitada, **AJUSTAR**, conformidade metodológica parcial. Monitoramento de inferência efetiva e decisões condicionais demonstrados no escopo, sem homologar o critério global do plano. Painéis reproduzidos: 28/28 avaliáveis por condição, dois sem referência; controle com mesma informação e benefício incremental zero. Calibração probabilística não mensurável; investigação autônoma, aprendizagem metacognitiva e autorregulação adaptativa não demonstradas.
 
 Tempos de operações diferentes não demonstram custo-benefício definitivo; custos exclusivos e memória por condição não isolados. Repetições/casos não ampliam validade externa; referências sintéticas, pressupostos e autoria compartilhados. Suíte 162 testes aprovados, incluindo três duplicados por inclusão. A1–A8 e protocolos históricos preservados. Próxima etapa nominal EC-09 — Formação pedagógica contínua, não iniciada.
+
+## EC-09 — Primeira subetapa: diagnosticar competências
+
+Base `0f9c60e6b088c1d392a8b5d14af98f54888d76d4`, devs inicialmente limpa e sincronizada. [Diagnóstico documental](EC-09_diagnostico_competencias.md) distingue registro/recuperação, composição com regra fornecida, aquisição simbólica delimitada EC-04, monitoramento e retenção de objetivos pedagógicos ainda não demonstrados. `Microcurriculum` recebe observações externamente e não treina ou consolida implicitamente; pt-BR controlado não comprova domínio linguístico. EC-04/05/06/07/08 e suas ressalvas preservadas.
+
+Nenhum experimento novo, alteração de produção ou ciclo pedagógico autônomo. A1–A8 preservadas; aceite global EC-09 não avaliado. Próxima subetapa nominal: **mapear pré-requisitos**, não iniciada.
