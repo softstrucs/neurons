@@ -636,3 +636,7 @@ Base `f3c6cccf9b53f050966e8016efa6148971cc0d89`. [Especificação documental](EC
 ## EC-12 — Registrar questões abertas
 
 Base `8d4e20e97a4afe6137c04ff22130636ad6382c06`. [Registro documental](EC-12_questoes_abertas.md): Q01–Q19 rastreadas às 17 lacunas e aos 15 contratos, com hipóteses concorrentes, critérios e limites. Consciência artificial permanece investigação opcional, distinta e não pré-requisito; nenhuma experiência subjetiva alegada. **AJUSTAR**, quarta subetapa documental concluída; EC-12 permanece aberta, sem auditoria final nem nova etapa iniciada. A1–A8 e limitações históricas preservadas.
+
+## EC-12 — Auditoria científica final e avaliação do plano v0.2
+
+Base `2de147d2ceddc2399665358e2340e02bd515f3e4`. [Auditoria EC-12](EC-12_auditoria_cientifica_final.md): **encerrada como consolidação documental delimitada, AJUSTAR, conformidade parcial**; critério global parcialmente atendido documentalmente, decisão humana de continuidade pendente. [Matriz do plano](Plano_v0_2_consolidacao_final.md): ciclo EC-03–12 documentado e delimitado; EC-00–02 têm fontes históricas primárias pendentes e fechamento integral de EC-02 não verificável pelas fontes inventariadas. Plano não declarado integralmente encerrado; não há homologação de capacidades gerais nem autorização de novo ciclo. A1–A8 e resultados históricos preservados.
