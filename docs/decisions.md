@@ -560,3 +560,9 @@ Regressão 162 testes aprovados, com três testes históricos duplicados por inc
 Base `180ce67e2cced3615e77c359e5cf142382fd7ff5`, devs inicialmente limpa e sincronizada. [Definição documental](EC-10_contextos_tarefas.md) distingue recuperação, composição fornecida, generalização em família, transferência entre tarefas/domínios, retenção e cumulatividade; propõe T10-R/C/F/T/D/L/K/N com negativas e limites. Renomeação não demonstra transferência estrutural; aquisição persistente e efeito comparativo exigem mecanismo e evidência futuros.
 
 A1–A8, produção e resultados anteriores preservados; nenhum experimento novo. Primeira subetapa concluída documentalmente; próxima nominal **estabelecer controles de renomeação e recuperação**, não iniciada. EC-10 permanece aberta.
+
+## EC-10 — Estabelecer controles de renomeação e recuperação
+
+Base `baf48fb662d589b0a08472d7fc3a77557fc38bd4`, devs inicialmente limpa e sincronizada. [Especificação prospectiva](EC-10_controles_renomeacao_recuperacao.md) define bijeção, isomorfismo e limitações de ordem/custo, controles de recuperação, regra e composição, partições e equivalência informacional. Renomeação isolada não demonstra transferência; controle privado de informação não sustenta superioridade.
+
+A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Subetapa documental concluída; próxima nominal **avaliar transferência genuína, retenção longitudinal e interferência**, não iniciada. EC-10 permanece aberta.
