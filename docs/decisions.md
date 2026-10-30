@@ -506,3 +506,9 @@ A1–A8 e conclusões anteriores preservadas; nenhum teste, implementação ou e
 Base `40c63847aa12963079de5841ebd8c07807339b62`. [Protocolo](protocolos/EC-08_decisoes_revisao_investigacao.md) e [resultados](EC-08_resultados_decisoes.md): 12 sondas, 14 consultas por repetição, duas repetições e duas condições, 56 decisões; Monitor e controle simbólico concordaram 28/28, com 4 respostas originais, 2 revisadas e 22 abstenções por condição. Referências e contextos sintéticos fornecidos; S8–S10 não demonstram decisão de investigar, permissão ou suspeita no núcleo. Sem ação externa nem aprendizado persistente. **AJUSTAR**; controles compartilham pressupostos, custos não uniformizados e dados por condição parcialmente medidos.
 
 Regressão 156 testes aprovados; A1–A8, produção e protocolos históricos preservados. Próxima subetapa nominal **medir calibração e custo-benefício**, não iniciada.
+
+## EC-08 — Medir calibração e custo-benefício
+
+Base `acbd0e04bfc8bf4c31975aa9047cef4328a0a594`. [Protocolo](protocolos/EC-08_calibracao_custo_beneficio.md) e [resultados](EC-08_resultados_calibracao_custo_beneficio.md): calibração probabilística não mensurável; 28/28 decisões avaliáveis concordantes em cada condição e dois casos por condição sem referência. Benefício incremental do Monitor frente ao controle simbólico equivalente observado zero; custos de Monitor/inferência não isolados. Referências, topologias e pressupostos compartilhados, medições limitadas; **AJUSTAR**, sem custo-benefício positivo geral ou metacognição geral demonstrados.
+
+Suíte 162 testes aprovados, incluindo três duplicados por `include!` e três novos testes de qualidade. Fundamentos A1–A8, código de produção e protocolos históricos preservados. Próximo passo: auditoria final da EC-08, sem iniciar etapa posterior.
