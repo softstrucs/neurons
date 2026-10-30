@@ -632,3 +632,7 @@ Base `5db7d3ef77f4b2572e09bfb464cb4ffbd9aabb05`. [Avaliação documental](EC-12_
 ## EC-12 — Definir pré-requisitos de especialização
 
 Base `f3c6cccf9b53f050966e8016efa6148971cc0d89`. [Especificação documental](EC-12_pre_requisitos_especializacao.md): modalidades configurada, funcional, adquirida e transferível; papéis multiagentes e contratos condicionais, rastreados às 17 lacunas. Nenhum agente, mecanismo cognitivo ou experimento novo; autonomia e transferência não presumidas. **AJUSTAR**, subetapa documental concluída, EC-12 aberta e A1–A8 preservadas. Próxima nominal: **registrar questões abertas**, não iniciada.
+
+## EC-12 — Registrar questões abertas
+
+Base `8d4e20e97a4afe6137c04ff22130636ad6382c06`. [Registro documental](EC-12_questoes_abertas.md): Q01–Q19 rastreadas às 17 lacunas e aos 15 contratos, com hipóteses concorrentes, critérios e limites. Consciência artificial permanece investigação opcional, distinta e não pré-requisito; nenhuma experiência subjetiva alegada. **AJUSTAR**, quarta subetapa documental concluída; EC-12 permanece aberta, sem auditoria final nem nova etapa iniciada. A1–A8 e limitações históricas preservadas.
