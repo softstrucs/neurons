@@ -1,0 +1,36 @@
+# EC-06 — Protocolo prospectivo: raciocínio com evidências
+
+## Estatuto e hipótese
+
+Base `5a3974ba2b572cbf8a257e9a97e2314812770511`, devs. Protocolo desta subetapa, antes da implementação e do primeiro painel final. H: para uma relação homogênea e regra fornecida, Monitor/TwoHopTask distinguem recuperação, composição de dois fatos, ausência e oposição direta, com provas verificáveis e sem gabarito na decisão. Um controle simbólico com os mesmos fatos e consulta deve alcançar as mesmas decisões; uma ablação de sinapses deve remover a propagação nas consultas compostas. Não se prevê superioridade neural. A hipótese é falsificável por resposta indevida, abstenção indevida, prova inválida, divergência não explicada ou falta de repetibilidade.
+
+Selecionadas EC06-R, EC06-C2, EC06-I e o subcaso de oposição direta de EC06-X; EC06-G é observado apenas como novas consultas/IDs com topologias conhecidas. Excluídas EC06-S (tipagem geral ausente), EC06-P com alternativa conflitante (Monitor recebe só uma prova), EC06-K/V (versões/validade não integram o núcleo), EC06-M (núcleo limita prova a dois passos) e outros perfis EC06-X (D1 não é política do núcleo). Essas exclusões não afirmam incapacidade universal nem satisfazem todas as dez tarefas.
+
+## Semântica e informação
+
+Relação abstrata L em contexto explícito; cada cenário contém uma única relação de mesma classe, declarada adequada para a regra local `L(a,b) ∧ L(b,c) ⇒ L(a,c)`, com entidades distintas. Não atribuir essa propriedade a outros predicados, causalidade ou tradução. Consulta pede verificar `L(x,z)`; x e z são argumentos legítimos, não classificação correta. Valor +1 representa relato positivo; −1 oposição. Fatos são `Observed`, com origem fornecida e tempo 0; não há autenticação de origem ou validade temporal. Regra e versão são identificadas por este protocolo, não retornadas pelo núcleo. Nenhuma conclusão composta é cadastrada diretamente.
+
+Não há aquisição de regra, feedback, atualização durante consulta ou persistência de conclusões. Entradas são fatos sintéticos fornecidos. O avaliador usa a classe esperada somente depois das decisões e verifica separadamente referências, contexto, polaridade, extremos, intermediário e conexões. EvidênciaID ausente é registrado como ausência, não verificação empírica.
+
+## Partições, gerador e perfis
+
+D=8, V=8, F=24 cenários; respectivamente 2/2/2/2, 2/2/2/2 e 6/6/6/6 por perfil abaixo. Ordem por i=0..N−1, perfil i mod 4; cada cenário é uma memória independente. IDs de contexto e nós usam offsets D=10000, V=20000, F=30000. Calcular permutação de 0..N−1 por Fisher–Yates: estado u64 inicial 17+offset; para j de N−1 até 1: estado=(estado*6364136223846793005+1442695040888963407) mod 2^64; k=estado mod (j+1); trocar posições j/k. Base=offset+100*permutação[i]; x=base+11,y=base+23,z=base+37,w=base+41, contexto=base+53. IDs de engramas são 1..n na ordem abaixo, por memória. Rótulo de perfil e esperado ficam somente no avaliador; executor recebe memória e consulta, não i, rótulo ou gabarito. IDs e estruturas são sintéticos e previsíveis: a inspeção deve confirmar que nenhum decisor usa a aritmética do gerador como atalho; não alegar independência estatística ou cegueira de autoria.
+
+| Perfil | Fatos de aquisição em ordem | Monitor esperado | Controle simbólico esperado | Literal esperado | Ablação esperada |
+|---|---|---|---|---|---|
+| R direta | +L(x,z) | Respond/Direct(1) | Respond/Direct(1) | Direct(1) | Direct(1) |
+| C dois passos | +L(x,y), +L(y,z), +L(x,w) | Respond/TwoHop(1,2) | Respond/TwoHop(1,2) | ausência | Unsupported |
+| I insuficiente | +L(x,y), +L(z,w) | MissingEvidence | MissingEvidence | ausência | Unsupported |
+| X oposição direta | +L(x,y), +L(y,z), −L(x,z) | ContradictoryEvidence | ContradictoryEvidence | ausência positiva | Unsupported |
+
+O controle literal examina a mesma memória inteira e retorna somente uma associação positiva direta; não trata negativo como positivo. O controle simbólico independente verifica oposição direta e enumera caminhos de dois fatos usando os mesmos registros, consulta e contexto; não chama Monitor/TwoHopTask nem recebe o esperado. Ablação chama `evaluate_without_synapses` com mesma memória/consulta: não inclui Monitor e não é controle informacional de detecção de conflito; comparação neural se restringe a C e I. Em R, caminho direto não executa circuito; em X a ablação não testa detecção de oposição. Relatar essas diferenças, sem forçar semântica equivalente.
+
+Desenvolvimento D, depois validação V; congelar fonte, fixtures e avaliador por SHA-256 antes do primeiro final. Se for preciso ajustar após F, interromper e preparar novo conjunto final sob revisão; não ajustar a avaliação observada. D/V/F têm IDs distintos, mas as mesmas quatro topologias: são problemas individuais com consultas não cadastradas em C, não novas estruturas ou prova de generalização ampla. Proibir acesso de modelos ao gabarito/índice. Repetir F em duas sequências globais a partir de memórias novas, comparando decisões, provas e eventos.
+
+## Contagens, critérios e recursos
+
+Por repetição: 24 cenários ×4 condições =96 consultas, sendo24 por condição; final duas repetições=192 consultas. Cada perfil terá12 consultas por condição nas duas repetições. C e X têm 12 consultas compostas por condição e não contêm aresta positiva direta x→z. O modelo deverá retornar6 diretas,6 compostas,6 Missing e6 Conflict por repetição. Simbólico deve coincidir em decisões e evidências válidas; literal:6 diretas e18 ausências; ablação:6 diretas e18 Unsupported. Não contar ausência literal como acerto de composição nem ausência como falsidade universal.
+
+Com os fatos fixados, contagem analítica prevista de eventos: candidato R=0, C=4, I=2, X=3 por cenário; ablação R=0 e demais=1; controles simbólico e literal=0. Por repetição: candidato54, ablação18, total72; duas repetições144. Eventos são contados dos relatórios efetivos; divergência de previsão é registrada sem ajuste do protocolo. Métricas por perfil/condição: respostas corretas, prova válida entre respostas, cobertura, abstenções adequadas, falsas abstenções, respostas indevidas, eventos, diferenças, custo e repetibilidade. Precisão de resposta sem respostas é indefinida. Condição de sucesso funcional: tabela e provas conformes nas duas repetições, sem acesso ao oráculo ou mutação; falha funcional se resposta/prova incompatível ocorrer em execução válida. Erro inesperado, limite excedido, gabarito vazado ou instrumento insuficiente para uma alegação específica gera interrupção/inconclusão, não resultado cognitivo positivo.
+
+`TwoHopTask::new(8,16,32)` e `Monitor::new(task,1)`; no máximo3 fatos por cenário; entrada exclusivamente IDs u32 positivos. Sem regras, domínios ou dependências externas adicionais; Rust std e testes isolados, produção preservada. RSS isolado <256 MiB; dados vivos e fixtures <=256 KiB por condição; painel <=30s; /home >=3 GiB. Medir tempo monotônico, RSS do processo isolado e espaço; contabilizar capacidades e declarar alocações não observadas. O teto de eventos por consulta é32; não confundir com visitas simbólicas ou CPU. Sem medição completa, não alegar orçamento de trabalho equivalente. Registrar crescimento de target. Controles compartilham política/fatos/avaliador/autor apesar de decisão independente; não é prova independente de equipe.
