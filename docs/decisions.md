@@ -524,3 +524,9 @@ Tempos de operações diferentes não demonstram custo-benefício definitivo; cu
 Base `0f9c60e6b088c1d392a8b5d14af98f54888d76d4`, devs inicialmente limpa e sincronizada. [Diagnóstico documental](EC-09_diagnostico_competencias.md) distingue registro/recuperação, composição com regra fornecida, aquisição simbólica delimitada EC-04, monitoramento e retenção de objetivos pedagógicos ainda não demonstrados. `Microcurriculum` recebe observações externamente e não treina ou consolida implicitamente; pt-BR controlado não comprova domínio linguístico. EC-04/05/06/07/08 e suas ressalvas preservadas.
 
 Nenhum experimento novo, alteração de produção ou ciclo pedagógico autônomo. A1–A8 preservadas; aceite global EC-09 não avaliado. Próxima subetapa nominal: **mapear pré-requisitos**, não iniciada.
+
+## EC-09 — Mapear pré-requisitos
+
+Base `b048dc200233ebbf7f834e25ee5c500e931b5ca7`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_mapear_pre_requisitos.md) distingue dependências necessárias, facilitadoras, complementares, hipotéticas e sequências por conveniência; propõe proveniência, contexto, alternativas, ciclos e critérios falsificáveis. Relações de exemplo são fornecidas, não descobertas ou validadas pelo núcleo. Nenhuma arquitetura universal ou planejador foi adotado.
+
+A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Subetapa documental concluída; próxima nominal **selecionar experiências**, não iniciada.
