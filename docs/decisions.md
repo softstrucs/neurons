@@ -536,3 +536,9 @@ A1–A8, produção e resultados históricos preservados; nenhum experimento nov
 Base `6e8ce200e9ed9fe50a488c982ad8ae3512183ec5`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_selecionar_experiencias.md) distingue candidatas, critérios, autorização, abstenção e execução de aprendizagem verificável; define modalidades e exemplos conceituais, controles prospectivos e limites. Seleção adaptativa pedagógica e ganho causal persistente não foram demonstrados; experiências e hipóteses do documento não foram executadas.
 
 A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Subetapa documental concluída; próxima nominal **acompanhar prática, avaliação, revisão e consolidação**, não iniciada.
+
+## EC-09 — Acompanhar prática, avaliação, revisão e consolidação
+
+Base `6fdf47053722a75bb7d635b5d9d09e0e4b75e589`, devs inicialmente limpa e sincronizada. [Especificação](EC-09_acompanhar_pratica_avaliacao.md) distingue execução, desempenho, revisão, persistência, retenção e transferência; propõe rastreabilidade, controles e hipóteses prospectivas sem alegar ciclo autônomo ou consolidação funcional demonstrada. Exemplos não executados; evidências históricas e ressalvas preservadas.
+
+Nenhum teste ou experimento novo; A1–A8 e produção preservadas. Subetapa documental concluída; próxima nominal **permitir progressão somente por competência demonstrada**, não iniciada; EC-09 não encerrada.
