@@ -458,3 +458,9 @@ Preservadas limitações EC-03/04/05/06 e diretrizes A1–A8. Primeira subetapa 
 Base `dd1f998f48c6737336bf8e592e2e5e74496e8335`, devs inicialmente limpa e sincronizada. [Especificação documental](EC-07_hipoteses_operacionais.md) distingue lacuna, pergunta, candidata, evidências, previsões, método, critérios, resultado e incerteza; inclui origens, rastreabilidade, casos conceituais e limites. `Hypothesis` é consulta fornecida e a enumeração EC-04 usa família fornecida: nenhuma das duas, isoladamente, demonstra formulação autônoma de hipótese investigável ou descoberta. Exemplos não foram executados e não há protocolo experimental novo.
 
 Diretrizes A1–A8 e conclusões anteriores preservadas. Subetapa documental delimitada concluída; aceitação global EC-07 não avaliada. Próxima subetapa nominal: **selecionar intervenções sob orçamento**, não iniciada.
+
+## EC-07 — Selecionar intervenções sob orçamento
+
+Base `f2eac683397b50669526142838908587ec9d28a6`, devs inicialmente limpa e sincronizada. [Especificação documental](EC-07_selecao_intervencoes_orcamento.md) define objetivos, candidatas, evidências, custos multidimensionais, permissões, risco, seleção justificada, interrupção, resultados e rastreabilidade. A utilidade não autoriza ação externa ou irreversível; estimativas não calibradas não são medições. Limites de eventos e tentativas e revisão programada existem, mas não demonstram seleção autônoma de investigação ou ganho de aprendizagem.
+
+Exemplos são conceituais, não executados; nenhuma política definitiva, arquitetura ou experimento foi criado. A1–A8 e conclusões históricas preservadas. Subetapa documental concluída; aceitação global EC-07 não avaliada. Próxima subetapa nominal: **comparar investigação ativa com seleção aleatória e política fixa**, não iniciada.
