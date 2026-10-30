@@ -644,3 +644,7 @@ Base `2de147d2ceddc2399665358e2340e02bd515f3e4`. [Auditoria EC-12](EC-12_auditor
 ## Plano v0.2 — Reconciliação histórica EC-00 a EC-02
 
 Base `ca8b915a7e7599430b5c7feb03913cc45328c07b`. [Reconciliação](Plano_v0_2_reconciliacao_historica_EC00_EC02.md): transcrições EC-02.2 e EC-02.4-R1 já estavam arquivadas nos commits `34afddb` e `f86953b`, coincidem com cópias locais e não comprovam pré-registro independente. Relatórios integrais EC-00/01/02 e decisão global EC-02 não localizados no escopo; EC-02.4 permanece encerrada delimitadamente, **AJUSTAR**, sem extrapolar a EC-02 global. Corrigida a matriz de [consolidação](Plano_v0_2_consolidacao_final.md) quanto aos protocolos localizados; plano não integralmente encerrado, sem novo ciclo ou alteração de resultados históricos.
+
+## Plano Executivo de Evolução Cognitiva v0.3 — proposta documental
+
+Base `1f950dbcb4d35746b44e969e9ed22ee1bdf9ea8d`. Autorizada a elaboração documental de [proposta v0.3](planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md). A proposta permanece **NÃO APROVADA**, sem autorização ou execução de qualquer etapa; não altera resultados históricos nem declara o v0.2 integralmente homologado.
