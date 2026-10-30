@@ -616,3 +616,7 @@ Base `c324f779b8fe0dd1104c1e2d933c2bd8a31d2920`. [Matriz e relatório](EC-11_int
 ## EC-11 — Regressão, recursos e confiabilidade delimitada
 
 Base `501b928ad85f26b56cad6e1afb004d2318151282`. [Protocolo](protocolos/EC-11_confiabilidade_integrada.md) e [resultados](EC-11_resultados_confiabilidade_integrada.md): duas repetições do cenário fixo, com checkpoint em arquivo e restauração em processos separados, preservaram decisões, registros e ordem da fila; negativos de corrupção, tamanho, contexto e orçamento passaram. Circuito/pesos não serializados, permissões e autonomia integradas não avaliáveis. **AJUSTAR**, conformidade parcial; EC-11 permanece aberta, sem iniciar EC-12. Regressão 185 aprovados, zero falhos e um ignorado EC-10 R3; A1–A8 e histórico preservados.
+
+## EC-11 — Auditoria científica final e encerramento delimitado
+
+Base `8bb77307d4c870aa229b1bffbd50bd9ab8158eeb`. [Auditoria final](EC-11_auditoria_cientifica_final.md): **EC-11 encerrada como investigação técnico-científica delimitada, AJUSTAR, conformidade metodológica parcial**. Critério global parcialmente atendido no cenário restrito, não homologado para confiabilidade longitudinal geral. Painel reproduziu bytes e decisões, porém não comparou relatório completo entre repetições como H1 previa; persistência neuronal, permissões integradas e autonomia não demonstradas. A1–A8 e resultados históricos preservados; EC-12 não iniciada.
