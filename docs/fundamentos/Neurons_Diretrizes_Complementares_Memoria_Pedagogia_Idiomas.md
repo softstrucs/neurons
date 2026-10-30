@@ -59,3 +59,23 @@ Conservar separadamente conhecimento fornecido, mecanismo programado, mudança i
 | A7 | 4, 9, 10, 11, 12 | Alegações proporcionais aos dados, incertezas e controles; consciência como questão distinta. |
 
 A tabela expressa compatibilidade conceitual, não prova de atendimento aos princípios. A política experimental delimitada P1 da EC-05 não se torna política universal da memória por constar desta delegação. O [índice de fundamentos](README.md), o [registro de decisões](../decisions.md) e a [preparação de retenção contextual](../protocolos/EC-05_preparacao_retencao_contextual.md) mantêm a rastreabilidade entre diretriz, decisão local e investigação pendente.
+
+## A8. Competência Cognitiva Generalizável
+
+O Neurons deverá desenvolver progressivamente mecanismos cognitivos e metacognitivos que permitam investigar problemas inéditos, identificar lacunas, adquirir conhecimentos e competências, formular e testar hipóteses, raciocinar com fundamentos lógicos e científicos, construir explicações verificáveis, avaliar alternativas, decidir e agir dentro das permissões estabelecidas, verificar resultados e transferir aprendizados entre domínios e subdomínios.
+
+A correção não deverá ser presumida pela plausibilidade de uma resposta, pela memorização de exemplos ou pela aplicação mecânica de padrões. O sistema deverá distinguir recuperação, inferência, aprendizagem, descoberta e verificação, preservando evidências, proveniência, limitações e incertezas.
+
+Esta diretriz constitui um objetivo científico e arquitetural futuro, não uma capacidade já demonstrada.
+
+### Esclarecimentos científicos de A8
+
+1. A diretriz não proíbe memória, reconhecimento de padrões, estatística ou probabilidades como instrumentos auxiliares.
+2. Exige que conclusões sejam avaliadas segundo evidências, métodos apropriados, critérios de validade e possibilidades de verificação.
+3. Não pressupõe que todos os problemas sejam solucionáveis nem que toda resposta possa ser demonstrada como correta.
+4. O sistema deverá reconhecer incerteza, insuficiência de evidências, limitações de recursos e problemas indecidíveis.
+5. A generalização entre domínios deverá ser demonstrada experimentalmente, não presumida.
+6. A analogia com um organismo vivo é funcional; não implica vida biológica, consciência subjetiva ou experiência fenomenal.
+7. Não declarar AGI, consciência artificial ou superioridade sobre LLMs sem evidências comparativas.
+
+A8 orientará investigações futuras sobre aprendizagem, raciocínio, descoberta, verificação e transferência entre domínios e subdomínios. Sua aprovação não altera A1–A7 nem autoriza automaticamente implementação, alteração arquitetural ou avanço da EC-06.
