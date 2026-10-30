@@ -476,3 +476,9 @@ Base `0bf240ae49b5d919f011fe439e077f87f0ec907d`. [Protocolo prospectivo](protoco
 Base `e70a15acf29b5f13d00363f53f4839f4b4376064`. [Protocolo complementar](protocolos/EC-07_controle_aleatorio_R1.md) e [resultados](EC-07_resultados_controle_aleatorio_R1.md) preservam experimento histórico. SplitMix64 com rejeição de módulo, 32 sementes fixas e duas repetições: 2.688 decisões de três políticas e 896 do controle; ativa 384/896, PRNG 128/896, fixa 128/896, sem respostas erradas ou violações observadas. Ativa supera PRNG nas 32 sementes agregadas V/F/A; sorteios compartilhados tornam observações dependentes. Vetores PRNG e posições passaram; não se afirma inferência populacional.
 
 **AJUSTAR**, sem aprendizagem ou autonomia demonstradas; previsões exatas fornecidas e instrumentos de dados/trabalho parciais. Suíte 150 testes aprovados. Preservados A1–A8, protocolos e código de produção; próxima subetapa nominal medir ganho informacional e de competência não iniciada.
+
+## EC-07 — Medir ganho informacional e de competência
+
+Base `8b961748ed5e1a1924d2783ec5cd66598d487002`. [Protocolo](protocolos/EC-07_ganho_informacional.md) e [resultados](EC-07_resultados_ganho_informacional.md): avaliador externo mede cardinalidade, sem probabilidades. Em 256 casos finais, evidência informativa reduziu uma alternativa em 64/64, controle sem evidência reduziu zero, repetição acrescentou zero e 64 contradições resultaram em abstenção com ganho indefinido. Cálculo sintético não é atualização cognitiva pelo núcleo; competência persistente não mensurada nem demonstrada neste painel. Resultado **AJUSTAR**; EC-04 preservada como evidência anterior delimitada, sem ligação causal estabelecida com R1.
+
+Suíte 153 testes aprovados; dados por condição e custos de trabalho não medidos integralmente. A1–A8, código de produção e protocolos históricos preservados. Subetapa concluída no escopo delimitado; revisão da EC-07 permanece pendente, sem iniciar etapa posterior.
