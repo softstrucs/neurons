@@ -624,3 +624,7 @@ Base `8bb77307d4c870aa229b1bffbd50bd9ab8158eeb`. [Auditoria final](EC-11_auditor
 ## EC-12 — Inventariar competências demonstradas
 
 Base `35c10b7503aea3b360228b08b353ecf1faa63962`. [Inventário documental](EC-12_inventario_competencias_demonstradas.md): evidências EC-00–11 e interfaces de produção classificadas por escopo, preservando resultados negativos, limitações dos controles e painel R3 EC-10 ignorado. **AJUSTAR**, subetapa concluída documentalmente; EC-12 permanece aberta e critério global não homologado. A1–A8 preservadas como diretrizes; nenhum experimento novo. Próxima subetapa nominal: **avaliar lacunas**, não iniciada.
+
+## EC-12 — Avaliar lacunas
+
+Base `5db7d3ef77f4b2572e09bfb464cb4ffbd9aabb05`. [Avaliação documental](EC-12_avaliacao_lacunas.md): 17 lacunas de implementação, validação e ciência, com evidências, dependências, condições de avaliação e priorização recomendada, sem decisão arquitetural ou autorização de desenvolvimento. Preservados R3 EC-10 não executado, H1 EC-11 parcialmente verificada e diretrizes A1–A8. **AJUSTAR**, subetapa documental delimitada concluída; EC-12 permanece aberta. Próxima nominal: **definir pré-requisitos de especialização**, não iniciada.
