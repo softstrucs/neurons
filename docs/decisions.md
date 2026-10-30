@@ -612,3 +612,7 @@ Próxima subetapa nominal: **integrar apenas mecanismos validados**, não inicia
 ## EC-11 — Integrar apenas mecanismos validados
 
 Base `c324f779b8fe0dd1104c1e2d933c2bd8a31d2920`. [Matriz e relatório](EC-11_integracao_mecanismos_validados.md): adaptador delimitado conecta `Engine`, `EngramStore`, `Monitor` e checkpoint existente; configuração do monitor é fornecida pelo chamador e não serializada. Dois testes focais verificam ordem, evidências, contexto, abstenção, consultas sem mutação e corrupção. Sem persistência de circuito ou pesos nem alegações de autonomia, transferência ou aprendizagem geral. **AJUSTAR**; EC-11 permanece aberta e A1–A8 preservadas. Próxima subetapa nominal: **executar testes de regressão, recursos, rastreabilidade, segurança, retenção e autonomia limitada**, não iniciada.
+
+## EC-11 — Regressão, recursos e confiabilidade delimitada
+
+Base `501b928ad85f26b56cad6e1afb004d2318151282`. [Protocolo](protocolos/EC-11_confiabilidade_integrada.md) e [resultados](EC-11_resultados_confiabilidade_integrada.md): duas repetições do cenário fixo, com checkpoint em arquivo e restauração em processos separados, preservaram decisões, registros e ordem da fila; negativos de corrupção, tamanho, contexto e orçamento passaram. Circuito/pesos não serializados, permissões e autonomia integradas não avaliáveis. **AJUSTAR**, conformidade parcial; EC-11 permanece aberta, sem iniciar EC-12. Regressão 185 aprovados, zero falhos e um ignorado EC-10 R3; A1–A8 e histórico preservados.
