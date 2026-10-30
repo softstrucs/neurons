@@ -566,3 +566,9 @@ A1–A8, produção e resultados anteriores preservados; nenhum experimento novo
 Base `baf48fb662d589b0a08472d7fc3a77557fc38bd4`, devs inicialmente limpa e sincronizada. [Especificação prospectiva](EC-10_controles_renomeacao_recuperacao.md) define bijeção, isomorfismo e limitações de ordem/custo, controles de recuperação, regra e composição, partições e equivalência informacional. Renomeação isolada não demonstra transferência; controle privado de informação não sustenta superioridade.
 
 A1–A8, produção e resultados históricos preservados; nenhum experimento novo. Subetapa documental concluída; próxima nominal **avaliar transferência genuína, retenção longitudinal e interferência**, não iniciada. EC-10 permanece aberta.
+
+## EC-10 — Avaliação diagnóstica de retenção e interferência
+
+Base `8c54697e2575c7c3d1505630a046b5ff7cc437fb`. [Protocolo](protocolos/EC-10_retencao_interferencia.md), teste isolado e [resultado](EC-10_resultados_retencao_interferencia.md): protótipo simbólico EC-04 reteve 32/32 decisões após intervalo real curto e treino em contexto B separado; revisão deliberada produziu 28/32 frente ao critério antigo e 8/8 frente ao revisado, versus 4/8 no congelado. Indutor simbólico concordou em decisões. Sem evidência de transferência genuína, retenção após reinício ou interferência entre pesos compartilhados.
+
+**AJUSTAR; não conformidade:** desenvolvimento, validação e F reutilizaram vetores e critérios, apenas renomeando contexto; não há avaliação final independente, em desacordo com separação solicitada. Renomeação D/V/F não foi assertada entre execuções; estado/evidência do controle só parcialmente comparados. Resultados diagnósticos preservados, sem corrigir após F; necessário protocolo e conjunto separado. Suíte 166 testes aprovados; A1–A8 e produção preservados. EC-10 permanece aberta.
