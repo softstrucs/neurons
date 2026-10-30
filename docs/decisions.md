@@ -640,3 +640,7 @@ Base `8d4e20e97a4afe6137c04ff22130636ad6382c06`. [Registro documental](EC-12_que
 ## EC-12 — Auditoria científica final e avaliação do plano v0.2
 
 Base `2de147d2ceddc2399665358e2340e02bd515f3e4`. [Auditoria EC-12](EC-12_auditoria_cientifica_final.md): **encerrada como consolidação documental delimitada, AJUSTAR, conformidade parcial**; critério global parcialmente atendido documentalmente, decisão humana de continuidade pendente. [Matriz do plano](Plano_v0_2_consolidacao_final.md): ciclo EC-03–12 documentado e delimitado; EC-00–02 têm fontes históricas primárias pendentes e fechamento integral de EC-02 não verificável pelas fontes inventariadas. Plano não declarado integralmente encerrado; não há homologação de capacidades gerais nem autorização de novo ciclo. A1–A8 e resultados históricos preservados.
+
+## Plano v0.2 — Reconciliação histórica EC-00 a EC-02
+
+Base `ca8b915a7e7599430b5c7feb03913cc45328c07b`. [Reconciliação](Plano_v0_2_reconciliacao_historica_EC00_EC02.md): transcrições EC-02.2 e EC-02.4-R1 já estavam arquivadas nos commits `34afddb` e `f86953b`, coincidem com cópias locais e não comprovam pré-registro independente. Relatórios integrais EC-00/01/02 e decisão global EC-02 não localizados no escopo; EC-02.4 permanece encerrada delimitadamente, **AJUSTAR**, sem extrapolar a EC-02 global. Corrigida a matriz de [consolidação](Plano_v0_2_consolidacao_final.md) quanto aos protocolos localizados; plano não integralmente encerrado, sem novo ciclo ou alteração de resultados históricos.
