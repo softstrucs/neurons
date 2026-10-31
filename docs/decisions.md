@@ -684,3 +684,7 @@ Por autorização humana expressa, base `c7b5244aecd40ed1051cf7afb9b58364d0b6b82
 ## V03-F1-P01 — D04-E03: métrica operacional de memória
 
 Por autorização humana expressa, base `166c7cbff16128748fcdf55adca6be937b629d2b`, [D04-E03](protocolos/V03-F1-P01_D04-E03_memoria_cgroup_APROVADA.md) substitui, exclusivamente no V03-F1-P01, o critério operacional RSS por **256 MiB (268435456 bytes) de memória cobrada ao cgroup v2**, mediante contenção efetiva e validação futura; RSS permanece complementar. D04-E02 preservada: 256 KiB de dados vivos são restrição não verificada e não indispensável à alegação local. Tempo inferior a 30 s e `/home` com pelo menos 3 GiB livres permanecem. O ambiente anteriormente investigado não está validado; D/V sob contenção, congelamento e autorização de F pendentes. Nenhuma capacidade homologada.
+
+## V03-F1-P01 — Infraestrutura cgroup v2
+
+Base `c2d0df217b3eaa2abd32f300f309bc6cd6a10967`. [Diagnóstico](V03-F1-P01_validacao_infraestrutura_cgroup.md): **C — contenção indisponível no ambiente desta sessão**; montagem visível de cgroup somente leitura e barramento systemd de usuário inacessível. Não se contornou o sandbox nem se criaram grupos ou serviços; controles sintéticos e D/V sob contenção permanecem pendentes. Procedimento não privilegiado no hospedeiro é proposto apenas para diagnóstico, sem presumir sucesso; F não autorizado, congelamento não aprovado e nenhuma competência homologada.
