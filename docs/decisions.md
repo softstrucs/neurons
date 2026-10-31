@@ -660,3 +660,7 @@ Por autorização humana expressa na delegação desta formalização, base `0fe
 ## V03-F1-P01 — Preparação documental do primeiro protocolo
 
 Por autorização humana para preparação documental, base `e3957ca36cbe039670741cc4b4060abef8666957`, [V03-F1-P01](protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md) propõe consultas diretas, rastreabilidade pública e isolamento contextual. Estado **PROPOSTO / NÃO APROVADO**, execução **NÃO AUTORIZADA**; verificador e esquema canônico ainda não foram implementados ou validados. Nenhuma frente iniciada experimentalmente; nenhum painel ou capacidade homologada.
+
+## V03-F1-P01 — Instrumentação preliminar D/V
+
+Base `0a056cf760486ad328294b20607c3c63f1dc46c7`. [Relatório](V03-F1-P01_validacao_preliminar_instrumentos.md): verificador separado, esquema canônico e controles D/V; V1 e V2 preservadas e V3 repetida após correções dos instrumentos. F não gerado nem executado; gerador aceita apenas D/V. Instrumentação **parcialmente validada**, com variantes não exercidas, independência compartilhada e revisão S2/S3 pendentes; protocolo final não aprovado e F1 sem homologação experimental final. Núcleo e plano aprovados preservados.
