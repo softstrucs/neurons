@@ -712,3 +712,7 @@ Base `30feb8c51b2ec1a1b6b9a3e30a43c8099fe0764a`. Usuário relata nove controles 
 ## V03-F1-P01 — Preparação D/V sob cgroup
 
 Base `375fef13b5442fa480a25760187c179927763d35`. Usuário relata controles sintéticos aprovados no hospedeiro. [Preparação do executor](V03-F1-P01_preparacao_executor_dv_cgroup.md): scope de 256 MiB com pré-verificação externa, tempo, espaço e coleta; D/V não executados. Amostragem não comprova todos os descendentes breves; executor mantém resultado **INCONCLUSIVO** e prontidão pendente. Autorização específica de D/V, validação integral, congelamento e F continuam pendentes; nenhuma competência homologada.
+
+## V03-F1-P01 — Rastreabilidade de descendentes D/V
+
+Base `2529e0035743d0292d0c2feb0d06e0f502dab5d1`. [Instrumentação prospectiva](V03-F1-P01_preparacao_executor_dv_cgroup.md): único ponto explícito de criação dos filhos de restauração recebeu handshake e verificação de PID, criador, geração e cgroup; coordenador exige 18 registros únicos por partição. Testes seguros de comunicação e classificação passaram sem executar D/V. Validação real, encerramento por falhas e cobertura além dos caminhos identificados permanecem pendentes; executor retorna inconclusivo, F não autorizado e congelamento não aprovado.

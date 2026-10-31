@@ -69,6 +69,19 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def live_process(pid):
+    """Lê criador e geração do PID enquanto o processo aguarda liberação."""
+    data = Path(f'/proc/{pid}/stat').read_text()
+    suffix = data.rsplit(')', 1)[1].split()
+    return int(suffix[1]), int(suffix[19]), str(common.cgroup_path(pid))
+
+
+def verify_test_ready(line, run_id, pid, parent_pid, ticks, group):
+    marker = line.find('V03TEST_READY|')
+    return (marker >= 0 and line[marker:].strip().split('|')
+            == ['V03TEST_READY', run_id, str(pid), str(parent_pid), str(ticks), group])
+
+
 def snapshot(path):
     peak = path / 'memory.peak'
     return {'max': (path / 'memory.max').read_text().strip(),
@@ -95,6 +108,42 @@ def sample_members(path, stop, result):
         stop.wait(0.002)
 
 
+def verify_restore_traces(output, run_id, partition, parent_pid, cgroup):
+    """Verifica 18 registros de filho distintos; polling não é referência."""
+    if partition not in ('D', 'V'):
+        raise ValueError('partição não autorizada')
+    expected = {f'{partition}-{rep}-{case}' for rep in range(3) for case in range(1, 7)}
+    seen, identities, records = set(), set(), []
+    for line in output.splitlines():
+        marker = line.find('V03TRACE_RECORD|')
+        if marker < 0:
+            continue
+        fields = line[marker:].split('|')
+        if len(fields) != 14:
+            raise ValueError('registro incompleto')
+        _, run, child_id, role, pid, ppid, ticks, group, begin, entered, end, elapsed, code, sig = fields
+        try:
+            pid, ppid, ticks, begin, entered, end, elapsed, code, sig = map(
+                int, (pid, ppid, ticks, begin, entered, end, elapsed, code, sig))
+        except ValueError as exc:
+            raise ValueError('registro numérico inválido') from exc
+        identity = (pid, ticks)
+        if (run != run_id or child_id not in expected or child_id in seen or role != 'restore'
+                or pid <= 0 or ppid != parent_pid or ticks <= 0 or identity in identities
+                or group != cgroup or not (0 < begin <= entered <= end) or elapsed <= 0
+                or code != 0 or sig != 0):
+            raise ValueError('identidade, cgroup, tempo ou saída divergente')
+        seen.add(child_id)
+        identities.add(identity)
+        records.append({'child_id': child_id, 'pid': pid, 'parent_pid': ppid,
+                        'start_ticks': ticks, 'cgroup': group, 'start_unix_ns': begin,
+                        'entry_unix_ns': entered, 'end_unix_ns': end,
+                        'elapsed_monotonic_ns': elapsed, 'exit_code': code, 'signal': sig})
+    if seen != expected:
+        raise ValueError('registros ausentes')
+    return records
+
+
 def worker():
     started = time.monotonic()
     path = common.cgroup_path(os.getpid())
@@ -113,15 +162,21 @@ def worker():
     env = dict(os.environ)
     env.pop('NEURONS_V03_F1_DV_CASE', None)
     env.pop('NEURONS_V03_F1_DV_CHECKPOINT', None)
+    env['NEURONS_V03_TRACE_CGROUP'] = '/' + str(path.relative_to(ROOT))
     for name in TEST_NAMES:
         allowed_test(name)
+        run_id = secrets.token_hex(16)
+        env['NEURONS_V03_TRACE_RUN'] = run_id
         if (path / 'memory.max').read_text().strip() != str(LIMIT):
             raise RuntimeError('teto alterado; interrompido')
         remaining = DEADLINE - (time.monotonic() - started)
         if remaining <= 0:
             raise TimeoutError('limite total')
+        spawned_ns = time.time_ns()
+        spawned_monotonic_ns = time.monotonic_ns()
         proc = subprocess.Popen([str(exe), '--exact', name, '--nocapture'],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True, env=env)
         observations = {'samples': [], 'unverified': [], 'inconsistent': [], 'errors': []}
         stop = threading.Event()
         monitor = threading.Thread(target=sample_members, args=(path, stop, observations), daemon=True)
@@ -130,14 +185,47 @@ def worker():
             inside = common.cgroup_path(proc.pid) == path
             if not inside:
                 raise RuntimeError('processo fora da contenção')
-            output, error = proc.communicate(timeout=remaining)
+            prefix = ''
+            while True:
+                line = proc.stdout.readline()
+                if not line:
+                    raise RuntimeError('identidade do teste ausente')
+                prefix += line
+                if 'V03TEST_READY|' in line:
+                    break
+            ppid, start_ticks, group = live_process(proc.pid)
+            if (ppid != os.getpid() or group != env['NEURONS_V03_TRACE_CGROUP']
+                    or not verify_test_ready(line, run_id, proc.pid, ppid, start_ticks, group)):
+                raise RuntimeError('identidade do teste divergente; nenhuma consulta liberada')
+            entered_ns = time.time_ns()
+            entered_monotonic_ns = time.monotonic_ns()
+            proc.stdin.write(f'V03TEST_GO|{run_id}|{proc.pid}|{start_ticks}\n')
+            proc.stdin.flush()
+            proc.stdin.close()
+            proc.stdin = None
+            rest, error = proc.communicate(timeout=max(0.01, DEADLINE - (time.monotonic() - started)))
+            output = prefix + rest
+            if output.count('V03TEST_READY|') != 1:
+                raise RuntimeError('identidade do teste duplicada')
         finally:
             if proc.poll() is None:
                 proc.kill()
                 proc.wait()
             stop.set()
             monitor.join(timeout=1)
+        traces = verify_restore_traces(output, run_id, 'D' if name == 'development' else 'V',
+                                       proc.pid, env['NEURONS_V03_TRACE_CGROUP'])
         entry['partitions'][name] = {'pid': proc.pid, 'inside': inside, 'returncode': proc.returncode,
+                                     'run_id': run_id, 'restore_traces': traces,
+                                     'role': 'test_harness', 'parent_pid': ppid,
+                                     'start_ticks': start_ticks, 'cgroup': group,
+                                     'start_unix_ns': spawned_ns, 'entry_unix_ns': entered_ns,
+                                     'end_unix_ns': time.time_ns(),
+                                     'start_monotonic_ns': spawned_monotonic_ns,
+                                     'entry_monotonic_ns': entered_monotonic_ns,
+                                     'end_monotonic_ns': time.monotonic_ns(),
+                                     'exit_code': proc.returncode if proc.returncode >= 0 else None,
+                                     'signal': -proc.returncode if proc.returncode < 0 else 0,
                                      'stdout': output, 'stderr': error, 'membership_samples': observations}
         if monitor.is_alive() or observations['errors'] or observations['inconsistent']:
             raise RuntimeError('verificação de processos incompleta; interrompido')
@@ -146,8 +234,8 @@ def worker():
     entry['after'] = snapshot(path)
     entry['elapsed_s'] = time.monotonic() - started
     entry['remaining_pids'] = entry['after']['pids']
-    # Harness não expõe pertencimento dos filhos breves: não homologar escopo integral.
-    entry['descendant_membership'] = 'NAO_VERIFICADO_INTEGRALMENTE'
+    # A instrumentação é prospectiva: validação real e cobertura além do harness permanecem pendentes.
+    entry['descendant_membership'] = 'REGISTROS_LOCAIS_VERIFICADOS_NAO_HOMOLOGADOS'
     entry['status'] = 'INCONCLUSIVO'
     print('DV_EVIDENCE=' + json.dumps(entry, sort_keys=True), flush=True)
     return 1

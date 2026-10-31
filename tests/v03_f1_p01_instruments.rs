@@ -2,6 +2,8 @@
 mod canonical;
 #[path = "support/v03_f1_p01/reference.rs"]
 mod reference;
+#[path = "support/v03_f1_p01/trace.rs"]
+mod trace;
 use neurons::cognition::{Hypothesis, TwoHopTask};
 use neurons::engine::Engine;
 use neurons::engram::{Cue, Engram, EngramId, EngramStore, EvidenceId, RecordStatus};
@@ -86,6 +88,7 @@ fn child_process() {
     let Ok(spec) = std::env::var("NEURONS_V03_F1_DV_CASE") else {
         return;
     };
+    trace::child_gate();
     let mut c = spec.chars();
     let p = c.next().unwrap();
     let n = c.as_str().parse::<u8>().unwrap();
@@ -114,7 +117,7 @@ fn execute(p: char) {
     let mut decisions = 0;
     let mut comparisons = 0;
     let mut altered = 0;
-    for _rep in 0..3 {
+    for rep in 0..3 {
         for n in 1..=6 {
             let m = manifest(p, n).unwrap();
             let (a, a2, b, e) = run(&m);
@@ -132,12 +135,11 @@ fn execute(p: char) {
                 diag.differences
             );
             decisions += 2;
-            let out = std::process::Command::new(std::env::current_exe().unwrap())
-                .args(["--exact", "child_process", "--nocapture"])
+            let mut cmd = std::process::Command::new(std::env::current_exe().unwrap());
+            cmd.args(["--exact", "child_process", "--nocapture"])
                 .env("NEURONS_V03_F1_DV_CASE", format!("{p}{n}"))
-                .env("NEURONS_V03_F1_DV_CHECKPOINT", hex(&b))
-                .output()
-                .unwrap();
+                .env("NEURONS_V03_F1_DV_CHECKPOINT", hex(&b));
+            let out = trace::run_child(&mut cmd, p, rep, n);
             assert!(out.status.success());
             let stdout = String::from_utf8(out.stdout).unwrap();
             assert!(
@@ -262,9 +264,11 @@ fn execute(p: char) {
 }
 #[test]
 fn development() {
+    trace::test_gate();
     execute('D')
 }
 #[test]
 fn validation() {
+    trace::test_gate();
     execute('V')
 }
