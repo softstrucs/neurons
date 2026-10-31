@@ -167,7 +167,10 @@ pub fn verify(m: &Manifest, f: &Fields, observed: &[Record]) -> Diagnosis {
     add(
         &mut expected,
         "attempts.0.inference.value.facts_loaded",
-        pos.len(),
+        m.records
+            .iter()
+            .filter(|r| r.context == m.context && r.sign == 1 && r.to > 0)
+            .count(),
     );
     add(
         &mut expected,

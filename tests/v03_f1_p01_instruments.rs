@@ -177,6 +177,30 @@ fn execute(p: char) {
                 assert_eq!(restored.checkpoint().unwrap(), before);
             }
             if n == 1 {
+                // Fato positivo adicional no mesmo contexto: não muda o suporte,
+                // mas deve aparecer em facts_loaded. Usar apenas IDs D/V.
+                let mut extra_case = manifest(p, 1).unwrap();
+                let mut unrelated = extra_case.records[0].clone();
+                unrelated.id += 100;
+                unrelated.to += 1;
+                extra_case.records.push(unrelated);
+                let (extra_fields, _, _, extra_records) = run(&extra_case);
+                assert_eq!(
+                    reference::verify(&extra_case, &extra_fields, &extra_records).verdict,
+                    Verdict::Valid
+                );
+                let mut wrong_count = extra_fields.clone();
+                wrong_count
+                    .iter_mut()
+                    .find(|(k, _)| k == "attempts.0.inference.value.facts_loaded")
+                    .unwrap()
+                    .1 = "1".into();
+                let count_diagnosis = reference::verify(&extra_case, &wrong_count, &extra_records);
+                assert_eq!(count_diagnosis.verdict, Verdict::Invalid);
+                assert!(count_diagnosis
+                    .differences
+                    .iter()
+                    .any(|x| x.contains("facts_loaded")));
                 let encoded = canonical::wire(&a);
                 assert_eq!(canonical::parse_wire(&encoded).unwrap(), a);
                 assert!(canonical::parse_wire("not-a-length").is_err());

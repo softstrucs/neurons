@@ -664,3 +664,7 @@ Por autorização humana para preparação documental, base `e3957ca36cbe0396707
 ## V03-F1-P01 — Instrumentação preliminar D/V
 
 Base `0a056cf760486ad328294b20607c3c63f1dc46c7`. [Relatório](V03-F1-P01_validacao_preliminar_instrumentos.md): verificador separado, esquema canônico e controles D/V; V1 e V2 preservadas e V3 repetida após correções dos instrumentos. F não gerado nem executado; gerador aceita apenas D/V. Instrumentação **parcialmente validada**, com variantes não exercidas, independência compartilhada e revisão S2/S3 pendentes; protocolo final não aprovado e F1 sem homologação experimental final. Núcleo e plano aprovados preservados.
+
+## V03-F1-P01 — Auditoria de prontidão pré-final
+
+Base `f0dcb9e94fcaf91ec2a06db8e5b9772edf695ae0`. [Auditoria](V03-F1-P01_auditoria_prontidao_pre_final.md) e [emenda E01 proposta](protocolos/V03-F1-P01_E01_identidade_S2_S3.md): S2/S3 estruturalmente equivalentes com IDs distintos; referência corrigida para fatos positivos adicionais, D/V repetidos, cobertura sintética e recursos parcialmente avaliados. Parecer **APTO COM PENDÊNCIAS EXPLÍCITAS**, sem aprovação ou execução de F; independência externa, limites finos e decisão sobre E01 pendentes. Núcleo e plano v0.3 preservados; nenhuma competência homologada.

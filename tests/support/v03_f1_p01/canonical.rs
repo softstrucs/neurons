@@ -170,11 +170,17 @@ fn inference(f: &mut Fields, p: &str, i: InferenceReport) {
         target_activations,
     } = i;
     hyp(f, &path(p, "hypothesis"), hypothesis);
-    let q = path(p, "outcome");
+    serialize_outcome(f, &path(p, "outcome"), outcome);
+    put(f, &path(p, "facts_loaded"), facts_loaded);
+    put(f, &path(p, "processed_events"), processed_events);
+    put(f, &path(p, "source_activations"), source_activations);
+    put(f, &path(p, "target_activations"), target_activations);
+}
+fn serialize_outcome(f: &mut Fields, q: &str, outcome: Outcome) {
     match outcome {
         Outcome::DirectRecall(x) => {
-            put(f, &q, "DirectRecall");
-            put(f, &path(&q, "id"), x.get());
+            put(f, q, "DirectRecall");
+            put(f, &path(q, "id"), x.get());
         }
         Outcome::Inferred(Proof {
             via,
@@ -182,23 +188,19 @@ fn inference(f: &mut Fields, p: &str, i: InferenceReport) {
             second_fact,
             via_activations,
         }) => {
-            put(f, &q, "Inferred");
-            put(f, &path(&q, "via"), via.get());
-            put(f, &path(&q, "first_fact"), first_fact.get());
-            put(f, &path(&q, "second_fact"), second_fact.get());
-            put(f, &path(&q, "via_activations"), via_activations);
+            put(f, q, "Inferred");
+            put(f, &path(q, "via"), via.get());
+            put(f, &path(q, "first_fact"), first_fact.get());
+            put(f, &path(q, "second_fact"), second_fact.get());
+            put(f, &path(q, "via_activations"), via_activations);
         }
-        Outcome::Unsupported => put(f, &q, "Unsupported"),
-        Outcome::InconclusiveBudget => put(f, &q, "InconclusiveBudget"),
+        Outcome::Unsupported => put(f, q, "Unsupported"),
+        Outcome::InconclusiveBudget => put(f, q, "InconclusiveBudget"),
         Outcome::InconclusivePropagation(x) => {
-            put(f, &q, "InconclusivePropagation");
-            circuit(f, &path(&q, "error"), x);
+            put(f, q, "InconclusivePropagation");
+            circuit(f, &path(q, "error"), x);
         }
     }
-    put(f, &path(p, "facts_loaded"), facts_loaded);
-    put(f, &path(p, "processed_events"), processed_events);
-    put(f, &path(p, "source_activations"), source_activations);
-    put(f, &path(p, "target_activations"), target_activations);
 }
 fn revision(x: RevisionReason) -> &'static str {
     match x {
@@ -353,4 +355,77 @@ pub fn parse_wire(wire: &str) -> Result<Fields, &'static str> {
         return Err("unknown_schema");
     }
     Ok(out)
+}
+
+// Pontos de prova do codec: serializam valores públicos isolados, sem fabricar
+// ReviewReport ou alegar que determinada variante seja alcançável em review.
+#[allow(dead_code)]
+pub fn inspect_neuron(x: NeuronError) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    neuron(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_synapse(x: SynapseError) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    synapse(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_engine(x: EngineError) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    engine(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_circuit(x: CircuitError) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    circuit(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_cognition(x: CognitionError) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    cognition(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_evidence(x: EvidenceRefs) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    evidence(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_conflict(x: Conflict) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    conflict(&mut f, "value", x);
+    f
+}
+#[allow(dead_code)]
+pub fn inspect_assessment(x: Assessment) -> Fields {
+    vec![
+        ("schema".into(), "v03-f1-p01/v1".into()),
+        ("value".into(), assessment(x).into()),
+    ]
+}
+#[allow(dead_code)]
+pub fn inspect_abstain(x: AbstainReason) -> Fields {
+    vec![
+        ("schema".into(), "v03-f1-p01/v1".into()),
+        ("value".into(), abstain(x).into()),
+    ]
+}
+#[allow(dead_code)]
+pub fn inspect_revision(x: RevisionReason) -> Fields {
+    vec![
+        ("schema".into(), "v03-f1-p01/v1".into()),
+        ("value".into(), revision(x).into()),
+    ]
+}
+
+#[allow(dead_code)]
+pub fn inspect_outcome(x: Outcome) -> Fields {
+    let mut f = vec![("schema".into(), "v03-f1-p01/v1".into())];
+    serialize_outcome(&mut f, "value", x);
+    f
 }
