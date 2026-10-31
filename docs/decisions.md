@@ -688,3 +688,7 @@ Por autorização humana expressa, base `166c7cbff16128748fcdf55adca6be937b629d2
 ## V03-F1-P01 — Infraestrutura cgroup v2
 
 Base `c2d0df217b3eaa2abd32f300f309bc6cd6a10967`. [Diagnóstico](V03-F1-P01_validacao_infraestrutura_cgroup.md): **C — contenção indisponível no ambiente desta sessão**; montagem visível de cgroup somente leitura e barramento systemd de usuário inacessível. Não se contornou o sandbox nem se criaram grupos ou serviços; controles sintéticos e D/V sob contenção permanecem pendentes. Procedimento não privilegiado no hospedeiro é proposto apenas para diagnóstico, sem presumir sucesso; F não autorizado, congelamento não aprovado e nenhuma competência homologada.
+
+## V03-F1-P01 — Preparação dos controles sintéticos cgroup
+
+Base `29ea13a416e7c9cc45101c0f1ab3a4183812b161`. Usuário relata scope no hospedeiro com `memory.max=268435456`; leitura não valida contenção. [Instrumentos e procedimento](V03-F1-P01_instrumentos_controles_cgroup.md) preparados; apenas testes puros e inspeções seguras foram executados. Controles de pressão/OOM, D/V sob contenção e F não executados; F não autorizado, congelamento não aprovado, nenhuma competência homologada.
