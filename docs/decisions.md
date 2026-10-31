@@ -708,3 +708,7 @@ Base `67906b90f7ebfe0567589f250c2ad1963f32eaf4`. Usuário relata `Result=oom-kil
 ## V03-F1-P01 — OOMPolicy confirmada antes da pressão
 
 Base `30feb8c51b2ec1a1b6b9a3e30a43c8099fe0764a`. Usuário relata nove controles internos verdadeiros e limpeza, mas scope desaparecido antes da consulta de política: resultado geral histórico **inconclusivo**. [Correção](V03-F1-P01_instrumentos_controles_cgroup.md): supervisor verifica unidade ativa, política e cgroup e libera o coordenador somente após confirmação; evidência é preservada e validada separadamente da limpeza posterior. Testes seguros sem OOM; execução real, D/V e homologação pendentes, congelamento não aprovado e F não autorizado.
+
+## V03-F1-P01 — Preparação D/V sob cgroup
+
+Base `375fef13b5442fa480a25760187c179927763d35`. Usuário relata controles sintéticos aprovados no hospedeiro. [Preparação do executor](V03-F1-P01_preparacao_executor_dv_cgroup.md): scope de 256 MiB com pré-verificação externa, tempo, espaço e coleta; D/V não executados. Amostragem não comprova todos os descendentes breves; executor mantém resultado **INCONCLUSIVO** e prontidão pendente. Autorização específica de D/V, validação integral, congelamento e F continuam pendentes; nenhuma competência homologada.

@@ -1,0 +1,56 @@
+"""Verificação pura do preflight; nunca executa partição nem cria scope."""
+import io
+from pathlib import Path
+import tempfile
+import unittest
+from unittest import mock
+
+import dv_cgroup_executor as executor
+
+
+class SafeExecutor(unittest.TestCase):
+    def test_only_explicit_partitions(self):
+        self.assertEqual(executor.allowed_test('development'), 'development')
+        self.assertEqual(executor.allowed_test('validation'), 'validation')
+        for value in ('F', 'final', '', 'child_process'):
+            with self.assertRaises(ValueError):
+                executor.allowed_test(value)
+
+    def test_scope_validation_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / 'neurons-v03-f1-dv-test.scope'
+            path.mkdir()
+            (path / 'memory.max').write_text(str(executor.LIMIT))
+            props = {'LoadState': 'loaded', 'ActiveState': 'active',
+                     'ControlGroup': '/neurons-v03-f1-dv-test.scope'}
+            with mock.patch.object(executor, 'ROOT', root), \
+                 mock.patch.object(executor.common, 'cgroup_path', return_value=path):
+                self.assertTrue(executor.validate_scope(path, 'neurons-v03-f1-dv-test', 42, props))
+                for key in props:
+                    bad = dict(props)
+                    del bad[key]
+                    self.assertFalse(executor.validate_scope(path, 'neurons-v03-f1-dv-test', 42, bad))
+                (path / 'memory.max').write_text('max')
+                self.assertFalse(executor.validate_scope(path, 'neurons-v03-f1-dv-test', 42, props))
+
+    def test_worker_without_release_cannot_launch(self):
+        with mock.patch.object(executor.common, 'cgroup_path', return_value=Path('/fake.scope')), \
+             mock.patch.object(executor, 'snapshot', return_value={'max': str(executor.LIMIT)}), \
+             mock.patch('sys.stdin', io.StringIO('{"release":false}\n')), \
+             mock.patch.object(executor.subprocess, 'Popen') as spawn, \
+             mock.patch('sys.stdout', new_callable=io.StringIO):
+            with self.assertRaises(RuntimeError):
+                executor.worker()
+            spawn.assert_not_called()
+
+    def test_low_space_cannot_launch_scope(self):
+        with mock.patch.object(executor, 'free_home', return_value=executor.MIN_FREE - 1), \
+             mock.patch.object(executor.subprocess, 'Popen') as spawn:
+            with self.assertRaises(RuntimeError):
+                executor.supervisor()
+            spawn.assert_not_called()
+
+
+if __name__ == '__main__':
+    unittest.main()
