@@ -100,21 +100,39 @@ class SafeAssessment(unittest.TestCase):
             (path / 'memory.swap.events').write_text('max 3\n')
             self.assertEqual(instrument.snapshot(path)['swap_events'], {'max': 3})
 
-    def test_systemd_oom_without_full_evidence_is_inconclusive(self):
-        process = mock.Mock()
-        process.communicate.return_value = ('NEURONS_CGROUP_STAGE={"stage":"before_pressure"}\n', '')
-        process.returncode = -15
-        shown = mock.Mock(returncode=0, stdout='ActiveState=failed\nControlGroup=\nResult=oom-kill\nOOMPolicy=continue\n')
-        output = io.StringIO()
-        with mock.patch.object(instrument.subprocess, 'Popen', return_value=process), \
-             mock.patch.object(instrument.subprocess, 'run', return_value=shown), \
-             contextlib.redirect_stdout(output):
-            self.assertEqual(instrument.run_host(), 1)
-        text = output.getvalue()
-        self.assertIn('"status": "INCONCLUSIVO"', text)
-        self.assertIn('"full_evidence_received": false', text)
-        self.assertIn('"Result": "oom-kill"', text)
-        self.assertIn('--property=OOMPolicy=continue', text)
+    def test_live_policy_confirmed_and_refuses_missing_or_wrong(self):
+        unit = 'neurons-v03-f1-012345'
+        coordinator = {'cgroup': '/sys/fs/cgroup/user.slice/' + unit + '.scope', 'coordinator_pid': 42}
+        output = ('LoadState=loaded\nActiveState=active\nOOMPolicy=continue\n'
+                  'ControlGroup=/user.slice/' + unit + '.scope\n')
+        shown = mock.Mock(returncode=0, stdout=output)
+        with mock.patch.object(instrument.subprocess, 'run', return_value=shown), \
+             mock.patch.object(instrument, 'cgroup_path', return_value=Path(coordinator['cgroup'])):
+            policy = instrument.verify_live_policy(unit, coordinator)
+        self.assertTrue(instrument.confirmed_policy_evidence(policy, unit))
+        for key, value in [('OOMPolicy', ''), ('OOMPolicy', 'stop'), ('ActiveState', 'inactive'),
+                           ('LoadState', 'not-found'), ('ControlGroup', '/user.slice/wrong.scope')]:
+            changed = copy.deepcopy(policy)
+            changed['properties'][key] = value
+            self.assertFalse(instrument.confirmed_policy_evidence(changed, unit))
+        self.assertFalse(instrument.confirmed_policy_evidence({}, unit))
+        policy['pid_in_scope'] = False
+        self.assertFalse(instrument.confirmed_policy_evidence(policy, unit))
+
+    def test_disappeared_scope_cleanup_and_incomplete_cleanup(self):
+        self.assertTrue(instrument.scope_cleanup_verified({'LoadState': 'not-found', 'ActiveState': 'inactive', 'ControlGroup': ''}, 0))
+        self.assertFalse(instrument.scope_cleanup_verified({'ActiveState': 'active', 'ControlGroup': ''}, 0))
+        self.assertFalse(instrument.scope_cleanup_verified({'ActiveState': 'inactive'}, 0))
+        self.assertFalse(instrument.scope_cleanup_verified({'ActiveState': 'inactive', 'ControlGroup': ''}, 1))
+
+    def test_pressure_refuses_absent_policy_before_allocation(self):
+        with mock.patch.object(instrument, 'cgroup_path', return_value=Path('/sys/fs/cgroup/fake.scope')), \
+             mock.patch.object(instrument, 'require_synthetic_limits'), \
+             mock.patch.dict(instrument.os.environ, {'NEURONS_CGROUP_LIVE_POLICY': ''}), \
+             mock.patch.object(instrument.mmap, 'mmap') as allocate:
+            with self.assertRaises(RuntimeError):
+                instrument.worker('pressure')
+            allocate.assert_not_called()
 
     def test_stage_is_flushed_to_external_stream(self):
         stream = io.StringIO()

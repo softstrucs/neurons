@@ -704,3 +704,7 @@ Base `afa74bd3c53edf5c5a4bb0c9b6374f3ec0e2d138`. Usuário relata segunda execuç
 ## V03-F1-P01 — Observabilidade do OOM relatado
 
 Base `67906b90f7ebfe0567589f250c2ad1963f32eaf4`. Usuário relata `Result=oom-kill` no systemd, mas evidência completa ausente e limpeza não comprovada; OOM relatado não valida todos os controles. [Registro](V03-F1-P01_instrumentos_controles_cgroup.md): scope sintético solicita `OOMPolicy=continue`, marcos são enviados ao supervisor externo e propriedades são coletadas; faltas permanecem inconclusivas. Política anterior e identidade da vítima não comprovadas. Sem pressão nesta atividade, D/V pendente, congelamento não aprovado e F não autorizado.
+
+## V03-F1-P01 — OOMPolicy confirmada antes da pressão
+
+Base `30feb8c51b2ec1a1b6b9a3e30a43c8099fe0764a`. Usuário relata nove controles internos verdadeiros e limpeza, mas scope desaparecido antes da consulta de política: resultado geral histórico **inconclusivo**. [Correção](V03-F1-P01_instrumentos_controles_cgroup.md): supervisor verifica unidade ativa, política e cgroup e libera o coordenador somente após confirmação; evidência é preservada e validada separadamente da limpeza posterior. Testes seguros sem OOM; execução real, D/V e homologação pendentes, congelamento não aprovado e F não autorizado.

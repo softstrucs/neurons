@@ -6,9 +6,11 @@ import mmap
 import os
 from pathlib import Path
 import secrets
+import selectors
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 
 LIMIT = 48 * 1024 * 1024
@@ -102,9 +104,59 @@ def emit_stage(name, **details):
     print('NEURONS_CGROUP_STAGE=' + json.dumps({'stage': name, **details}, sort_keys=True), flush=True)
 
 
+def verify_live_policy(unit, coordinator):
+    """O supervisor externo verifica a unidade e a identidade do cgroup ativo."""
+    shown = subprocess.run(['systemctl', '--user', 'show', unit + '.scope',
+                            '--property=LoadState', '--property=ActiveState',
+                            '--property=ControlGroup', '--property=OOMPolicy'],
+                           capture_output=True, text=True, timeout=3)
+    props = dict(line.split('=', 1) for line in shown.stdout.splitlines() if '=' in line)
+    expected = str(coordinator.get('cgroup', ''))
+    pid = coordinator.get('coordinator_pid')
+    try:
+        pid_in_scope = type(pid) is int and pid > 0 and str(cgroup_path(pid)) == expected
+    except (OSError, ValueError):
+        pid_in_scope = False
+    valid = (shown.returncode == 0 and props.get('LoadState') == 'loaded'
+             and props.get('ActiveState') == 'active' and props.get('OOMPolicy') == 'continue'
+             and props.get('ControlGroup', '').startswith('/')
+             and str(ROOT / props['ControlGroup'].lstrip('/')) == expected
+             and Path(expected).name == unit + '.scope' and pid_in_scope)
+    return {'confirmed': valid, 'scope': unit + '.scope', 'properties': props,
+            'coordinator_pid': pid, 'cgroup': expected, 'pid_in_scope': pid_in_scope}
+
+
+def confirmed_policy_evidence(evidence, unit):
+    """Confronta política, unidade e caminho sem aceitar marcador isolado."""
+    try:
+        props = evidence['properties']
+        path = Path(evidence['cgroup'])
+        return (evidence['confirmed'] is True and evidence['pid_in_scope'] is True
+                and evidence['scope'] == unit + '.scope'
+                and type(evidence['coordinator_pid']) is int and evidence['coordinator_pid'] > 0
+                and props['LoadState'] == 'loaded' and props['ActiveState'] == 'active'
+                and props['OOMPolicy'] == 'continue' and props['ControlGroup'].startswith('/')
+                and str(ROOT / props['ControlGroup'].lstrip('/')) == str(path)
+                and path.name == unit + '.scope')
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
+def scope_cleanup_verified(properties, returncode):
+    return (returncode == 0 and properties.get('ActiveState') == 'inactive'
+            and 'ControlGroup' in properties and properties['ControlGroup'] == '')
+
+
 def worker(mode):
     if mode == 'pressure':
-        require_synthetic_limits(cgroup_path(os.getpid()))
+        path = cgroup_path(os.getpid())
+        require_synthetic_limits(path)
+        try:
+            policy = json.loads(os.environ.get('NEURONS_CGROUP_LIVE_POLICY', ''))
+            if not confirmed_policy_evidence(policy, path.name.removesuffix('.scope')):
+                raise ValueError('política inválida')
+        except (ValueError, TypeError):
+            raise RuntimeError('política OOM não confirmada; pressão não iniciada')
     if mode == 'below':
         grand = subprocess.Popen([sys.executable, __file__, '--worker', 'grandchild'], stdout=subprocess.PIPE, text=True)
         try:
@@ -138,6 +190,15 @@ def coordinate():
     out = {'coordinator_pid': os.getpid(), 'cgroup': str(path), 'before': snapshot(path)}
     require_synthetic_limits(path)
     emit_stage('coordinator_ready', coordinator_pid=os.getpid(), cgroup=str(path), snapshot=out['before'])
+    try:
+        policy = json.loads(sys.stdin.readline())
+        unit = path.name.removesuffix('.scope')
+        if not confirmed_policy_evidence(policy, unit) or policy['coordinator_pid'] != os.getpid():
+            raise ValueError('política ou identidade não confirmada')
+    except (ValueError, KeyError, TypeError):
+        raise RuntimeError('política OOM não confirmada; pressão não iniciada')
+    out['live_policy'] = policy
+    emit_stage('policy_confirmed_before_pressure', **policy)
     below = subprocess.Popen([sys.executable, __file__, '--worker', 'below'], stdout=subprocess.PIPE, text=True)
     try:
         ids = json.loads(below.stdout.readline())
@@ -151,7 +212,8 @@ def coordinate():
             below.wait()
     require_synthetic_limits(path)
     emit_stage('before_pressure', coordinator_pid=os.getpid(), cgroup=str(path), snapshot=snapshot(path))
-    pressure = subprocess.Popen([sys.executable, __file__, '--worker', 'pressure'])
+    pressure_env = dict(os.environ, NEURONS_CGROUP_LIVE_POLICY=json.dumps(policy))
+    pressure = subprocess.Popen([sys.executable, __file__, '--worker', 'pressure'], env=pressure_env)
     try:
         out['pressure_inside'] = cgroup_path(pressure.pid) == path
         out['pids']['pressure'] = pressure.pid
@@ -194,10 +256,44 @@ def run_host():
                sys.executable, str(Path(__file__).resolve()), '--coordinate']
     started = time.monotonic()
     print(json.dumps({'supervisor_pid': os.getpid(), 'scope': unit + '.scope', 'command': command}), flush=True)
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    error_file = tempfile.TemporaryFile(mode='w+t')
+    proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=error_file)
     timed_out = False
+    live_policy = None
+    chunks = []
+    pending = b''
     try:
-        stdout, stderr = proc.communicate(timeout=DEADLINE)
+        with selectors.DefaultSelector() as selector:
+            selector.register(proc.stdout, selectors.EVENT_READ)
+            while selector.get_map():
+                remaining = DEADLINE - (time.monotonic() - started)
+                if remaining <= 0:
+                    raise subprocess.TimeoutExpired(command, DEADLINE)
+                for key, _ in selector.select(remaining):
+                    chunk = os.read(key.fd, 65536)
+                    if not chunk:
+                        selector.unregister(key.fileobj)
+                        break
+                    chunks.append(chunk)
+                    pending += chunk
+                    while b'\n' in pending:
+                        line, pending = pending.split(b'\n', 1)
+                        prefix = b'NEURONS_CGROUP_STAGE='
+                        if line.startswith(prefix):
+                            try:
+                                stage = json.loads(line[len(prefix):])
+                                if stage.get('stage') == 'coordinator_ready':
+                                    if live_policy is not None:
+                                        raise ValueError('marcador duplicado')
+                                    live_policy = verify_live_policy(unit, stage)
+                                    if not confirmed_policy_evidence(live_policy, unit):
+                                        raise ValueError('política não confirmada')
+                                    proc.stdin.write((json.dumps(live_policy) + '\n').encode())
+                                    proc.stdin.flush()
+                            except (OSError, ValueError, TypeError, AttributeError, subprocess.TimeoutExpired) as exc:
+                                print('politica_inconclusiva=' + str(exc), file=sys.stderr, flush=True)
+                                proc.stdin.close()
+        proc.wait(timeout=max(0.01, DEADLINE - (time.monotonic() - started)))
     except subprocess.TimeoutExpired:
         timed_out = True
         try:
@@ -207,22 +303,37 @@ def run_host():
         finally:
             if proc.poll() is None:
                 proc.kill()
-        stdout, stderr = proc.communicate(timeout=5)
+        proc.wait(timeout=5)
+    finally:
+        if proc.stdin and not proc.stdin.closed:
+            proc.stdin.close()
+    stdout = b''.join(chunks).decode('utf-8', errors='replace')
+    error_file.seek(0)
+    stderr = error_file.read()
+    error_file.close()
     print(stdout, end='')
     print(stderr, end='', file=sys.stderr)
     # Scope disappearance is a necessary cleanup check, never sufficient alone.
     shown = subprocess.run(['systemctl', '--user', 'show', unit + '.scope', '--property=LoadState', '--property=ActiveState', '--property=ControlGroup', '--property=Result', '--property=OOMPolicy'], capture_output=True, text=True, timeout=5)
     properties = dict(line.split('=', 1) for line in shown.stdout.splitlines() if '=' in line)
-    cleaned = (shown.returncode == 0 and properties.get('ActiveState') == 'inactive'
-               and 'ControlGroup' in properties and properties['ControlGroup'] == '')
+    cleaned = scope_cleanup_verified(properties, shown.returncode)
     evidence = [x for x in stdout.splitlines() if x.startswith('NEURONS_CGROUP_EVIDENCE=')]
     stages = [x for x in stdout.splitlines() if x.startswith('NEURONS_CGROUP_STAGE=')]
-    policy_confirmed = properties.get('OOMPolicy') == 'continue'
-    success = not timed_out and proc.returncode == 0 and len(evidence) == 1 and cleaned and policy_confirmed
+    policy_confirmed = confirmed_policy_evidence(live_policy, unit) if live_policy else False
+    full_evidence_valid = False
+    if len(evidence) == 1:
+        try:
+            record = json.loads(evidence[0].split('=', 1)[1])
+            full_evidence_valid = (record['live_policy'] == live_policy
+                                   and evaluate(record)['status'] == 'CONTROLES_SINTETICOS_APROVADOS')
+        except (KeyError, TypeError, ValueError):
+            pass
+    success = not timed_out and proc.returncode == 0 and full_evidence_valid and cleaned and policy_confirmed
     print(json.dumps({'supervisor_elapsed_s': time.monotonic()-started, 'scope_exit': proc.returncode,
                       'timeout': timed_out, 'cleanup_observed': cleaned, 'scope_properties': properties,
                       'stages_received': len(stages), 'full_evidence_received': len(evidence) == 1,
-                      'oom_policy_confirmed': policy_confirmed,
+                      'full_evidence_valid': full_evidence_valid,
+                      'oom_policy_confirmed': policy_confirmed, 'live_policy': live_policy,
                       'status': 'CONTROLES_SINTETICOS_APROVADOS' if success else 'INCONCLUSIVO'}), flush=True)
     return 0 if success else 1
 
