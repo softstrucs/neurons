@@ -2,6 +2,7 @@
 """Controles sintéticos V03-F1-P01; nenhuma partição cognitiva é acessada."""
 import argparse
 import json
+import mmap
 import os
 from pathlib import Path
 import secrets
@@ -47,7 +48,8 @@ def evaluate(record):
         checks = {
             'A_abaixo': record['below_exit'] == 0 and record['below_inside'],
             'B_pressao': delta['max'] > 0,
-            'C_oom': delta['oom_kill'] > 0 and record['pressure_exit'] == -signal.SIGKILL,
+            'C_oom': (delta['oom_kill'] > 0 and record['pressure_exit'] == -signal.SIGKILL
+                      and record['pressure_inside'] is True),
             'D_filhos': (record['below_inside'] and record['grandchild_inside']
                          and record['pressure_inside'] and record['timeout_inside']),
             'E_timeout': record['timeout_occurred'] and record['timeout_exit'] == -signal.SIGKILL,
@@ -59,6 +61,14 @@ def evaluate(record):
                 'status': 'CONTROLES_SINTETICOS_APROVADOS' if all(checks.values()) else 'INCONCLUSIVO'}
     except (KeyError, TypeError, ValueError):
         return {'status': 'INCONCLUSIVO', 'reason': 'evidência ausente ou inválida'}
+
+
+def touch_pages(block, size, page_size):
+    """Escreve um byte em cada página, sem pressupor alocação física de zeros."""
+    if size <= 0 or page_size <= 0:
+        raise ValueError('tamanho inválido')
+    for offset in range(0, size, page_size):
+        block[offset] = 1
 
 
 def worker(mode):
@@ -79,8 +89,11 @@ def worker(mode):
     elif mode == 'pressure':
         time.sleep(0.1)
         blocks = []
+        page_size = os.sysconf('SC_PAGE_SIZE')
         while len(blocks) < 96:
-            blocks.append(bytearray(1024 * 1024))
+            block = mmap.mmap(-1, 1024 * 1024, access=mmap.ACCESS_WRITE)
+            blocks.append(block)
+            touch_pages(block, len(block), page_size)
         raise RuntimeError('pressão não provocou OOM dentro do teto de carga')
     elif mode == 'timeout':
         time.sleep(10)

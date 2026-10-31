@@ -5,6 +5,14 @@ import cgroup_controls as instrument
 
 
 class SafeAssessment(unittest.TestCase):
+    def test_pressure_touches_each_page_safely(self):
+        sample = bytearray(19)
+        instrument.touch_pages(sample, len(sample), 4)
+        self.assertEqual(list(sample), [1 if i % 4 == 0 else 0 for i in range(19)])
+        for size, page in ((0, 4), (4, 0), (-1, 4)):
+            with self.assertRaises(ValueError):
+                instrument.touch_pages(sample, size, page)
+
     def record(self):
         return {'before': {'max': str(instrument.LIMIT), 'events': {'max': 0, 'oom': 0, 'oom_kill': 0}},
                 'after': {'max': str(instrument.LIMIT), 'events': {'max': 1, 'oom': 1, 'oom_kill': 1}},
@@ -23,7 +31,7 @@ class SafeAssessment(unittest.TestCase):
             del r[key]
             self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO', key)
         for change in ({'pressure_exit': -9, 'after': {'max': str(instrument.LIMIT), 'events': {'max': 1, 'oom': 0, 'oom_kill': 0}}},
-                       {'remaining_pids': [42, 43]}, {'grandchild_inside': False},
+                       {'remaining_pids': [42, 43]}, {'grandchild_inside': False}, {'pressure_inside': False},
                        {'timeout_occurred': False}, {'elapsed_s': instrument.DEADLINE}):
             r = self.record()
             r.update(change)

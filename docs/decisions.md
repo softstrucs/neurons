@@ -692,3 +692,7 @@ Base `c2d0df217b3eaa2abd32f300f309bc6cd6a10967`. [Diagnóstico](V03-F1-P01_valid
 ## V03-F1-P01 — Preparação dos controles sintéticos cgroup
 
 Base `29ea13a416e7c9cc45101c0f1ab3a4183812b161`. Usuário relata scope no hospedeiro com `memory.max=268435456`; leitura não valida contenção. [Instrumentos e procedimento](V03-F1-P01_instrumentos_controles_cgroup.md) preparados; apenas testes puros e inspeções seguras foram executados. Controles de pressão/OOM, D/V sob contenção e F não executados; F não autorizado, congelamento não aprovado, nenhuma competência homologada.
+
+## V03-F1-P01 — Correção do controle sintético C
+
+Base `2a5d32f0189d829b03686a73939d4de6dfd5751b`. Usuário relatou pressão no limite, mas `oom_kill=0` e saída 1: **inconclusivo**, não validação. [Registro e correção](V03-F1-P01_instrumentos_controles_cgroup.md): mapeamentos anônimos limitados com escrita em cada página; controle C exige `oom_kill`, SIGKILL e pertença ao cgroup. Causa exata anterior não estabelecida; testes puros sem pressão passaram. Nova execução no hospedeiro e D/V sob contenção pendentes; F não autorizado.
