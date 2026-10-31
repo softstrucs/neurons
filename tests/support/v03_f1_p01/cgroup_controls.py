@@ -32,11 +32,32 @@ def events(path):
 
 def snapshot(path):
     peak = path / 'memory.peak'
+    swap_events = path / 'memory.swap.events'
     return {'max': (path / 'memory.max').read_text().strip(),
             'current': int((path / 'memory.current').read_text()),
             'peak': int(peak.read_text()) if peak.exists() else None,
             'events': events(path / 'memory.events'),
+            'swap_max': (path / 'memory.swap.max').read_text().strip(),
+            'swap_current': int((path / 'memory.swap.current').read_text()),
+            'swap_events': events(swap_events) if swap_events.exists() else None,
             'pids': sorted(int(x) for x in (path / 'cgroup.procs').read_text().split())}
+
+
+def require_synthetic_limits(path):
+    """Falha fechada: pressão só é permitida com ambos os limites verificáveis."""
+    try:
+        memory_max = (path / 'memory.max').read_text().strip()
+        swap_max = (path / 'memory.swap.max').read_text().strip()
+    except OSError as exc:
+        raise RuntimeError('limites de memória e swap não verificáveis') from exc
+    if memory_max != str(LIMIT) or swap_max != '0':
+        raise RuntimeError('limites sintéticos de memória ou swap divergentes')
+
+
+def valid_swap_events(value):
+    return value is None or (isinstance(value, dict) and bool(value)
+                             and all(isinstance(k, str) and type(v) is int and v >= 0
+                                     for k, v in value.items()))
 
 
 def evaluate(record):
@@ -55,6 +76,11 @@ def evaluate(record):
             'E_timeout': record['timeout_occurred'] and record['timeout_exit'] == -signal.SIGKILL,
             'F_sobreviventes': record['children_reaped'] and record['remaining_pids'] == [record['coordinator_pid']],
             'limite': before['max'] == str(LIMIT) and after['max'] == str(LIMIT),
+            'swap_isolado': (before['swap_max'] == '0' and after['swap_max'] == '0'
+                              and type(before['swap_current']) is int and before['swap_current'] >= 0
+                              and type(after['swap_current']) is int and after['swap_current'] >= 0
+                              and valid_swap_events(before['swap_events'])
+                              and valid_swap_events(after['swap_events'])),
             'tempo': 0 <= record['elapsed_s'] < DEADLINE,
         }
         return {'checks': checks, 'event_delta': delta,
@@ -72,8 +98,8 @@ def touch_pages(block, size, page_size):
 
 
 def worker(mode):
-    if mode == 'pressure' and (cgroup_path(os.getpid()) / 'memory.max').read_text().strip() != str(LIMIT):
-        raise RuntimeError('pressão proibida fora de cgroup com limite sintético')
+    if mode == 'pressure':
+        require_synthetic_limits(cgroup_path(os.getpid()))
     if mode == 'below':
         grand = subprocess.Popen([sys.executable, __file__, '--worker', 'grandchild'], stdout=subprocess.PIPE, text=True)
         try:
@@ -105,8 +131,7 @@ def coordinate():
     started = time.monotonic()
     path = cgroup_path(os.getpid())
     out = {'coordinator_pid': os.getpid(), 'cgroup': str(path), 'before': snapshot(path)}
-    if out['before']['max'] != str(LIMIT):
-        raise RuntimeError('limite efetivo inesperado')
+    require_synthetic_limits(path)
     below = subprocess.Popen([sys.executable, __file__, '--worker', 'below'], stdout=subprocess.PIPE, text=True)
     try:
         ids = json.loads(below.stdout.readline())
@@ -118,6 +143,7 @@ def coordinate():
         if below.poll() is None:
             below.kill()
             below.wait()
+    require_synthetic_limits(path)
     pressure = subprocess.Popen([sys.executable, __file__, '--worker', 'pressure'])
     try:
         out['pressure_inside'] = cgroup_path(pressure.pid) == path
@@ -155,7 +181,8 @@ def coordinate():
 def run_host():
     unit = 'neurons-v03-f1-' + secrets.token_hex(8)
     command = ['systemd-run', '--user', '--scope', '--quiet', '--unit=' + unit,
-               '--property=MemoryMax=' + str(LIMIT), sys.executable, str(Path(__file__).resolve()), '--coordinate']
+               '--property=MemoryMax=' + str(LIMIT), '--property=MemorySwapMax=0',
+               sys.executable, str(Path(__file__).resolve()), '--coordinate']
     started = time.monotonic()
     print(json.dumps({'supervisor_pid': os.getpid(), 'scope': unit + '.scope', 'command': command}), flush=True)
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

@@ -696,3 +696,7 @@ Base `29ea13a416e7c9cc45101c0f1ab3a4183812b161`. Usuário relata scope no hosped
 ## V03-F1-P01 — Correção do controle sintético C
 
 Base `2a5d32f0189d829b03686a73939d4de6dfd5751b`. Usuário relatou pressão no limite, mas `oom_kill=0` e saída 1: **inconclusivo**, não validação. [Registro e correção](V03-F1-P01_instrumentos_controles_cgroup.md): mapeamentos anônimos limitados com escrita em cada página; controle C exige `oom_kill`, SIGKILL e pertença ao cgroup. Causa exata anterior não estabelecida; testes puros sem pressão passaram. Nova execução no hospedeiro e D/V sob contenção pendentes; F não autorizado.
+
+## V03-F1-P01 — Isolamento de swap no scope sintético
+
+Base `afa74bd3c53edf5c5a4bb0c9b6374f3ec0e2d138`. Usuário relata segunda execução inconclusiva sem OOM e swap ancestral disponível. [Instrumento e registro](V03-F1-P01_instrumentos_controles_cgroup.md): scope sintético solicita `MemorySwapMax=0`, verifica `memory.max` e `memory.swap.max` antes de pressão e registra dados de swap nos snapshots. Sem execução real de pressão nesta atividade; contenção e D/V pendentes, congelamento não aprovado, F não autorizado. Sem alteração global de swap ou decisões D04-E02/E03.

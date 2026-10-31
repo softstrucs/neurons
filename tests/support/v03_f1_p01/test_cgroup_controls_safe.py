@@ -1,6 +1,9 @@
 """Testes puros: sem scope, sem subprocessos e sem pressão de memória."""
 import copy
+from pathlib import Path
+import tempfile
 import unittest
+from unittest import mock
 import cgroup_controls as instrument
 
 
@@ -14,8 +17,10 @@ class SafeAssessment(unittest.TestCase):
                 instrument.touch_pages(sample, size, page)
 
     def record(self):
-        return {'before': {'max': str(instrument.LIMIT), 'events': {'max': 0, 'oom': 0, 'oom_kill': 0}},
-                'after': {'max': str(instrument.LIMIT), 'events': {'max': 1, 'oom': 1, 'oom_kill': 1}},
+        return {'before': {'max': str(instrument.LIMIT), 'swap_max': '0', 'swap_current': 0,
+                           'swap_events': None, 'events': {'max': 0, 'oom': 0, 'oom_kill': 0}},
+                'after': {'max': str(instrument.LIMIT), 'swap_max': '0', 'swap_current': 0,
+                          'swap_events': None, 'events': {'max': 1, 'oom': 1, 'oom_kill': 1}},
                 'below_exit': 0, 'below_inside': True, 'grandchild_inside': True,
                 'pressure_inside': True, 'timeout_inside': True,
                 'pressure_exit': -9, 'timeout_occurred': True, 'timeout_exit': -9,
@@ -30,12 +35,68 @@ class SafeAssessment(unittest.TestCase):
             r = copy.deepcopy(original)
             del r[key]
             self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO', key)
-        for change in ({'pressure_exit': -9, 'after': {'max': str(instrument.LIMIT), 'events': {'max': 1, 'oom': 0, 'oom_kill': 0}}},
+        for change in ({'pressure_exit': -9, 'after': {'max': str(instrument.LIMIT), 'swap_max': '0',
+                        'swap_current': 0, 'swap_events': None, 'events': {'max': 1, 'oom': 0, 'oom_kill': 0}}},
                        {'remaining_pids': [42, 43]}, {'grandchild_inside': False}, {'pressure_inside': False},
                        {'timeout_occurred': False}, {'elapsed_s': instrument.DEADLINE}):
             r = self.record()
             r.update(change)
             self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO')
+
+    def test_swap_missing_or_inconsistent_is_inconclusive(self):
+        for phase in ('before', 'after'):
+            for value in ('max', '1', ''):
+                r = self.record()
+                r[phase]['swap_max'] = value
+                self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO')
+            for key in ('swap_max', 'swap_current', 'swap_events'):
+                r = self.record()
+                del r[phase][key]
+                self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO')
+            for value in (-1, '0', None):
+                r = self.record()
+                r[phase]['swap_current'] = value
+                self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO')
+            for value in ({}, {'max': -1}, {'max': '1'}):
+                r = self.record()
+                r[phase]['swap_events'] = value
+                self.assertEqual(instrument.evaluate(r)['status'], 'INCONCLUSIVO')
+
+    def test_limit_guard_fails_closed_before_allocation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path / 'memory.max').write_text(str(instrument.LIMIT))
+            with self.assertRaises(RuntimeError):
+                instrument.require_synthetic_limits(path)
+            (path / 'memory.swap.max').write_text('max')
+            with self.assertRaises(RuntimeError):
+                instrument.require_synthetic_limits(path)
+            (path / 'memory.swap.max').write_text('0')
+            instrument.require_synthetic_limits(path)
+            (path / 'memory.max').write_text('max')
+            with mock.patch.object(instrument, 'cgroup_path', return_value=path), \
+                 mock.patch.object(instrument.mmap, 'mmap') as allocate:
+                with self.assertRaises(RuntimeError):
+                    instrument.worker('pressure')
+                allocate.assert_not_called()
+            with mock.patch.object(instrument, 'cgroup_path', return_value=path), \
+                 mock.patch.object(instrument, 'snapshot', return_value={}), \
+                 mock.patch.object(instrument.subprocess, 'Popen') as launch:
+                with self.assertRaises(RuntimeError):
+                    instrument.coordinate()
+                launch.assert_not_called()
+
+    def test_snapshot_optional_swap_events(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            for name, value in {'memory.max': str(instrument.LIMIT), 'memory.current': '10',
+                                'memory.swap.max': '0', 'memory.swap.current': '0',
+                                'memory.events': 'max 0\noom 0\noom_kill 0\n',
+                                'cgroup.procs': '42\n'}.items():
+                (path / name).write_text(value)
+            self.assertIsNone(instrument.snapshot(path)['swap_events'])
+            (path / 'memory.swap.events').write_text('max 3\n')
+            self.assertEqual(instrument.snapshot(path)['swap_events'], {'max': 3})
 
 
 if __name__ == '__main__':
