@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import selectors
 import subprocess
@@ -84,6 +85,44 @@ def verify_test_ready(line, run_id, pid, parent_pid, ticks, group):
 
 def only_coordinator(pids, coordinator_pid):
     return type(coordinator_pid) is int and coordinator_pid > 0 and pids == [coordinator_pid]
+
+
+def read_test_ready(stream, deadline):
+    """Lê bytes sem buffering antecipado, com prazo e limite de saída."""
+    data = bytearray()
+    with selectors.DefaultSelector() as selector:
+        selector.register(stream, selectors.EVENT_READ)
+        while time.monotonic() < deadline:
+            if not selector.select(max(0, deadline - time.monotonic())):
+                raise TimeoutError('timeout aguardando V03TEST_READY')
+            chunk = os.read(stream.fileno(), 1)
+            if not chunk:
+                raise RuntimeError('canal encerrado antes de V03TEST_READY')
+            data.extend(chunk)
+            if len(data) > 65536:
+                raise RuntimeError('saída de identidade excede limite')
+            if chunk == b'\n' and b'V03TEST_READY|' in data:
+                return data.decode('utf-8', errors='strict')
+    raise TimeoutError('timeout aguardando V03TEST_READY')
+
+
+def stop_owned_scope(unit, ownership_confirmed=False):
+    """Não envia sinais por PID nem age sobre unidades fora do namespace próprio."""
+    if (not ownership_confirmed
+            or not re.fullmatch(r'neurons-v03-f1-(?:dv|cleanup)-[0-9a-f]{16}\.scope', unit)):
+        return {'status': 'INCONCLUSIVO', 'reason': 'identidade de unidade inválida'}
+    try:
+        stopped = subprocess.run(['systemctl', '--user', 'stop', unit], capture_output=True, text=True, timeout=5)
+        shown = subprocess.run(['systemctl', '--user', 'show', unit, '--property=LoadState',
+                                '--property=ActiveState', '--property=ControlGroup', '--property=Result'],
+                               capture_output=True, text=True, timeout=5)
+        props = dict(x.split('=', 1) for x in shown.stdout.splitlines() if '=' in x)
+        clean = stopped.returncode == 0 and common.scope_cleanup_verified(props, shown.returncode)
+        return {'status': 'LIMPEZA_OBSERVADA' if clean else 'INCONCLUSIVO',
+                'stop_exit': stopped.returncode, 'stop_error': stopped.stderr,
+                'show_exit': shown.returncode, 'properties': props}
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {'status': 'INCONCLUSIVO', 'reason': str(exc)}
 
 
 def snapshot(path):
@@ -178,9 +217,10 @@ def worker():
             raise TimeoutError('limite total')
         spawned_ns = time.time_ns()
         spawned_monotonic_ns = time.monotonic_ns()
+        stderr_file = tempfile.TemporaryFile(mode='w+t')
         proc = subprocess.Popen([str(exe), '--exact', name, '--nocapture'],
                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, text=True, env=env)
+                                stderr=stderr_file, text=True, env=env)
         observations = {'samples': [], 'unverified': [], 'inconsistent': [], 'errors': []}
         stop = threading.Event()
         monitor = threading.Thread(target=sample_members, args=(path, stop, observations), daemon=True)
@@ -189,14 +229,8 @@ def worker():
             inside = common.cgroup_path(proc.pid) == path
             if not inside:
                 raise RuntimeError('processo fora da contenção')
-            prefix = ''
-            while True:
-                line = proc.stdout.readline()
-                if not line:
-                    raise RuntimeError('identidade do teste ausente')
-                prefix += line
-                if 'V03TEST_READY|' in line:
-                    break
+            prefix = read_test_ready(proc.stdout, started + DEADLINE)
+            line = next(x for x in prefix.splitlines() if 'V03TEST_READY|' in x)
             ppid, start_ticks, group = live_process(proc.pid)
             if (ppid != os.getpid() or group != env['NEURONS_V03_TRACE_CGROUP']
                     or not verify_test_ready(line, run_id, proc.pid, ppid, start_ticks, group)):
@@ -207,16 +241,19 @@ def worker():
             proc.stdin.flush()
             proc.stdin.close()
             proc.stdin = None
-            rest, error = proc.communicate(timeout=max(0.01, DEADLINE - (time.monotonic() - started)))
+            rest, _ = proc.communicate(timeout=max(0.01, DEADLINE - (time.monotonic() - started)))
+            stderr_file.seek(0)
+            error = stderr_file.read()
             output = prefix + rest
             if output.count('V03TEST_READY|') != 1:
                 raise RuntimeError('identidade do teste duplicada')
         finally:
             if proc.poll() is None:
                 proc.kill()
-                proc.wait()
+                proc.wait(timeout=3)
             stop.set()
             monitor.join(timeout=1)
+            stderr_file.close()
         traces = verify_restore_traces(output, run_id, 'D' if name == 'development' else 'V',
                                        proc.pid, env['NEURONS_V03_TRACE_CGROUP'])
         entry['partitions'][name] = {'pid': proc.pid, 'inside': inside, 'returncode': proc.returncode,
@@ -299,13 +336,12 @@ def supervisor():
     except subprocess.TimeoutExpired:
         timed_out = True
         try:
-            subprocess.run(['systemctl', '--user', 'stop', unit + '.scope'], timeout=5, check=False)
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            print('stop_inconclusivo=' + str(exc), file=sys.stderr)
+            print(json.dumps({'timeout_cleanup': stop_owned_scope(unit + '.scope', verified)}), flush=True)
         finally:
-            if proc.poll() is None:
-                proc.kill()
-        proc.wait(timeout=5)
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                print('launcher_still_active_inconclusivo', file=sys.stderr, flush=True)
     finally:
         if proc.stdin and not proc.stdin.closed:
             proc.stdin.close()
@@ -322,12 +358,7 @@ def supervisor():
         props = {'query_error': str(exc)}
         cleanup = False
     if not cleanup:
-        try:
-            stopped = subprocess.run(['systemctl', '--user', 'stop', unit + '.scope'],
-                                     capture_output=True, text=True, timeout=5)
-            print(json.dumps({'cleanup_stop_exit': stopped.returncode, 'cleanup_stop_error': stopped.stderr}), flush=True)
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            print('cleanup_stop_inconclusivo=' + str(exc), file=sys.stderr, flush=True)
+        print(json.dumps({'cleanup_attempt': stop_owned_scope(unit + '.scope', verified)}), flush=True)
     print(json.dumps({'status': 'INCONCLUSIVO', 'scope_exit': proc.returncode, 'timeout': timed_out,
                       'scope_verified': verified, 'cleanup_observed': cleanup, 'properties': props,
                       'supervisor_elapsed_s': time.monotonic() - started}), flush=True)

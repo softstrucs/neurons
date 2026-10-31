@@ -7,6 +7,7 @@ import select
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from unittest import mock
 
@@ -14,6 +15,47 @@ import dv_cgroup_executor as executor
 
 
 class SafeExecutor(unittest.TestCase):
+    def test_ready_pipe_deadline_and_closed(self):
+        read_fd, write_fd = os.pipe()
+        try:
+            with os.fdopen(read_fd, 'rb') as stream:
+                start = time.monotonic()
+                with self.assertRaises(TimeoutError):
+                    executor.read_test_ready(stream, start + 0.05)
+                self.assertLess(time.monotonic() - start, 1.0)
+                os.close(write_fd)
+                write_fd = None
+                with self.assertRaises(RuntimeError):
+                    executor.read_test_ready(stream, time.monotonic() + 0.5)
+        finally:
+            if write_fd is not None:
+                os.close(write_fd)
+
+    def test_ready_pipe_valid(self):
+        read_fd, write_fd = os.pipe()
+        try:
+            os.write(write_fd, b'prefix\nV03TEST_READY|synthetic\n')
+            with os.fdopen(read_fd, 'rb') as stream:
+                self.assertIn('V03TEST_READY|synthetic', executor.read_test_ready(stream, time.monotonic() + 1))
+        finally:
+            os.close(write_fd)
+
+    def test_scope_stop_failure_and_failed_state(self):
+        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        ok = mock.Mock(returncode=0, stdout='ActiveState=inactive\nControlGroup=\n', stderr='')
+        failed = mock.Mock(returncode=0, stdout='ActiveState=failed\nControlGroup=\n', stderr='')
+        denied = mock.Mock(returncode=1, stdout='', stderr='denied')
+        with mock.patch.object(executor.subprocess, 'run', side_effect=[ok, ok]):
+            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'LIMPEZA_OBSERVADA')
+        with mock.patch.object(executor.subprocess, 'run', side_effect=[denied, ok]):
+            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'INCONCLUSIVO')
+        with mock.patch.object(executor.subprocess, 'run', side_effect=[ok, failed]):
+            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'INCONCLUSIVO')
+        with mock.patch.object(executor.subprocess, 'run') as run:
+            self.assertEqual(executor.stop_owned_scope('user.slice', True)['status'], 'INCONCLUSIVO')
+            self.assertEqual(executor.stop_owned_scope(unit, False)['status'], 'INCONCLUSIVO')
+            run.assert_not_called()
+
     def test_real_active_descendant_and_cleanup(self):
         script = ("import subprocess,sys; c=subprocess.Popen([sys.executable,'-c','import time; time.sleep(8)']); "
                   "print(c.pid,flush=True); sys.stdin.readline(); c.terminate(); c.wait(timeout=2)")

@@ -720,3 +720,7 @@ Base `2529e0035743d0292d0c2feb0d06e0f502dab5d1`. [Instrumentação prospectiva](
 ## V03-F1-P01 — Handshake e limpeza sintéticos
 
 Base `03747ce5e81307391650e85ab8db94a711d58343`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): processos auxiliares reais testaram handshake, falhas, timeout, encerramento e descendente ativo, sem D/V ou checkpoints. Corrigido bloqueio potencial de canais com drenagem paralela e timeout local; primeira tentativa de simulador de canal fechado falhou e foi corrigida antes da repetição. Validação sob cgroup real e limpeza após OOM/morte abrupta permanecem pendentes; executor inconclusivo, congelamento não aprovado e F não autorizado.
+
+## V03-F1-P01 — Supervisão e limpeza externas
+
+Base `e55209f77a5cba0fcbbe8502b8e408c99ee0083f`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): espera por identidade com prazo e `stderr` sem pipe bloqueante; stop e reconsulta restritos a scope próprio, com falhas inconclusivas. Preparado teste sintético separado de falha abrupta, não executado por barramento systemd inacessível no sandbox. Testes seguros passaram; limpeza em scope real, D/V e homologação pendentes; F não autorizado e congelamento não aprovado.
