@@ -656,3 +656,7 @@ Base `378551e285481f2941af994c693f7c2fe4a387d1`. [Revisão documental](planos/Ne
 ## Plano v0.3 — Aprovação documental condicionada
 
 Por autorização humana expressa na delegação desta formalização, base `0fe379aaa27c5f32c6a24ce28da3e19478c29792`, o [Plano Executivo v0.3 oficial](planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md) está **APROVADO DOCUMENTALMENTE COM CONDIÇÕES**, com base no [parecer B](planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md). Aplicam-se C01 dependências por alegação, C02 atribuição neuronal com controles/ablações, C03 limites de permissões/persistência, C04 critérios separados de retenção/transferência/especialização e C05 protocolos prospectivos. F1–F7 **NÃO INICIADAS**; implementação e experimentação **NÃO AUTORIZADAS**; capacidades futuras **NÃO HOMOLOGADAS**. Cada investigação depende de autorização posterior e condicionantes aplicáveis; proposta e parecer históricos preservados.
+
+## V03-F1-P01 — Preparação documental do primeiro protocolo
+
+Por autorização humana para preparação documental, base `e3957ca36cbe039670741cc4b4060abef8666957`, [V03-F1-P01](protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md) propõe consultas diretas, rastreabilidade pública e isolamento contextual. Estado **PROPOSTO / NÃO APROVADO**, execução **NÃO AUTORIZADA**; verificador e esquema canônico ainda não foram implementados ou validados. Nenhuma frente iniciada experimentalmente; nenhum painel ou capacidade homologada.
