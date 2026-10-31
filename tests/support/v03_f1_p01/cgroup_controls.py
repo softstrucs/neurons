@@ -97,6 +97,11 @@ def touch_pages(block, size, page_size):
         block[offset] = 1
 
 
+def emit_stage(name, **details):
+    """Entrega marcos ao supervisor externo antes de eventual morte do grupo."""
+    print('NEURONS_CGROUP_STAGE=' + json.dumps({'stage': name, **details}, sort_keys=True), flush=True)
+
+
 def worker(mode):
     if mode == 'pressure':
         require_synthetic_limits(cgroup_path(os.getpid()))
@@ -132,6 +137,7 @@ def coordinate():
     path = cgroup_path(os.getpid())
     out = {'coordinator_pid': os.getpid(), 'cgroup': str(path), 'before': snapshot(path)}
     require_synthetic_limits(path)
+    emit_stage('coordinator_ready', coordinator_pid=os.getpid(), cgroup=str(path), snapshot=out['before'])
     below = subprocess.Popen([sys.executable, __file__, '--worker', 'below'], stdout=subprocess.PIPE, text=True)
     try:
         ids = json.loads(below.stdout.readline())
@@ -144,11 +150,14 @@ def coordinate():
             below.kill()
             below.wait()
     require_synthetic_limits(path)
+    emit_stage('before_pressure', coordinator_pid=os.getpid(), cgroup=str(path), snapshot=snapshot(path))
     pressure = subprocess.Popen([sys.executable, __file__, '--worker', 'pressure'])
     try:
         out['pressure_inside'] = cgroup_path(pressure.pid) == path
         out['pids']['pressure'] = pressure.pid
+        emit_stage('pressure_started', pressure_pid=pressure.pid, pressure_inside=out['pressure_inside'])
         out['pressure_exit'] = pressure.wait(timeout=5)
+        emit_stage('pressure_finished', pressure_pid=pressure.pid, pressure_exit=out['pressure_exit'], snapshot=snapshot(path))
     finally:
         if pressure.poll() is None:
             pressure.kill()
@@ -181,7 +190,7 @@ def coordinate():
 def run_host():
     unit = 'neurons-v03-f1-' + secrets.token_hex(8)
     command = ['systemd-run', '--user', '--scope', '--quiet', '--unit=' + unit,
-               '--property=MemoryMax=' + str(LIMIT), '--property=MemorySwapMax=0',
+               '--property=MemoryMax=' + str(LIMIT), '--property=MemorySwapMax=0', '--property=OOMPolicy=continue',
                sys.executable, str(Path(__file__).resolve()), '--coordinate']
     started = time.monotonic()
     print(json.dumps({'supervisor_pid': os.getpid(), 'scope': unit + '.scope', 'command': command}), flush=True)
@@ -202,14 +211,18 @@ def run_host():
     print(stdout, end='')
     print(stderr, end='', file=sys.stderr)
     # Scope disappearance is a necessary cleanup check, never sufficient alone.
-    shown = subprocess.run(['systemctl', '--user', 'show', unit + '.scope', '--property=LoadState', '--property=ActiveState', '--property=ControlGroup'], capture_output=True, text=True, timeout=5)
+    shown = subprocess.run(['systemctl', '--user', 'show', unit + '.scope', '--property=LoadState', '--property=ActiveState', '--property=ControlGroup', '--property=Result', '--property=OOMPolicy'], capture_output=True, text=True, timeout=5)
     properties = dict(line.split('=', 1) for line in shown.stdout.splitlines() if '=' in line)
     cleaned = (shown.returncode == 0 and properties.get('ActiveState') == 'inactive'
                and 'ControlGroup' in properties and properties['ControlGroup'] == '')
     evidence = [x for x in stdout.splitlines() if x.startswith('NEURONS_CGROUP_EVIDENCE=')]
-    success = not timed_out and proc.returncode == 0 and len(evidence) == 1 and cleaned
+    stages = [x for x in stdout.splitlines() if x.startswith('NEURONS_CGROUP_STAGE=')]
+    policy_confirmed = properties.get('OOMPolicy') == 'continue'
+    success = not timed_out and proc.returncode == 0 and len(evidence) == 1 and cleaned and policy_confirmed
     print(json.dumps({'supervisor_elapsed_s': time.monotonic()-started, 'scope_exit': proc.returncode,
                       'timeout': timed_out, 'cleanup_observed': cleaned, 'scope_properties': properties,
+                      'stages_received': len(stages), 'full_evidence_received': len(evidence) == 1,
+                      'oom_policy_confirmed': policy_confirmed,
                       'status': 'CONTROLES_SINTETICOS_APROVADOS' if success else 'INCONCLUSIVO'}), flush=True)
     return 0 if success else 1
 

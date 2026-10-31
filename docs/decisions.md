@@ -700,3 +700,7 @@ Base `2a5d32f0189d829b03686a73939d4de6dfd5751b`. Usuário relatou pressão no li
 ## V03-F1-P01 — Isolamento de swap no scope sintético
 
 Base `afa74bd3c53edf5c5a4bb0c9b6374f3ec0e2d138`. Usuário relata segunda execução inconclusiva sem OOM e swap ancestral disponível. [Instrumento e registro](V03-F1-P01_instrumentos_controles_cgroup.md): scope sintético solicita `MemorySwapMax=0`, verifica `memory.max` e `memory.swap.max` antes de pressão e registra dados de swap nos snapshots. Sem execução real de pressão nesta atividade; contenção e D/V pendentes, congelamento não aprovado, F não autorizado. Sem alteração global de swap ou decisões D04-E02/E03.
+
+## V03-F1-P01 — Observabilidade do OOM relatado
+
+Base `67906b90f7ebfe0567589f250c2ad1963f32eaf4`. Usuário relata `Result=oom-kill` no systemd, mas evidência completa ausente e limpeza não comprovada; OOM relatado não valida todos os controles. [Registro](V03-F1-P01_instrumentos_controles_cgroup.md): scope sintético solicita `OOMPolicy=continue`, marcos são enviados ao supervisor externo e propriedades são coletadas; faltas permanecem inconclusivas. Política anterior e identidade da vítima não comprovadas. Sem pressão nesta atividade, D/V pendente, congelamento não aprovado e F não autorizado.

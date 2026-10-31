@@ -1,5 +1,7 @@
 """Testes puros: sem scope, sem subprocessos e sem pressão de memória."""
 import copy
+import contextlib
+import io
 from pathlib import Path
 import tempfile
 import unittest
@@ -97,6 +99,29 @@ class SafeAssessment(unittest.TestCase):
             self.assertIsNone(instrument.snapshot(path)['swap_events'])
             (path / 'memory.swap.events').write_text('max 3\n')
             self.assertEqual(instrument.snapshot(path)['swap_events'], {'max': 3})
+
+    def test_systemd_oom_without_full_evidence_is_inconclusive(self):
+        process = mock.Mock()
+        process.communicate.return_value = ('NEURONS_CGROUP_STAGE={"stage":"before_pressure"}\n', '')
+        process.returncode = -15
+        shown = mock.Mock(returncode=0, stdout='ActiveState=failed\nControlGroup=\nResult=oom-kill\nOOMPolicy=continue\n')
+        output = io.StringIO()
+        with mock.patch.object(instrument.subprocess, 'Popen', return_value=process), \
+             mock.patch.object(instrument.subprocess, 'run', return_value=shown), \
+             contextlib.redirect_stdout(output):
+            self.assertEqual(instrument.run_host(), 1)
+        text = output.getvalue()
+        self.assertIn('"status": "INCONCLUSIVO"', text)
+        self.assertIn('"full_evidence_received": false', text)
+        self.assertIn('"Result": "oom-kill"', text)
+        self.assertIn('--property=OOMPolicy=continue', text)
+
+    def test_stage_is_flushed_to_external_stream(self):
+        stream = io.StringIO()
+        with contextlib.redirect_stdout(stream):
+            instrument.emit_stage('before_pressure', coordinator_pid=42)
+        self.assertIn('NEURONS_CGROUP_STAGE=', stream.getvalue())
+        self.assertIn('"coordinator_pid": 42', stream.getvalue())
 
 
 if __name__ == '__main__':
