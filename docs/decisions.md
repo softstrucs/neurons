@@ -716,3 +716,7 @@ Base `375fef13b5442fa480a25760187c179927763d35`. Usuário relata controles sint�
 ## V03-F1-P01 — Rastreabilidade de descendentes D/V
 
 Base `2529e0035743d0292d0c2feb0d06e0f502dab5d1`. [Instrumentação prospectiva](V03-F1-P01_preparacao_executor_dv_cgroup.md): único ponto explícito de criação dos filhos de restauração recebeu handshake e verificação de PID, criador, geração e cgroup; coordenador exige 18 registros únicos por partição. Testes seguros de comunicação e classificação passaram sem executar D/V. Validação real, encerramento por falhas e cobertura além dos caminhos identificados permanecem pendentes; executor retorna inconclusivo, F não autorizado e congelamento não aprovado.
+
+## V03-F1-P01 — Handshake e limpeza sintéticos
+
+Base `03747ce5e81307391650e85ab8db94a711d58343`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): processos auxiliares reais testaram handshake, falhas, timeout, encerramento e descendente ativo, sem D/V ou checkpoints. Corrigido bloqueio potencial de canais com drenagem paralela e timeout local; primeira tentativa de simulador de canal fechado falhou e foi corrigida antes da repetição. Validação sob cgroup real e limpeza após OOM/morte abrupta permanecem pendentes; executor inconclusivo, congelamento não aprovado e F não autorizado.

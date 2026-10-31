@@ -1,6 +1,11 @@
 """Verificação pura do preflight; nunca executa partição nem cria scope."""
 import io
+import os
 from pathlib import Path
+import signal
+import select
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -9,6 +14,27 @@ import dv_cgroup_executor as executor
 
 
 class SafeExecutor(unittest.TestCase):
+    def test_real_active_descendant_and_cleanup(self):
+        script = ("import subprocess,sys; c=subprocess.Popen([sys.executable,'-c','import time; time.sleep(8)']); "
+                  "print(c.pid,flush=True); sys.stdin.readline(); c.terminate(); c.wait(timeout=2)")
+        parent = subprocess.Popen([sys.executable, '-u', '-c', script], stdin=subprocess.PIPE,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                  start_new_session=True)
+        descendant = None
+        try:
+            self.assertTrue(select.select([parent.stdout], [], [], 3)[0], 'timeout de inicialização')
+            descendant = int(parent.stdout.readline())
+            self.assertTrue(Path(f'/proc/{descendant}').exists())
+            self.assertFalse(executor.only_coordinator([parent.pid, descendant], parent.pid))
+            self.assertTrue(executor.only_coordinator([parent.pid], parent.pid))
+            parent.communicate(input='stop\n', timeout=3)
+            self.assertEqual(parent.returncode, 0)
+            self.assertFalse(Path(f'/proc/{descendant}').exists())
+        finally:
+            if parent.poll() is None:
+                os.killpg(parent.pid, signal.SIGKILL)
+                parent.wait(timeout=3)
+
     def test_harness_identity_gate_rejects_missing_or_wrong(self):
         args = ('run', 12, 7, 99, '/scope')
         self.assertTrue(executor.verify_test_ready('test development ... V03TEST_READY|run|12|7|99|/scope\n', *args))

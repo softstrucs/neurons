@@ -82,6 +82,10 @@ def verify_test_ready(line, run_id, pid, parent_pid, ticks, group):
             == ['V03TEST_READY', run_id, str(pid), str(parent_pid), str(ticks), group])
 
 
+def only_coordinator(pids, coordinator_pid):
+    return type(coordinator_pid) is int and coordinator_pid > 0 and pids == [coordinator_pid]
+
+
 def snapshot(path):
     peak = path / 'memory.peak'
     return {'max': (path / 'memory.max').read_text().strip(),
@@ -234,6 +238,8 @@ def worker():
     entry['after'] = snapshot(path)
     entry['elapsed_s'] = time.monotonic() - started
     entry['remaining_pids'] = entry['after']['pids']
+    if not only_coordinator(entry['remaining_pids'], os.getpid()):
+        raise RuntimeError('descendente ativo ou lista de processos inconsistente')
     # A instrumentação é prospectiva: validação real e cobertura além do harness permanecem pendentes.
     entry['descendant_membership'] = 'REGISTROS_LOCAIS_VERIFICADOS_NAO_HOMOLOGADOS'
     entry['status'] = 'INCONCLUSIVO'
