@@ -92,6 +92,7 @@ def host_test():
         record = None
         proof = None
         observations = []
+        execution_errors = []
         try:
             # O supervisor usa seu próprio PID lançado, /proc e systemd, nunca o marcador filho.
             until = started + 4
@@ -106,7 +107,7 @@ def host_test():
             if proof is None:
                 raise RuntimeError('propriedade do scope não confirmada; trabalho não liberado')
             policy = evidence.verify_preflight(unit, proof, executor.ROOT)
-            observations.append(evidence.collect_population(executor.ROOT / proof.cgroup.lstrip('/'), time.monotonic() + 0.25))
+            observations.append(evidence.observe_population(executor.ROOT / proof.cgroup.lstrip('/'), time.monotonic() + 0.25))
             print(json.dumps({'policy_preflight': policy, 'population_before_release': observations[-1]}), flush=True)
             if (observations[-1]['status'] != 'COLETA_COMPLETA'
                     or not any(x['pid'] == proof.coordinator_pid and x['ticks'] == proof.coordinator_ticks
@@ -121,7 +122,7 @@ def host_test():
             print(json.dumps({'ownership_proof': vars(proof), 'work_release': True}), flush=True)
             until = started + 9
             while time.monotonic() < until:
-                observations.append(evidence.collect_population(executor.ROOT / proof.cgroup.lstrip('/'), min(until, time.monotonic() + 0.25)))
+                observations.append(evidence.observe_population(executor.ROOT / proof.cgroup.lstrip('/'), min(until, time.monotonic() + 0.25)))
                 lines = os.pread(log.fileno(), 1_048_576, 0).decode('utf-8', errors='replace').splitlines()
                 matches = [x for x in lines if x.startswith('SYNTH_SCOPE_READY=')]
                 if len(matches) == 1:
@@ -140,7 +141,8 @@ def host_test():
                     raise RuntimeError('descendente divergente')
             if proc.wait(timeout=2) != 77:
                 raise RuntimeError('falha abrupta não confirmada')
-        except (OSError, ValueError, KeyError, IndexError, RuntimeError, TimeoutError, subprocess.TimeoutExpired) as exc:
+        except Exception as exc:
+            execution_errors.append({'error_type': type(exc).__name__, 'reason': str(exc)})
             print(json.dumps({'stage': 'preflight', 'status': 'INCONCLUSIVO', 'reason': str(exc)}), flush=True)
         finally:
             finalization = executor.finish_owned_scope(unit, proof, proc.stdin, observations=observations)
@@ -160,17 +162,20 @@ def host_test():
                                             'new_ticks': live['ticks']})
                 except (FileNotFoundError, ProcessLookupError):
                     pass
-                except (OSError, ValueError, IndexError) as exc:
+                except Exception as exc:
                     unknown_processes.append({'pid': item['pid'], 'reason': str(exc)})
         elif record is not None:
             unknown_processes.append({'reason': 'marcador incompleto ou inválido'})
         else:
             unknown_processes.append({'reason': 'marcador ausente; descendentes não enumerados'})
-        output = os.pread(log.fileno(), 1_048_576, 0).decode('utf-8', errors='replace')
-        print(output, end='')
+        try:
+            output = os.pread(log.fileno(), 1_048_576, 0).decode('utf-8', errors='replace')
+            print(output, end='')
+        except Exception as exc:
+            execution_errors.append({'stage': 'log_read', 'error_type': type(exc).__name__, 'reason': str(exc)})
         print(json.dumps({'status': 'INCONCLUSIVO', 'cleanup': cleanup, 'channel_close': finalization['channel_close'], 'survivors': survivors,
                           'unknown_processes': unknown_processes,
-                          'reused_pids': reused_pids,
+                          'reused_pids': reused_pids, 'execution_errors': execution_errors,
                           'scope_exit': proc.poll(), 'elapsed_s': time.monotonic()-started}), flush=True)
         # Validação exige inspeção humana dos dados; nunca promove automaticamente F ou D/V.
         return 1

@@ -200,70 +200,162 @@ def inspect_known(observations, deadline):
     return result
 
 
+def observe_population(path, deadline):
+    """Fronteira de observabilidade: erros comuns e inesperados viram evidência."""
+    try:
+        if time.monotonic() >= deadline:
+            raise TimeoutError('deadline de coleta já expirado')
+        sample = collect_population(path, deadline)
+        if (not isinstance(sample, dict) or sample.get('status') not in ('COLETA_COMPLETA', 'INDISPONIVEL')
+                or type(sample.get('empty')) is not bool):
+            raise ValueError('resultado de coleta inválido')
+        sample = dict(sample)
+        sample.setdefault('identities', [])
+        sample.setdefault('errors', [])
+        if not isinstance(sample['identities'], list) or not isinstance(sample['errors'], list):
+            raise ValueError('estrutura de observação inválida')
+        for identity in sample['identities']:
+            if (not isinstance(identity, dict) or type(identity.get('pid')) is not int
+                    or type(identity.get('ticks')) is not int or identity['pid'] <= 0 or identity['ticks'] <= 0):
+                raise ValueError('identidade coletada inválida')
+        if sample['status'] == 'COLETA_COMPLETA' and (type(sample.get('inode')) is not int or sample['errors']):
+            raise ValueError('coleta declarada completa sem evidência consistente')
+        if sample['status'] == 'COLETA_COMPLETA':
+            nodes = sample.get('nodes')
+            if not isinstance(nodes, list) or not nodes:
+                raise ValueError('coleta completa sem população de grupos')
+            for node in nodes:
+                if (not isinstance(node, dict) or node.get('events', {}).get('populated') not in ('0', '1')
+                        or not isinstance(node.get('pids'), list) or not isinstance(node.get('tids'), list)):
+                    raise ValueError('população de grupo incompleta')
+            empty = all(x['events']['populated'] == '0' and not x['pids'] and not x['tids'] for x in nodes)
+            if sample['empty'] != empty:
+                raise ValueError('classificação de vazio inconsistente')
+        if time.monotonic() > deadline:
+            sample.update(status='INDISPONIVEL', empty=False)
+            sample['errors'] = [*sample['errors'], 'TimeoutError: orçamento de coleta ultrapassado']
+        return sample
+    except Exception as exc:
+        # Não inclui BaseException: interrupção humana/morte do supervisor não é este ensaio.
+        return {'time': stamp(), 'path': str(path), 'status': 'INDISPONIVEL', 'empty': False,
+                'identities': [], 'errors': [type(exc).__name__ + ': ' + str(exc)]}
+
+
+def record_failure(out, stage, exc):
+    failure = {'stage': stage, 'error_type': type(exc).__name__, 'reason': str(exc), 'time': stamp()}
+    out['errors'].append(failure)
+    out.setdefault('reason', stage + ': ' + failure['error_type'] + ': ' + failure['reason'])
+
+
+def append_observation(out, path, deadline, stage):
+    sample = observe_population(path, deadline)
+    out['observations'].append(sample)
+    if sample['status'] != 'COLETA_COMPLETA':
+        record_failure(out, stage, RuntimeError('coleta incompleta: ' + '; '.join(map(str, sample['errors']))))
+    return sample
+
+
+def classify_cleanup(out):
+    final = out['observations'][-1]
+    complete = all(x.get('status') == 'COLETA_COMPLETA' for x in out['observations'])
+    inodes = {x.get('inode') for x in out['observations']}
+    complete = complete and len(inodes) == 1 and None not in inodes
+    empty_after = final.get('status') == 'COLETA_COMPLETA' and final.get('empty')
+    no_survivors = all(x['classification'] in ('AUSENTE', 'PID_REUTILIZADO') for x in out['known_processes'])
+    out['observation_status'] = 'COMPLETA' if complete else 'INCOMPLETA'
+    completion = out['completion']
+    request = out['request']
+    if (not out['errors'] and complete and empty_after and no_survivors
+            and completion.get('state') == 'inactive' and completion['properties'].get('ControlGroup') == ''
+            and request.get('exit') == 0 and not request.get('timeout')):
+        out['status'] = 'VAZIO_DO_CGROUP_OBSERVADO'
+        out['cleanup_observation']['status'] = 'VAZIO_DO_CGROUP_OBSERVADO'
+
+
 def stop_with_evidence(unit, proof, root, observations=()):
-    """Chamado somente após validação de propriedade pelo executor."""
-    if (proof.unit != unit or proof.supervisor_pid != os.getpid()
-            or not re.fullmatch(r'neurons-v03-f1-cleanup-[0-9a-f]{16}\.scope', unit)
-            or not proof.cgroup.startswith('/') or '..' in Path(proof.cgroup).parts
-            or Path(proof.cgroup).name != unit):
-        return {'status': 'INCONCLUSIVO', 'reason': 'propriedade inválida; stop não emitido'}
+    """Falha de observação nunca autoriza nem impede stop da unidade revalidada."""
+    try:
+        valid = (proof.unit == unit and proof.supervisor_pid == os.getpid()
+                 and re.fullmatch(r'neurons-v03-f1-cleanup-[0-9a-f]{16}\.scope', unit)
+                 and proof.cgroup.startswith('/') and '..' not in Path(proof.cgroup).parts
+                 and Path(proof.cgroup).name == unit)
+    except Exception:
+        valid = False
+    if not valid:
+        return {'status': 'INCONCLUSIVO', 'reason': 'propriedade inválida; stop não emitido',
+                'request': {'status': 'NAO_SOLICITADO'}}
     started = time.monotonic()
     out = {'status': 'INCONCLUSIVO', 'unit': unit, 'invocation_id': proof.invocation_id,
-           'time': stamp(), 'observations': list(observations), 'queries': [],
-           'budgets_s': {'query': QUERY_S, 'request': REQUEST_S, 'completion': COMPLETION_S, 'final': FINAL_S}}
+           'time': stamp(), 'observations': [], 'queries': [], 'errors': [],
+           'request': {'status': 'NAO_SOLICITADO'}, 'completion': {'status': 'NAO_COMPROVADA'},
+           'cleanup_observation': {'status': 'INCONCLUSIVO'}, 'observation_status': 'INCOMPLETA',
+           'budgets_s': {'before': FINAL_S, 'query': QUERY_S, 'request': REQUEST_S,
+                         'completion': COMPLETION_S, 'final': FINAL_S}}
     path = root / proof.cgroup.lstrip('/')
-    out['observations'].append(collect_population(path, time.monotonic() + FINAL_S))
+    # Observações anteriores são auxiliares; nem sua estrutura pode suprimir a parada.
     try:
+        out['observations'] = list(observations)
+        for index, sample in enumerate(out['observations']):
+            if not isinstance(sample, dict) or sample.get('status') != 'COLETA_COMPLETA':
+                record_failure(out, 'population_previous_' + str(index),
+                               RuntimeError('evidência anterior incompleta: ' + str(sample)))
+    except Exception as exc:
+        record_failure(out, 'observations_import', exc)
+    append_observation(out, path, time.monotonic() + FINAL_S, 'population_before_stop')
+    try:
+        # Qualquer falha de autenticação/revalidação é fechada: sem stop.
         prior = query(unit)
         out['queries'].append(prior)
         if not same_unit(prior, proof, active=True) or not valid_policy(prior['properties']):
-            out['reason'] = 'identidade/política não revalidada; stop não emitido'
+            record_failure(out, 'revalidation', ValueError('identidade/política não revalidada; stop não emitido'))
             return out
-        # Consulta e stop não são atômicos: nunca alegar proteção contra troca entre chamadas.
+        # Consulta e stop não são atômicos; a corrida residual continua documentada.
         out['request_started'] = stamp()
         try:
             request = subprocess.run(['systemctl', '--user', '--no-block', 'stop', unit],
                                      capture_output=True, text=True, timeout=REQUEST_S)
-            out['request'] = {'exit': request.returncode, 'stderr': request.stderr, 'timeout': False}
-        except subprocess.TimeoutExpired:
-            out['request'] = {'timeout': True, 'reason': 'gerenciador pode continuar a parada'}
+            out['request'] = {'status': 'ACEITA' if request.returncode == 0 else 'FALHOU',
+                              'exit': request.returncode, 'stderr': request.stderr, 'timeout': False}
+            if request.returncode != 0:
+                record_failure(out, 'stop_request', OSError(request.stderr or 'stop recusado'))
+        except subprocess.TimeoutExpired as exc:
+            out['request'] = {'status': 'TIMEOUT', 'timeout': True,
+                              'reason': 'gerenciador pode continuar a parada'}
+            record_failure(out, 'stop_request', exc)
+        except Exception as exc:
+            out['request'] = {'status': 'FALHOU', 'error_type': type(exc).__name__, 'reason': str(exc)}
+            record_failure(out, 'stop_request', exc)
         out['request_finished'] = stamp()
         until = time.monotonic() + COMPLETION_S
         while time.monotonic() < until:
             shown = query(unit, min(QUERY_S, max(0.001, until - time.monotonic())))
             out['queries'].append(shown)
-            sample = collect_population(path, min(until, time.monotonic() + 0.25))
-            out['observations'].append(sample)
+            append_observation(out, path, min(until, time.monotonic() + 0.25), 'population_during_stop')
             p = shown['properties']
             if not same_unit(shown, proof):
-                out['reason'] = 'unidade desapareceu, mudou ou não verificável'
+                record_failure(out, 'completion_identity', ValueError('unidade desapareceu, mudou ou não verificável'))
                 break
             if p.get('ActiveState') in ('inactive', 'failed'):
-                out['completion'] = {'time': stamp(), 'state': p['ActiveState'], 'properties': p}
+                out['completion'] = {'status': 'CONCLUIDA' if p['ActiveState'] == 'inactive' else 'UNIDADE_FAILED',
+                                     'time': stamp(), 'state': p['ActiveState'], 'properties': p}
                 break
             time.sleep(min(0.05, max(0, until - time.monotonic())))
         else:
-            out['reason'] = 'deadline de conclusão; parada não comprovada'
-    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
-        out['reason'] = type(exc).__name__ + ': ' + str(exc)
+            record_failure(out, 'completion_wait', TimeoutError('deadline de conclusão; parada não comprovada'))
+    except Exception as exc:
+        record_failure(out, 'revalidation' if out['request']['status'] == 'NAO_SOLICITADO' else 'completion_query', exc)
     finally:
         until = time.monotonic() + FINAL_S
-        out['observations'].append(collect_population(path, until))
-        out['known_processes'] = inspect_known(out['observations'], until)
-        # Só afirma vazio observado com coletas completas, mesmo inode e final vazio.
-        # Remoção rápida pelo systemd mantém INCONCLUSIVO; nunca inventar populated=0.
-        final = out['observations'][-1]
-        complete_before = all(x.get('status') == 'COLETA_COMPLETA' for x in out['observations'])
-        inodes = {x.get('inode') for x in out['observations']}
-        complete_before = complete_before and len(inodes) == 1 and None not in inodes
-        empty_after = final.get('status') == 'COLETA_COMPLETA' and final.get('empty')
-        no_survivors = all(x['classification'] in ('AUSENTE', 'PID_REUTILIZADO') for x in out['known_processes'])
-        completion = out.get('completion', {})
-        request = out.get('request', {})
-        if (complete_before and empty_after and no_survivors and completion.get('state') == 'inactive'
-                and completion['properties'].get('ControlGroup') == ''
-                and request.get('exit') == 0 and not request.get('timeout')):
-            out['status'] = 'VAZIO_DO_CGROUP_OBSERVADO'
+        append_observation(out, path, until, 'population_final')
+        try:
+            out['known_processes'] = inspect_known(out['observations'], until)
+        except Exception as exc:
+            record_failure(out, 'known_processes_final', exc)
+            out['known_processes'] = [{'classification': 'NAO_IDENTIFICAVEL', 'reason': str(exc)}]
+        try:
+            classify_cleanup(out)
+        except Exception as exc:
+            record_failure(out, 'cleanup_classification', exc)
         out['scope_of_claim'] = 'observação local; escape ou descendentes nunca observados não são excluídos'
         out['end_time'] = stamp()
         out['elapsed_s'] = time.monotonic() - started

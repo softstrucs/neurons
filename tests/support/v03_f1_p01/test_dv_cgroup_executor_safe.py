@@ -18,7 +18,7 @@ import synthetic_scope_cleanup as synthetic
 class SafeExecutor(unittest.TestCase):
     def setUp(self):
         policy = mock.patch.object(synthetic.evidence, 'verify_preflight', return_value={})
-        population = mock.patch.object(synthetic.evidence, 'collect_population', return_value={'status': 'COLETA_COMPLETA', 'identities': [{'pid': 42, 'ticks': 123}]})
+        population = mock.patch.object(synthetic.evidence, 'collect_population', return_value={'status': 'COLETA_COMPLETA', 'empty': False, 'inode': 99, 'identities': [{'pid': 42, 'ticks': 123}], 'errors': [], 'nodes': [{'events': {'populated': '1'}, 'pids': [42], 'tids': [42]}]})
         release = mock.patch.object(synthetic.evidence, 'send_release')
         release.start()
         self.addCleanup(release.stop)

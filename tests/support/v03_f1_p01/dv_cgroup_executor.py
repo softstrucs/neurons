@@ -131,7 +131,7 @@ def close_channel(stream):
         if stream is not None and not stream.closed:
             stream.close()
         return {'status': 'CANAL_FECHADO'}
-    except (OSError, ValueError) as exc:
+    except Exception as exc:
         return {'status': 'INCONCLUSIVO', 'reason': str(exc), 'error_type': type(exc).__name__}
 
 
@@ -141,7 +141,7 @@ def finish_owned_scope(unit, proof, stream, observations=None):
     try:
         cleanup = (stop_owned_scope(unit, proof) if observations is None
                    else stop_owned_scope(unit, proof, observations=observations))
-    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+    except Exception as exc:
         cleanup = {'status': 'INCONCLUSIVO', 'reason': str(exc), 'error_type': type(exc).__name__}
     return {'channel_close': channel, 'cleanup': cleanup}
 

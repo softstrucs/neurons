@@ -21,7 +21,8 @@ class SafeEvidence(unittest.TestCase):
                        LoadState='loaded', ActiveState='active', ControlGroup=self.group)}
         self.inactive = {'exit': 0, 'properties': {'Id': self.unit, 'InvocationID': 'a'*32,
                          'LoadState': 'loaded', 'ActiveState': 'inactive', 'ControlGroup': ''}}
-        self.empty = {'status': 'COLETA_COMPLETA', 'empty': True, 'identities': [], 'inode': 99}
+        self.empty = {'status': 'COLETA_COMPLETA', 'empty': True, 'identities': [], 'inode': 99,
+                      'nodes': [{'events': {'populated': '0'}, 'pids': [], 'tids': []}]}
 
     def run_stop(self, queries, sample=None, request=None):
         with mock.patch.object(evidence, 'query', side_effect=queries), \
@@ -31,6 +32,106 @@ class SafeEvidence(unittest.TestCase):
                 run.return_value = mock.Mock(returncode=0, stderr='')
             result = executor.stop_owned_scope(self.unit, self.proof)
         return result, run
+
+    def test_collection_exceptions_before_stop_do_not_suppress_request(self):
+        for error in (OSError('leitura original'), RuntimeError('inesperada original'), KeyError('campo original')):
+            with self.subTest(error=type(error).__name__), \
+                 mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+                 mock.patch.object(evidence, 'collect_population', side_effect=[error, self.empty, self.empty]), \
+                 mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')) as request:
+                result = executor.stop_owned_scope(self.unit, self.proof)
+            request.assert_called_once()
+            self.assertEqual(result['request']['status'], 'ACEITA')
+            self.assertEqual(result['completion']['status'], 'CONCLUIDA')
+            self.assertEqual(result['status'], 'INCONCLUSIVO')
+            self.assertEqual(result['cleanup_observation']['status'], 'INCONCLUSIVO')
+            self.assertIn(str(error), result['reason'])
+            self.assertEqual(result['errors'][0]['stage'], 'population_before_stop')
+
+    def test_incomplete_or_malformed_collection_still_allows_revalidated_stop(self):
+        for sample in ({'status': 'INDISPONIVEL', 'empty': False, 'errors': ['permissão recusada']},
+                       None, {'status': 'COLETA_COMPLETA', 'empty': True},
+                       dict(self.empty, identities=[{'pid': 'wrong', 'ticks': 123}])):
+            with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+                 mock.patch.object(evidence, 'collect_population', side_effect=[sample, self.empty, self.empty]), \
+                 mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')) as request:
+                result = executor.stop_owned_scope(self.unit, self.proof)
+            request.assert_called_once()
+            self.assertEqual(result['status'], 'INCONCLUSIVO')
+            self.assertEqual(result['observation_status'], 'INCOMPLETA')
+
+    def test_final_collection_exception_preserves_stop_and_completion(self):
+        with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+             mock.patch.object(evidence, 'collect_population', side_effect=[self.empty, self.empty, AttributeError('falha final')]), \
+             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')):
+            result = executor.stop_owned_scope(self.unit, self.proof)
+        self.assertEqual(result['request']['status'], 'ACEITA')
+        self.assertEqual(result['completion']['status'], 'CONCLUIDA')
+        self.assertEqual(result['errors'][-1]['stage'], 'population_final')
+        self.assertIn('falha final', result['reason'])
+        self.assertEqual(result['status'], 'INCONCLUSIVO')
+
+    def test_simultaneous_observation_request_and_final_failures_are_retained(self):
+        with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+             mock.patch.object(evidence, 'collect_population', side_effect=[RuntimeError('primeira causa'), self.empty, OSError('última coleta')]), \
+             mock.patch.object(evidence, 'inspect_known', side_effect=TypeError('identidades finais')), \
+             mock.patch.object(evidence.subprocess, 'run', side_effect=OSError('pedido recusado')):
+            result = executor.stop_owned_scope(self.unit, self.proof)
+        self.assertIn('primeira causa', result['reason'])
+        errors = str(result['errors'])
+        for message in ('primeira causa', 'última coleta', 'pedido recusado', 'identidades finais'):
+            self.assertIn(message, errors)
+        self.assertEqual(result['request']['status'], 'FALHOU')
+        self.assertEqual(result['completion']['status'], 'CONCLUIDA')
+        self.assertEqual(result['status'], 'INCONCLUSIVO')
+
+    def test_observer_failure_never_overrides_ownership_or_policy_refusal(self):
+        for shown in ({'exit': 0, 'properties': dict(self.active['properties'], InvocationID='b'*32)},
+                      {'exit': 0, 'properties': dict(self.active['properties'], KillMode='process')},
+                      {'exit': 0, 'properties': {}}, None):
+            with mock.patch.object(evidence, 'query', return_value=shown), \
+                 mock.patch.object(evidence, 'collect_population', side_effect=RuntimeError('observador')), \
+                 mock.patch.object(evidence.subprocess, 'run') as request:
+                result = executor.stop_owned_scope(self.unit, self.proof)
+            request.assert_not_called()
+            self.assertEqual(result['request']['status'], 'NAO_SOLICITADO')
+            self.assertTrue(any(x['stage'] == 'revalidation' for x in result['errors']))
+
+    def test_late_collection_and_expired_deadline_are_inconclusive(self):
+        with mock.patch.object(evidence, 'collect_population') as collect:
+            result = evidence.observe_population(Path('/fake'), time.monotonic() - 1)
+        collect.assert_not_called()
+        self.assertEqual(result['status'], 'INDISPONIVEL')
+        with mock.patch.object(evidence, 'collect_population', side_effect=lambda *args: (time.sleep(0.02), self.empty)[1]):
+            result = evidence.observe_population(Path('/fake'), time.monotonic() + 0.005)
+        self.assertEqual(result['status'], 'INDISPONIVEL')
+        self.assertIn('ultrapassado', result['errors'][0])
+
+    def test_final_inspection_and_classification_errors_do_not_erase_original(self):
+        with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+             mock.patch.object(evidence, 'collect_population', return_value=self.empty), \
+             mock.patch.object(evidence, 'inspect_known', side_effect=RuntimeError('inspeção')), \
+             mock.patch.object(evidence, 'classify_cleanup', side_effect=ValueError('classificação')), \
+             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')):
+            result = executor.stop_owned_scope(self.unit, self.proof)
+        self.assertIn('inspeção', result['reason'])
+        self.assertIn('classificação', str(result['errors']))
+        self.assertEqual(result['completion']['status'], 'CONCLUIDA')
+        self.assertEqual(result['status'], 'INCONCLUSIVO')
+
+    def test_previous_incomplete_evidence_and_unexpected_channel_error_are_retained(self):
+        previous = {'status': 'INDISPONIVEL', 'empty': False, 'identities': [], 'errors': ['causa antes da finalização']}
+        channel = mock.Mock(closed=False)
+        channel.close.side_effect = RuntimeError('canal inesperado')
+        with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+             mock.patch.object(evidence, 'collect_population', return_value=self.empty), \
+             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')) as request:
+            result = executor.finish_owned_scope(self.unit, self.proof, channel, observations=[previous])
+        request.assert_called_once()
+        self.assertIn('canal inesperado', result['channel_close']['reason'])
+        self.assertIn('causa antes da finalização', result['cleanup']['reason'])
+        self.assertEqual(result['cleanup']['status'], 'INCONCLUSIVO')
+        self.assertEqual(result['cleanup']['completion']['status'], 'CONCLUIDA')
 
     def test_release_pipe_deadline_and_no_reader(self):
         r, w = os.pipe()
