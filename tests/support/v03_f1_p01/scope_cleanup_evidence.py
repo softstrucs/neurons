@@ -6,6 +6,8 @@ import selectors
 import re
 import time
 
+import scope_population_observer as concurrent
+
 MEMORY_MAX = 67108864
 QUERY_S = 1.0
 REQUEST_S = 1.0
@@ -54,12 +56,17 @@ def stamp():
     return {'monotonic_ns': time.monotonic_ns(), 'unix_ns': time.time_ns()}
 
 
-def query(unit, timeout=QUERY_S):
-    result = subprocess.run(['systemctl', '--user', 'show', unit,
-                             *['--property=' + x for x in PROPERTIES]],
-                            capture_output=True, text=True, timeout=timeout)
+def query(unit, timeout=QUERY_S, observe=None):
+    command = ['systemctl', '--user', 'show', unit, *['--property=' + x for x in PROPERTIES]]
+    result = (subprocess.run(command, capture_output=True, text=True, timeout=timeout) if observe is None
+              else concurrent.run_observed(command, timeout, observe))
     return {'time': stamp(), 'exit': result.returncode, 'stderr': result.stderr,
+            'client_observation_errors': getattr(result, 'observer_errors', []),
             'properties': dict(x.split('=', 1) for x in result.stdout.splitlines() if '=' in x)}
+
+
+def run_request(unit, timeout, observe):
+    return concurrent.run_observed(['systemctl', '--user', '--no-block', 'stop', unit], timeout, observe)
 
 
 def same_unit(shown, proof, active=False):
@@ -243,6 +250,10 @@ def observe_population(path, deadline):
 
 def record_failure(out, stage, exc):
     failure = {'stage': stage, 'error_type': type(exc).__name__, 'reason': str(exc), 'time': stamp()}
+    for attr in ('observer_errors', 'client_cleanup_errors'):
+        details = getattr(exc, attr, None)
+        if isinstance(details, list):
+            failure[attr] = details
     out['errors'].append(failure)
     out.setdefault('reason', stage + ': ' + failure['error_type'] + ': ' + failure['reason'])
 
@@ -292,6 +303,7 @@ def stop_with_evidence(unit, proof, root, observations=()):
            'budgets_s': {'before': FINAL_S, 'query': QUERY_S, 'request': REQUEST_S,
                          'completion': COMPLETION_S, 'final': FINAL_S}}
     path = root / proof.cgroup.lstrip('/')
+    monitor = concurrent.PopulationObserver(path, proof.invocation_id, time.monotonic() + QUERY_S + REQUEST_S + COMPLETION_S + FINAL_S)
     # Observações anteriores são auxiliares; nem sua estrutura pode suprimir a parada.
     try:
         out['observations'] = list(observations)
@@ -304,18 +316,20 @@ def stop_with_evidence(unit, proof, root, observations=()):
     append_observation(out, path, time.monotonic() + FINAL_S, 'population_before_stop')
     try:
         # Qualquer falha de autenticação/revalidação é fechada: sem stop.
-        prior = query(unit)
+        monitor.start()
+        prior = query(unit, observe=monitor.poll)
         out['queries'].append(prior)
         if not same_unit(prior, proof, active=True) or not valid_policy(prior['properties']):
             record_failure(out, 'revalidation', ValueError('identidade/política não revalidada; stop não emitido'))
             return out
+        monitor.bind(out['observations'][-1].get('inode'))
         # Consulta e stop não são atômicos; a corrida residual continua documentada.
         out['request_started'] = stamp()
         try:
-            request = subprocess.run(['systemctl', '--user', '--no-block', 'stop', unit],
-                                     capture_output=True, text=True, timeout=REQUEST_S)
+            request = run_request(unit, REQUEST_S, monitor.poll)
             out['request'] = {'status': 'ACEITA' if request.returncode == 0 else 'FALHOU',
-                              'exit': request.returncode, 'stderr': request.stderr, 'timeout': False}
+                              'exit': request.returncode, 'stderr': request.stderr, 'timeout': False,
+                              'client_observation_errors': (request.observer_errors if isinstance(getattr(request, 'observer_errors', None), list) else [])}
             if request.returncode != 0:
                 record_failure(out, 'stop_request', OSError(request.stderr or 'stop recusado'))
         except subprocess.TimeoutExpired as exc:
@@ -328,11 +342,14 @@ def stop_with_evidence(unit, proof, root, observations=()):
         out['request_finished'] = stamp()
         until = time.monotonic() + COMPLETION_S
         while time.monotonic() < until:
-            shown = query(unit, min(QUERY_S, max(0.001, until - time.monotonic())))
+            monitor.poll()
+            shown = query(unit, min(QUERY_S, max(0.001, until - time.monotonic())), observe=monitor.poll)
             out['queries'].append(shown)
             append_observation(out, path, min(until, time.monotonic() + 0.25), 'population_during_stop')
             p = shown['properties']
             if not same_unit(shown, proof):
+                if p.get('LoadState') == 'not-found' and p.get('ActiveState') == 'inactive':
+                    out['unit_removed'] = True
                 record_failure(out, 'completion_identity', ValueError('unidade desapareceu, mudou ou não verificável'))
                 break
             if p.get('ActiveState') in ('inactive', 'failed'):
@@ -345,6 +362,27 @@ def stop_with_evidence(unit, proof, root, observations=()):
     except Exception as exc:
         record_failure(out, 'revalidation' if out['request']['status'] == 'NAO_SOLICITADO' else 'completion_query', exc)
     finally:
+        try:
+            out['concurrent_population'] = monitor.finish()
+        except Exception as exc:
+            record_failure(out, 'concurrent_population_final', exc)
+            out['concurrent_population'] = {'samples': [], 'errors': [str(exc)], 'instance_bound': False}
+        finally:
+            # Última defesa para os únicos descritores do monitor, sem sinais.
+            for attr in ('events', 'directory'):
+                fd = getattr(monitor, attr, None)
+                if fd is not None:
+                    try:
+                        os.close(fd)
+                    except OSError as exc:
+                        record_failure(out, 'monitor_descriptor_close', exc)
+                    setattr(monitor, attr, None)
+        monitoring = out['concurrent_population']
+        request_ns = out.get('request_started', {}).get('monotonic_ns')
+        monitoring['started_before_stop'] = bool(request_ns and monitoring.get('started_ns')
+                                                  and monitoring['started_ns'] < request_ns)
+        monitoring['first_sample_before_stop'] = bool(request_ns and monitoring.get('first_sample_ns')
+                                                       and monitoring['first_sample_ns'] < request_ns)
         until = time.monotonic() + FINAL_S
         append_observation(out, path, until, 'population_final')
         try:
@@ -356,6 +394,13 @@ def stop_with_evidence(unit, proof, root, observations=()):
             classify_cleanup(out)
         except Exception as exc:
             record_failure(out, 'cleanup_classification', exc)
+        try:
+            out['classifications'] = concurrent.classifications(out)
+        except Exception as exc:
+            record_failure(out, 'independent_classifications', exc)
+            out['classifications'] = {'LIMPEZA_INTEGRAL_INCONCLUSIVA': True}
+        out['manager_evidence'] = {'source': 'state_queries', 'job_tracking': 'NAO_IMPLEMENTADO',
+                                   'journal_alone_confirms_stop': False}
         out['scope_of_claim'] = 'observação local; escape ou descendentes nunca observados não são excluídos'
         out['end_time'] = stamp()
         out['elapsed_s'] = time.monotonic() - started

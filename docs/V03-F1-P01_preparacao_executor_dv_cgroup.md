@@ -215,3 +215,56 @@ A margem anteriormente proposta de 24 s continua apenas referência para revisã
 **64 testes Python seguros passaram**: 27 do executor, 27 de política/evidências e 10 dos controles. Novos cenários cobrem erro antes do stop, exceção inesperada, retorno incompleto/malformado, coleta final falha, stop aceito após falha de coleta, recusa de propriedade/política, múltiplas falhas sem perda da primeira causa, inspeção/classificação final com erro, canal inesperado e deadlines expirados/ultrapassados. Os cenários anteriores de desaparecimento, PID reutilizado, zumbi, unidade externa/substituída e timeout continuam passando. Passaram dois testes Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão filtrada: **102 aprovados, zero falhos e 93 filtrados**, sem development/validation/frozen/final/panel/protocol; três avisos históricos EC-04 permanecem. Contagens específicas Rust se sobrepõem à regressão.
 
 **Parecer: APTO PARA AUDITORIA DE AUTORIZAÇÃO DO ENSAIO**, restrito à robustez implementada e às limitações explícitas; não é autorização nem validação operacional real. A limpeza geral permanece INCONCLUSIVA no instrumento: desaparecimento não comprova vazio, varredura não é atômica e escape/descendentes nunca observados não são excluídos. LIMPEZA REAL PENDENTE; D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Não avançar automaticamente.
+
+## Observação concorrente após o primeiro ensaio real
+
+Base `627abc1ef61b051c56304dcbe6ea5483715c70a4`. **Nesta atividade não houve nova tentativa real, scope, recuperação manual, D/V, F, EC-10 R3, pressão/OOM ou checkpoint.** Implementação e testes seguros não reclassificam o primeiro ensaio: **PARADA CORROBORADA; LIMPEZA INTEGRAL INCONCLUSIVA**.
+
+### Evidência histórica efetivamente disponível
+
+Foram lidos, sem alteração, `/tmp/neurons-cleanup-627abc1.stdout.log` e o stderr vazio. SHA-256 do stdout permaneceu `30889f8325d98e26cb5516e1d12970af58f4ccff6be1a6972585d54cbecfdae5`. Unidade `neurons-v03-f1-cleanup-05caedd90c3367a9.scope`, InvocationID `a43ce597b7fb45a3ae76b89db00b57cb`. O relatório anterior citou journal Started/Stopping/Stopped; não há stream D-Bus ou JSON do journal incorporado ao stdout, portanto não se inventou vinculação adicional de job/InvocationID.
+
+Tomando o início da solicitação de stop como t=0: a última amostra de população começou em **−5,292196 ms**, encontrou filho e neto, populated=1, e terminou aproximadamente em −4,836828 ms. A reconsulta ativa da mesma InvocationID foi registrada em −0,020362 ms. O cliente de stop retornou zero em **+4,672105 ms**. Em **+8,594129 ms**, a consulta retornou not-found/inactive com InvocationID vazio; em **+8,615130 ms**, a coleta já encontrou o diretório ausente. Não se conhece o instante exato da parada ou remoção nem sua posição em relação ao retorno do cliente. Não houve leitura de populated=0. O coordenador saiu 77; PID/ticks conhecidos estavam ausentes no final. OOMPolicy foi de fato observada como stop no pacote instalado, sem solicitação explícita desse valor; isso não demonstra sua configurabilidade em scopes nem altera o recorte sem pressão.
+
+### Monitor sem threads e recursos próprios
+
+O novo `scope_population_observer.py` abre o diretório e cgroup.events antes do pedido de stop e conserva descritores do objeto observado. O inode é confrontado com a coleta anterior e a unidade revalidada antes de vincular as amostras à InvocationID. Falha de abertura/vinculação não autoriza parar unidade externa nem transforma uma amostra em prova da instância. A revalidação de propriedade/política existente permanece obrigatória. A corrida entre essa revalidação e o pedido continua não atômica.
+
+Os clientes próprios de solicitação e de consulta pós-stop agora são executados assincronamente por Popen. Um único laço no supervisor lê a população enquanto esses clientes executam: não há thread de monitoramento ou processo observador adicional. O monitor é iniciado antes da consulta de revalidação; `started_ns`, `first_sample_ns`, `started_before_stop` e `first_sample_before_stop` distinguem início do monitor de primeira leitura bem-sucedida. A coleta recursiva anterior/posterior continua registrando subgrupos, processos e identidades. O monitor rápido acrescenta leituras do populated da raiz, cujo significado cgroup v2 abrange processos vivos na subárvore.
+
+Se o caminho desaparecer mas o descritor ainda fornecer conteúdo, registra-se a leitura efetivamente obtida do objeto aberto e path_inode ausente. Se kernfs retornar erro/EOF, isso é erro, não populated=0. Substituição observável do inode no caminho é recusada. Uma leitura zero válida e vinculada prova apenas a ausência de processos vivos naquela subárvore naquele instante; não prova recolhimento de zumbis nem ausência de processos escapados.
+
+`readings_1_then_0` registra os pares de valores efetivamente lidos, com timestamps. `transition_instant_observed=false` explicita que não se observou o instante exato da mudança nem continuidade entre amostras. Ausência depois de uma leitura 1 não cria leitura 0. A amostragem pode perder transições rápidas; nenhuma promessa de captura universal foi introduzida.
+
+O laço solicita intervalo de até 1 ms entre verificações, sujeito a duração de I/O/escalonamento. Valores iguais são registrados no máximo a cada 25 ms; mudanças são registradas na leitura que as detecta. Limites: 512 registros, 32 erros e 16 KiB por leitura; excedentes são contados, não crescem indefinidamente. Os clientes têm saída limitada a 64 KiB por canal e usam arquivos temporários fechados ao término. O monitor fecha seus descritores em finally. Em erro/timeout, só o cliente Popen próprio é encerrado e recolhido, com espera adicional de até 1 s; nunca se sinalizam PIDs experimentais por esse mecanismo. Falha de encerramento do cliente fica anexada à causa original. Não há garantia contra syscall ou processo em estado ininterruptível. Não foram adicionados workers órfãos ou daemon threads.
+
+O monitor dura até a soma query/request/completion/final (9 s desde sua criação) e é fechado na finalização, inclusive nas recusas de stop. O orçamento anterior de 22 s continua sendo soma de fases controladas; encerramento excepcional de cliente pode acrescentar até 1 s por cliente afetado. Não há um limite universal real de 22/24 s sob falhas de kernel, I/O ou escalonamento. Esgotamento de amostras, erros ou ausência de leitura não são corrigidos por repetição automática do ensaio.
+
+### Evidência systemd: avaliação e limite implementado
+
+A [API oficial v252](https://www.freedesktop.org/software/systemd/man/252/org.freedesktop.systemd1.html) permite Subscribe, StopUnit com objeto de job retornado e JobRemoved com resultado do job; a assinatura precisa preceder o pedido para evitar perder o evento. Vincular o job à unidade previamente atestada exige preservar essa associação e a InvocationID; JobRemoved/UnitRemoved não carregam sozinhos a InvocationID. RefUnit pode conservar referência da unidade em uma conexão persistente, mas não garante retenção do diretório cgroup. Nenhum desses métodos foi chamado nesta atividade.
+
+**Captura nativa de jobs/sinais D-Bus não foi implementada**: o protocolo continua usando consultas de estado, agora sem suspender a observação de população. PARADA_CONFIRMADA exige estado inactive da mesma Id/InvocationID; unidade removida antes dessa confirmação continua sem A. `manager_evidence.job_tracking=NAO_IMPLEMENTADO` torna essa limitação explícita. O analisador conservador `journal_evidence` não confirma parada por mensagem: nome sozinho não vincula instância; mesmo campos USER_UNIT/INVOCATION_ID coincidentes são apenas candidatos a correlação, exigindo origem e job/estado verificáveis. Não há coleta automática nova do journal nem promoção por texto Started/Stopped. O journal histórico não foi reinterpretado como captura de job.
+
+Referência para o significado hierárquico de populated: [documentação cgroup v2](https://docs.kernel.org/admin-guide/cgroup-v2.html#un-populated-notification).
+
+### Classificações independentes
+
+| Campo em classifications | Critério e alcance |
+|---|---|
+| PARADA_CONFIRMADA | Estado inactive observado com Id e InvocationID esperadas; aceite do stop ou journal por nome não basta |
+| POPULACAO_VAZIA_OBSERVADA | Leitura real populated=0 no objeto/inode vinculado à instância revalidada; restrita à subárvore e timestamps das amostras |
+| AUSENCIA_DOS_PROCESSOS_CONHECIDOS | Lista não vazia de identidades rastreadas, todas classificadas AUSENTE; zumbis, PID reutilizado e falhas de leitura permanecem categorias distintas |
+| LIMPEZA_INTEGRAL_INCONCLUSIVA | Sempre verdadeiro no recorte: não se excluem processos escapados ou nunca observados |
+| FALHA_DE_PARADA | Erro explícito na solicitação ou estado failed; falta de confirmação/timeout pode ser inconclusão sem demonstrar falha do gerenciador |
+| UNIDADE_REMOVIDA_OBSERVADA | Consulta not-found/inactive após o pedido; não é A nem B |
+
+A, B e C não se implicam. A classificação local legada de vazio por coletas completas permanece separada da nova evidência rápida de populated=0. O resultado geral continua INCONCLUSIVO e exige auditoria humana; mesmo uma leitura B não homologa limpeza universal ou D04-E03. Erros de coleta, solicitação e finalização continuam registrados separadamente e não apagam a causa original.
+
+### Higiene e validações
+
+Foram confirmados tipo, localização, ausência no índice Git e assinatura bytecode dos três arquivos não rastreados: `__pycache__/dv_cgroup_executor.cpython-311.pyc`, `__pycache__/cgroup_controls.cpython-311.pyc` e `__pycache__/scope_cleanup_evidence.cpython-311.pyc`. Somente esses três arquivos exatos foram removidos; não se usou git clean nem remoção recursiva. O diretório vazio não foi removido indiscriminadamente. Testes Python usam PYTHONDONTWRITEBYTECODE=1; o lançamento interno sintético passa a propagar essa variável aos descendentes, evitando novos caches.
+
+Passaram **74 testes Python seguros** (27 executor, 29 protocolo de evidências, 10 controles e 8 observador), dois testes Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão Rust filtrada: **102 aprovados, zero falhos, 93 filtrados**; três avisos históricos EC-04 permanecem. Cenários novos: remoção rápida, leituras 1/0, zero não observado, grupo ausente/substituído, vínculo de inode/InvocationID divergente, journal sem identidade suficiente, stop aceito sem conclusão, ausência de conhecidos, sobreviventes, erros simultâneos, deadline, limite de registros, fechamento de descritores e clientes locais recolhidos após timeout. Não se executaram systemctl ou scopes reais nos testes novos.
+
+**Estado preservado:** primeiro ensaio com parada corroborada e limpeza integral inconclusiva; nova observação IMPLEMENTADA e VALIDADA POR TESTES SEGUROS, PENDENTE DE VALIDAÇÃO REAL. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Nenhuma nova tentativa real está autorizada por esta alteração.

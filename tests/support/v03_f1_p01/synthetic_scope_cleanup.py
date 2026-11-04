@@ -88,7 +88,7 @@ def host_test():
     started = time.monotonic()
     print(json.dumps({'unit': unit, 'supervisor_pid': os.getpid(), 'command': command}), flush=True)
     with tempfile.TemporaryFile(mode='w+t') as log:
-        proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, bufsize=0)
+        proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, bufsize=0, env=dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
         record = None
         proof = None
         observations = []

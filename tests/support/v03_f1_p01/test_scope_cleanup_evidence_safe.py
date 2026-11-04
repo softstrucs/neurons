@@ -27,7 +27,7 @@ class SafeEvidence(unittest.TestCase):
     def run_stop(self, queries, sample=None, request=None):
         with mock.patch.object(evidence, 'query', side_effect=queries), \
              mock.patch.object(evidence, 'collect_population', return_value=sample or self.empty), \
-             mock.patch.object(evidence.subprocess, 'run', side_effect=request) as run:
+             mock.patch.object(evidence, 'run_request', side_effect=request) as run:
             if request is None:
                 run.return_value = mock.Mock(returncode=0, stderr='')
             result = executor.stop_owned_scope(self.unit, self.proof)
@@ -38,7 +38,7 @@ class SafeEvidence(unittest.TestCase):
             with self.subTest(error=type(error).__name__), \
                  mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
                  mock.patch.object(evidence, 'collect_population', side_effect=[error, self.empty, self.empty]), \
-                 mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')) as request:
+                 mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')) as request:
                 result = executor.stop_owned_scope(self.unit, self.proof)
             request.assert_called_once()
             self.assertEqual(result['request']['status'], 'ACEITA')
@@ -54,7 +54,7 @@ class SafeEvidence(unittest.TestCase):
                        dict(self.empty, identities=[{'pid': 'wrong', 'ticks': 123}])):
             with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
                  mock.patch.object(evidence, 'collect_population', side_effect=[sample, self.empty, self.empty]), \
-                 mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')) as request:
+                 mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')) as request:
                 result = executor.stop_owned_scope(self.unit, self.proof)
             request.assert_called_once()
             self.assertEqual(result['status'], 'INCONCLUSIVO')
@@ -63,7 +63,7 @@ class SafeEvidence(unittest.TestCase):
     def test_final_collection_exception_preserves_stop_and_completion(self):
         with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
              mock.patch.object(evidence, 'collect_population', side_effect=[self.empty, self.empty, AttributeError('falha final')]), \
-             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')):
+             mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')):
             result = executor.stop_owned_scope(self.unit, self.proof)
         self.assertEqual(result['request']['status'], 'ACEITA')
         self.assertEqual(result['completion']['status'], 'CONCLUIDA')
@@ -75,7 +75,7 @@ class SafeEvidence(unittest.TestCase):
         with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
              mock.patch.object(evidence, 'collect_population', side_effect=[RuntimeError('primeira causa'), self.empty, OSError('última coleta')]), \
              mock.patch.object(evidence, 'inspect_known', side_effect=TypeError('identidades finais')), \
-             mock.patch.object(evidence.subprocess, 'run', side_effect=OSError('pedido recusado')):
+             mock.patch.object(evidence, 'run_request', side_effect=OSError('pedido recusado')):
             result = executor.stop_owned_scope(self.unit, self.proof)
         self.assertIn('primeira causa', result['reason'])
         errors = str(result['errors'])
@@ -91,7 +91,7 @@ class SafeEvidence(unittest.TestCase):
                       {'exit': 0, 'properties': {}}, None):
             with mock.patch.object(evidence, 'query', return_value=shown), \
                  mock.patch.object(evidence, 'collect_population', side_effect=RuntimeError('observador')), \
-                 mock.patch.object(evidence.subprocess, 'run') as request:
+                 mock.patch.object(evidence, 'run_request') as request:
                 result = executor.stop_owned_scope(self.unit, self.proof)
             request.assert_not_called()
             self.assertEqual(result['request']['status'], 'NAO_SOLICITADO')
@@ -112,7 +112,7 @@ class SafeEvidence(unittest.TestCase):
              mock.patch.object(evidence, 'collect_population', return_value=self.empty), \
              mock.patch.object(evidence, 'inspect_known', side_effect=RuntimeError('inspeção')), \
              mock.patch.object(evidence, 'classify_cleanup', side_effect=ValueError('classificação')), \
-             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')):
+             mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')):
             result = executor.stop_owned_scope(self.unit, self.proof)
         self.assertIn('inspeção', result['reason'])
         self.assertIn('classificação', str(result['errors']))
@@ -125,13 +125,54 @@ class SafeEvidence(unittest.TestCase):
         channel.close.side_effect = RuntimeError('canal inesperado')
         with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
              mock.patch.object(evidence, 'collect_population', return_value=self.empty), \
-             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')) as request:
+             mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')) as request:
             result = executor.finish_owned_scope(self.unit, self.proof, channel, observations=[previous])
         request.assert_called_once()
         self.assertIn('canal inesperado', result['channel_close']['reason'])
         self.assertIn('causa antes da finalização', result['cleanup']['reason'])
         self.assertEqual(result['cleanup']['status'], 'INCONCLUSIVO')
         self.assertEqual(result['cleanup']['completion']['status'], 'CONCLUIDA')
+
+    def test_concurrent_monitor_starts_before_request_and_retains_zero_after_removal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / self.group.lstrip('/')
+            path.mkdir(parents=True)
+            events = path / 'cgroup.events'
+            events.write_text('populated 1\nfrozen 0\n')
+            sample = dict(self.empty, inode=path.stat().st_ino)
+            removed = {'exit': 0, 'properties': {'Id': self.unit, 'LoadState': 'not-found',
+                       'ActiveState': 'inactive', 'InvocationID': ''}}
+            def accepted(unit, timeout, poll):
+                monitor = poll.__self__
+                self.assertTrue(monitor.samples)
+                self.assertTrue(monitor.instance_bound)
+                events.write_text('populated 0\nfrozen 0\n')
+                poll()
+                events.unlink()
+                path.rmdir()
+                return subprocess.CompletedProcess([], 0, '', '')
+            with mock.patch.object(executor, 'ROOT', root), \
+                 mock.patch.object(evidence, 'query', side_effect=[self.active, removed]), \
+                 mock.patch.object(evidence, 'collect_population', return_value=sample), \
+                 mock.patch.object(evidence, 'run_request', side_effect=accepted):
+                result = executor.stop_owned_scope(self.unit, self.proof)
+        self.assertTrue(result['concurrent_population']['descriptors_closed'])
+        self.assertTrue(result['classifications']['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertFalse(result['classifications']['PARADA_CONFIRMADA'])
+        self.assertTrue(result['classifications']['UNIDADE_REMOVIDA_OBSERVADA'])
+        self.assertTrue(result['classifications']['LIMPEZA_INTEGRAL_INCONCLUSIVA'])
+
+    def test_monitor_finalization_error_does_not_hide_request_or_completion(self):
+        with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
+             mock.patch.object(evidence, 'collect_population', return_value=self.empty), \
+             mock.patch.object(evidence.concurrent.PopulationObserver, 'finish', side_effect=RuntimeError('monitor final falhou')), \
+             mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')):
+            result = executor.stop_owned_scope(self.unit, self.proof)
+        self.assertEqual(result['request']['status'], 'ACEITA')
+        self.assertEqual(result['completion']['status'], 'CONCLUIDA')
+        self.assertIn('monitor final falhou', str(result['errors']))
+        self.assertTrue(result['classifications']['LIMPEZA_INTEGRAL_INCONCLUSIVA'])
 
     def test_release_pipe_deadline_and_no_reader(self):
         r, w = os.pipe()
@@ -175,7 +216,7 @@ class SafeEvidence(unittest.TestCase):
         missing = {'status': 'INDISPONIVEL', 'empty': False, 'errors': ['FileNotFoundError']}
         with mock.patch.object(evidence, 'query', side_effect=[self.active, self.inactive]), \
              mock.patch.object(evidence, 'collect_population', side_effect=[self.empty, missing, missing]), \
-             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')):
+             mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')):
             result = executor.stop_owned_scope(self.unit, self.proof)
         self.assertEqual(result['status'], 'INCONCLUSIVO')
         self.assertIn('completion', result)
@@ -216,7 +257,7 @@ class SafeEvidence(unittest.TestCase):
     def test_completed_stop_requires_confirmed_empty_population(self):
         result, run = self.run_stop([self.active, self.inactive])
         self.assertEqual(result['status'], 'VAZIO_DO_CGROUP_OBSERVADO')
-        self.assertIn('--no-block', run.call_args.args[0])
+        self.assertEqual(run.call_args.args[0], self.unit)
         self.assertIn('completion', result)
         self.assertIn('scope_of_claim', result)
 
@@ -236,7 +277,7 @@ class SafeEvidence(unittest.TestCase):
         with mock.patch.object(evidence, 'COMPLETION_S', 0.03), \
              mock.patch.object(evidence, 'query', return_value=self.active), \
              mock.patch.object(evidence, 'collect_population', return_value=self.empty), \
-             mock.patch.object(evidence.subprocess, 'run', return_value=mock.Mock(returncode=0, stderr='')):
+             mock.patch.object(evidence, 'run_request', return_value=mock.Mock(returncode=0, stderr='')):
             start = time.monotonic()
             result = executor.stop_owned_scope(self.unit, self.proof)
         self.assertLess(time.monotonic() - start, 1)
