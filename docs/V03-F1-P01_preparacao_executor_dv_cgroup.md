@@ -268,3 +268,30 @@ Foram confirmados tipo, localização, ausência no índice Git e assinatura byt
 Passaram **74 testes Python seguros** (27 executor, 29 protocolo de evidências, 10 controles e 8 observador), dois testes Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão Rust filtrada: **102 aprovados, zero falhos, 93 filtrados**; três avisos históricos EC-04 permanecem. Cenários novos: remoção rápida, leituras 1/0, zero não observado, grupo ausente/substituído, vínculo de inode/InvocationID divergente, journal sem identidade suficiente, stop aceito sem conclusão, ausência de conhecidos, sobreviventes, erros simultâneos, deadline, limite de registros, fechamento de descritores e clientes locais recolhidos após timeout. Não se executaram systemctl ou scopes reais nos testes novos.
 
 **Estado preservado:** primeiro ensaio com parada corroborada e limpeza integral inconclusiva; nova observação IMPLEMENTADA e VALIDADA POR TESTES SEGUROS, PENDENTE DE VALIDAÇÃO REAL. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Nenhuma nova tentativa real está autorizada por esta alteração.
+
+## B1 — Classificação temporal da população
+
+Base `dbae5a27d9688a2ce15554912162de51b8a91338`. **IMPLEMENTADO e VALIDADO POR TESTES SEGUROS; PENDENTE DE VALIDAÇÃO REAL.** Não houve novo scope, ensaio real, D/V, F, EC-10 R3, pressão/OOM ou checkpoint D/V. Esta correção substitui o critério B da seção anterior, sem reinterpretar o primeiro ensaio.
+
+A auditoria de classifications() confirmou que qualquer leitura zero vinculada podia produzir POPULACAO_VAZIA_OBSERVADA, mesmo antes do pedido ou sem timestamps da solicitação. O classificador agora exige, para B positivo: pedido com status ACEITA; request_started/request_finished com monotonic_ns inteiros positivos e fim >= início; vínculo explícito da instância, InvocationID hexadecimal correspondente e inode inteiro positivo correspondente; timestamps das amostras válidos e estritamente crescentes na ordem registrada; sequência de leituras válidas adjacentes 1/0, com o 1 estritamente antes e o 0 estritamente depois do início da solicitação. Não se ordenam timestamps retrospectivamente para reconstruir uma sequência. Timestamp ausente, inválido, repetido ou fora de ordem impede B positivo. Divergências de inode, path_inode ou InvocationID e populated ausente/inválido excluem a amostra e ficam registradas em rejected_samples.
+
+O referencial de “após” é explicitamente o **início da solicitação**, não a conclusão da parada. Uma leitura zero durante a execução do cliente pode qualificar a sequência quando o pedido for posteriormente aceito; continua sem provar causalidade ou parada concluída. population_timing separa zero_before_stop_ns, one_before_stop_ns, zero_after_request_start_ns, zero_during_request_ns e zero_after_request_finished_ns. O intervalo durante o cliente é início < t <= fim; depois do retorno exige t > fim. Leitura exatamente no início não é anterior nem posterior. Zero posterior sem leitura 1 anterior permanece registrado como ponto observado, mas não produz B. Zero anterior nunca é promovido a esvaziamento pós-solicitação. Stop não solicitado, recusado ou com timeout não produz B, mesmo se houver leituras locais.
+
+readings_1_then_0 e readings_1_before_0_after preservam os pares e seus timestamps, sem alegar instante exato de transição: exact_transition_instant_observed permanece false. Leituras rejeitadas, erros do observador e contagem de amostras descartadas são limitações explícitas. Erros/descartes não apagam valores válidos efetivamente lidos: uma sequência ancorada pode continuar registrada com essas limitações, mas não prova continuidade entre amostras, limpeza integral ou ausência de escape. Uma unidade removida sem qualquer zero válido é classificada separadamente em removed_without_zero; desaparecimento não cria zero.
+
+| Evidência | B: POPULACAO_VAZIA_OBSERVADA |
+|---|---|
+| Zero somente antes do pedido | Falso; zero anterior preservado |
+| 1 antes e 0 após início do pedido aceito | Verdadeiro, limitado aos pontos/subárvore lidos |
+| Zero antes e 1 depois | Falso |
+| Zero depois, sem 1 anterior | Falso; zero posterior isolado preservado |
+| Remoção sem leitura zero | Falso; remoção separada |
+| Inode/InvocationID divergente | Amostra rejeitada; sem B baseado nela |
+| Tempos ausentes, repetidos ou fora de ordem | Falso; limitação temporal registrada |
+| Stop não solicitado, recusado ou com timeout | Falso; leituras não viram evidência de esvaziamento pelo pedido |
+
+PARADA_CONFIRMADA continua dependendo do estado da mesma unidade/InvocationID; AUSENCIA_DOS_PROCESSOS_CONHECIDOS continua independente da população. LIMPEZA_INTEGRAL_INCONCLUSIVA permanece true. B não equivale a homologação e sua semântica foi deliberadamente restringida ao esvaziamento temporalmente ancorado. Não há afirmação de que o stop causou a mudança ou de ausência universal de descendentes.
+
+Passaram **83 testes Python seguros** (27 executor, 29 evidências, 10 controles, 17 observador), dois Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão Rust filtrada: **102 aprovados, zero falhos e 93 filtrados**; três avisos históricos EC-04 permanecem. Foram cobertos os cenários da tabela, zero durante e após retorno do cliente, erros de leitura, amostras descartadas, estrutura incompleta e distinção entre A/B/C. Somente testes locais seguros; bytecode desabilitado. Critérios de propriedade e segurança da parada não foram modificados.
+
+**Estado preservado:** primeiro ensaio com PARADA CORROBORADA e LIMPEZA INTEGRAL INCONCLUSIVA. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Nenhuma etapa posterior ou nova tentativa real autorizada por esta correção.

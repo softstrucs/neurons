@@ -16,6 +16,96 @@ class SafePopulationObserver(unittest.TestCase):
         path.mkdir()
         (path / 'cgroup.events').write_text('populated ' + populated + '\nfrozen 0\n')
 
+    def temporal_report(self, readings):
+        return {'unit': 'scope', 'invocation_id': 'a'*32, 'request': {'status': 'ACEITA'},
+                'request_started': {'monotonic_ns': 20}, 'request_finished': {'monotonic_ns': 25},
+                'concurrent_population': {'instance_bound': True, 'inode': 99, 'invocation_id': 'a'*32,
+                    'errors': [], 'dropped_samples': 0,
+                    'samples': [{'monotonic_ns': timestamp, 'inode': 99, 'invocation_id': 'a'*32,
+                                 'events': {'populated': value}} for timestamp, value in readings]}}
+
+    def test_zero_only_before_stop_is_not_post_stop_empty(self):
+        result = observer.classifications(self.temporal_report([(10, '0')]))
+        self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertEqual(result['population_timing']['zero_before_stop_ns'], [10])
+        self.assertFalse(result['empty_observation_times_ns'])
+
+    def test_one_before_zero_after_and_during_request(self):
+        for zero in (23, 30):
+            result = observer.classifications(self.temporal_report([(10, '1'), (zero, '0')]))
+            self.assertTrue(result['POPULACAO_VAZIA_OBSERVADA'])
+            self.assertFalse(result['PARADA_CONFIRMADA'])
+            self.assertEqual(result['population_timing']['one_before_stop_ns'], [10])
+            self.assertEqual(result['population_timing']['zero_after_request_start_ns'], [zero])
+            self.assertFalse(result['population_timing']['exact_transition_instant_observed'])
+            self.assertTrue(result['LIMPEZA_INTEGRAL_INCONCLUSIVA'])
+
+    def test_zero_before_one_after_is_not_empty_after_stop(self):
+        result = observer.classifications(self.temporal_report([(10, '0'), (30, '1')]))
+        self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertEqual(result['population_timing']['zero_before_stop_ns'], [10])
+        self.assertFalse(result['population_timing']['readings_1_before_0_after'])
+
+    def test_zero_after_without_prior_one_is_only_an_isolated_reading(self):
+        result = observer.classifications(self.temporal_report([(30, '0')]))
+        self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertEqual(result['population_timing']['zero_after_request_start_ns'], [30])
+
+    def test_removal_without_zero_does_not_imply_empty(self):
+        report = self.temporal_report([(10, '1')])
+        report['unit_removed'] = True
+        result = observer.classifications(report)
+        self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertTrue(result['population_timing']['removed_without_zero'])
+
+    def test_wrong_invocation_or_inode_excludes_sample(self):
+        for key, value in (('invocation_id', 'b'*32), ('inode', 100), ('path_inode', 100)):
+            report = self.temporal_report([(10, '1'), (30, '0')])
+            report['concurrent_population']['samples'][1][key] = value
+            result = observer.classifications(report)
+            self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+            self.assertTrue(result['population_timing']['rejected_samples'])
+
+    def test_read_errors_and_dropped_samples_remain_explicit_limits(self):
+        report = self.temporal_report([(10, '1'), (30, '0')])
+        report['concurrent_population']['errors'] = [{'reason': 'leitura falhou'}]
+        report['concurrent_population']['dropped_samples'] = 3
+        result = observer.classifications(report)
+        self.assertTrue(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertTrue(result['population_timing']['limitations'])
+        self.assertTrue(result['LIMPEZA_INTEGRAL_INCONCLUSIVA'])
+        report['concurrent_population']['samples'][1]['events'] = {}
+        result = observer.classifications(report)
+        self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertTrue(result['population_timing']['rejected_samples'])
+
+    def test_missing_and_out_of_order_timestamps_are_not_repaired(self):
+        for readings in ([(30, '0'), (10, '1')], [(10, '1'), (None, '0')], [(10, '1'), (10, '0')]):
+            result = observer.classifications(self.temporal_report(readings))
+            self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+            self.assertFalse(result['population_timing']['sample_order_valid'])
+        for field in ('request_started', 'request_finished'):
+            report = self.temporal_report([(10, '1'), (30, '0')])
+            report.pop(field)
+            result = observer.classifications(report)
+            self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+            self.assertFalse(result['population_timing']['request_time_valid'])
+        report = self.temporal_report([(10, '1'), (30, '0')])
+        report['request_finished']['monotonic_ns'] = 19
+        self.assertFalse(observer.classifications(report)['POPULACAO_VAZIA_OBSERVADA'])
+
+    def test_not_requested_or_refused_stop_cannot_prove_post_stop_empty(self):
+        for status in ('NAO_SOLICITADO', 'FALHOU', 'TIMEOUT'):
+            report = self.temporal_report([(10, '1'), (30, '0')])
+            report['request']['status'] = status
+            result = observer.classifications(report)
+            self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+            self.assertTrue(result['LIMPEZA_INTEGRAL_INCONCLUSIVA'])
+            self.assertEqual(result['population_timing']['zero_after_request_start_ns'], [30])
+        report.pop('request_started')
+        report.pop('request_finished')
+        self.assertFalse(observer.classifications(report)['POPULACAO_VAZIA_OBSERVADA'])
+
     def test_readings_one_then_zero_and_fast_removal(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'scope'
@@ -33,6 +123,9 @@ class SafePopulationObserver(unittest.TestCase):
         self.assertTrue(result['descriptors_closed'])
         self.assertTrue(result['instance_bound'])
         report = {'invocation_id': 'a'*32, 'concurrent_population': result,
+                  'request': {'status': 'ACEITA'},
+                  'request_started': {'monotonic_ns': (result['samples'][0]['monotonic_ns'] + result['samples'][1]['monotonic_ns']) // 2},
+                  'request_finished': {'monotonic_ns': result['samples'][1]['monotonic_ns'] + 1},
                   'completion': {'status': 'NAO_COMPROVADA'}, 'known_processes': [{'classification': 'AUSENTE'}]}
         classes = observer.classifications(report)
         self.assertTrue(classes['POPULACAO_VAZIA_OBSERVADA'])

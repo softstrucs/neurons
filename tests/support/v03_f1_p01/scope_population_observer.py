@@ -161,9 +161,70 @@ def journal_evidence(record, proof):
 def classifications(report):
     observer = report.get('concurrent_population', {})
     proof_invocation = report.get('invocation_id')
-    samples = [x for x in observer.get('samples', []) if x.get('invocation_id') == proof_invocation
-               and x.get('inode') == observer.get('inode')]
-    empty = [x for x in samples if x.get('events', {}).get('populated') == '0'] if observer.get('instance_bound') else []
+    limitations = []
+    rejected = []
+    valid = []
+    started = report.get('request_started', {}).get('monotonic_ns')
+    finished = report.get('request_finished', {}).get('monotonic_ns')
+    positive_ns = lambda value: type(value) is int and value > 0
+    request_time_valid = positive_ns(started) and positive_ns(finished) and finished >= started
+    accepted = report.get('request', {}).get('status') == 'ACEITA'
+    if not request_time_valid:
+        limitations.append('timestamps da solicitação ausentes ou inválidos')
+    binding = (observer.get('instance_bound') is True and isinstance(proof_invocation, str)
+               and len(proof_invocation) == 32 and all(x in '0123456789abcdef' for x in proof_invocation)
+               and observer.get('invocation_id') == proof_invocation
+               and type(observer.get('inode')) is int and observer['inode'] > 0)
+    if not binding:
+        limitations.append('vínculo de inode/InvocationID não comprovado')
+    previous_time = None
+    ordered = True
+    for index, sample in enumerate(observer.get('samples', [])):
+        if not isinstance(sample, dict):
+            rejected.append({'index': index, 'reason': 'amostra inválida'})
+            continue
+        timestamp = sample.get('monotonic_ns')
+        if not positive_ns(timestamp):
+            ordered = False
+            rejected.append({'index': index, 'reason': 'timestamp ausente/inválido'})
+            continue
+        if previous_time is not None and timestamp <= previous_time:
+            ordered = False
+            rejected.append({'index': index, 'reason': 'timestamps fora de ordem ou repetidos'})
+            continue
+        previous_time = timestamp
+        if (not binding or sample.get('invocation_id') != proof_invocation
+                or type(sample.get('inode')) is not int or sample.get('inode') != observer.get('inode')
+                or sample.get('path_inode', observer.get('inode')) not in (None, observer.get('inode'))):
+            rejected.append({'index': index, 'reason': 'inode/InvocationID divergente'})
+            continue
+        if not isinstance(sample.get('events'), dict) or sample['events'].get('populated') not in ('0', '1'):
+            rejected.append({'index': index, 'reason': 'populated ausente/inválido'})
+            continue
+        valid.append(sample)
+    if not ordered:
+        limitations.append('ordem temporal incompleta; esvaziamento pós-solicitação não classificável')
+    if observer.get('errors'):
+        limitations.append('erros de leitura: ver concurrent_population.errors')
+    if observer.get('dropped_samples', 0):
+        limitations.append('amostras descartadas pelo limite de volume')
+    if rejected:
+        limitations.append('amostras rejeitadas na classificação')
+    before = [x for x in valid if request_time_valid and x['monotonic_ns'] < started]
+    after = [x for x in valid if request_time_valid and x['monotonic_ns'] > started]
+    zero_before = [x['monotonic_ns'] for x in before if x['events']['populated'] == '0']
+    one_before = [x['monotonic_ns'] for x in before if x['events']['populated'] == '1']
+    zero_after = [x['monotonic_ns'] for x in after if x['events']['populated'] == '0']
+    pairs = [{'one_ns': one['monotonic_ns'], 'zero_ns': zero['monotonic_ns']}
+             for one, zero in zip(valid, valid[1:])
+             if one['events']['populated'] == '1' and zero['events']['populated'] == '0']
+    # B exige 1 prévio e 0 após INÍCIO do pedido aceito; não afirma causalidade/conclusão.
+    anchored = [pair for pair in pairs if request_time_valid and pair['one_ns'] < started < pair['zero_ns']]
+    emptied_after_request = bool(accepted and request_time_valid and ordered and anchored)
+    if not accepted:
+        limitations.append('stop não aceito; leituras não qualificam esvaziamento pós-solicitação')
+    if zero_after and not anchored:
+        limitations.append('zero posterior isolado ou sem sequência 1 prévio/0 posterior')
     completion = report.get('completion', {})
     completed = (completion.get('status') == 'CONCLUIDA' and bool(proof_invocation)
                  and completion.get('properties', {}).get('InvocationID') == proof_invocation
@@ -173,10 +234,22 @@ def classifications(report):
     failed = (report.get('request', {}).get('status') == 'FALHOU'
               or report.get('completion', {}).get('status') == 'UNIDADE_FAILED')
     return {'PARADA_CONFIRMADA': completed,
-            'POPULACAO_VAZIA_OBSERVADA': bool(empty),
+            'POPULACAO_VAZIA_OBSERVADA': emptied_after_request,
             'AUSENCIA_DOS_PROCESSOS_CONHECIDOS': absent,
             'LIMPEZA_INTEGRAL_INCONCLUSIVA': True,
             'FALHA_DE_PARADA': failed,
             'UNIDADE_REMOVIDA_OBSERVADA': report.get('unit_removed', False),
-            'empty_observation_times_ns': [x['monotonic_ns'] for x in empty],
-            'limits': 'A, B e C são independentes; B cobre apenas a subárvore e instantes lidos'}
+            'empty_observation_times_ns': zero_after,
+            'population_timing': {'request_time_valid': request_time_valid, 'sample_order_valid': ordered,
+                'zero_before_stop_ns': zero_before, 'one_before_stop_ns': one_before,
+                'zero_after_request_start_ns': zero_after,
+                'zero_during_request_ns': [t for t in zero_after if t <= finished],
+                'zero_after_request_finished_ns': [t for t in zero_after if t > finished],
+                'readings_1_then_0': pairs, 'readings_1_before_0_after': anchored,
+                'exact_transition_instant_observed': False,
+                'removed_without_zero': bool(report.get('unit_removed') and not any(x['events']['populated'] == '0' for x in valid)),
+                'rejected_samples': rejected, 'limitations': limitations,
+                'observer_error_count': len(observer.get('errors', [])),
+                'dropped_sample_count': observer.get('dropped_samples', 0),
+                'stop_accepted': accepted},
+            'limits': 'B exige 1 antes e 0 após início de pedido aceito; não prova causalidade, parada concluída ou instante da transição; A e C são independentes'}
