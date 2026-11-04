@@ -12,6 +12,7 @@ import unittest
 from unittest import mock
 
 import dv_cgroup_executor as executor
+import synthetic_scope_cleanup as synthetic
 
 
 class SafeExecutor(unittest.TestCase):
@@ -42,19 +43,102 @@ class SafeExecutor(unittest.TestCase):
 
     def test_scope_stop_failure_and_failed_state(self):
         unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        group = '/user.slice/' + unit
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a' * 32)
+        prior = mock.Mock(returncode=0, stdout='InvocationID=' + 'a' * 32 + '\nControlGroup=' + group + '\n', stderr='')
+        changed = mock.Mock(returncode=0, stdout='InvocationID=' + 'b' * 32 + '\nControlGroup=' + group + '\n', stderr='')
         ok = mock.Mock(returncode=0, stdout='ActiveState=inactive\nControlGroup=\n', stderr='')
         failed = mock.Mock(returncode=0, stdout='ActiveState=failed\nControlGroup=\n', stderr='')
         denied = mock.Mock(returncode=1, stdout='', stderr='denied')
-        with mock.patch.object(executor.subprocess, 'run', side_effect=[ok, ok]):
-            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'LIMPEZA_OBSERVADA')
-        with mock.patch.object(executor.subprocess, 'run', side_effect=[denied, ok]):
-            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'INCONCLUSIVO')
-        with mock.patch.object(executor.subprocess, 'run', side_effect=[ok, failed]):
-            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'INCONCLUSIVO')
+        with mock.patch.object(executor.subprocess, 'run', side_effect=[prior, ok, ok]):
+            self.assertEqual(executor.stop_owned_scope(unit, proof)['status'], 'LIMPEZA_OBSERVADA')
+        with mock.patch.object(executor.subprocess, 'run', side_effect=[prior, denied, ok]):
+            self.assertEqual(executor.stop_owned_scope(unit, proof)['status'], 'INCONCLUSIVO')
+        with mock.patch.object(executor.subprocess, 'run', side_effect=[prior, ok, failed]):
+            self.assertEqual(executor.stop_owned_scope(unit, proof)['status'], 'INCONCLUSIVO')
+        with mock.patch.object(executor.subprocess, 'run', return_value=changed) as run:
+            self.assertEqual(executor.stop_owned_scope(unit, proof)['status'], 'INCONCLUSIVO')
+            self.assertEqual(run.call_count, 1)
+        with mock.patch.object(executor.subprocess, 'run', side_effect=OSError('bus indisponível')):
+            self.assertEqual(executor.stop_owned_scope(unit, proof)['status'], 'INCONCLUSIVO')
         with mock.patch.object(executor.subprocess, 'run') as run:
-            self.assertEqual(executor.stop_owned_scope('user.slice', True)['status'], 'INCONCLUSIVO')
-            self.assertEqual(executor.stop_owned_scope(unit, False)['status'], 'INCONCLUSIVO')
+            self.assertEqual(executor.stop_owned_scope('user.slice', proof)['status'], 'INCONCLUSIVO')
+            self.assertEqual(executor.stop_owned_scope(unit, None)['status'], 'INCONCLUSIVO')
+            self.assertEqual(executor.stop_owned_scope(unit, True)['status'], 'INCONCLUSIVO')
             run.assert_not_called()
+
+    def test_scope_ownership_independent_of_child_markers(self):
+        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        group = '/user.slice/' + unit
+        path = str(executor.ROOT / group.lstrip('/'))
+        shown = mock.Mock(returncode=0, stdout='LoadState=loaded\nActiveState=active\nControlGroup=' + group + '\nInvocationID=' + 'a'*32 + '\n')
+        with mock.patch.object(executor.subprocess, 'run', return_value=shown), \
+             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, path)]*2):
+            proof = executor.attest_scope(unit, 42)
+        self.assertEqual(proof.launcher_ticks, 123)
+        with mock.patch.object(executor.subprocess, 'run', return_value=shown), \
+             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, path), (os.getpid(), 124, path)]):
+            with self.assertRaises(ValueError):
+                executor.attest_scope(unit, 42)
+        with mock.patch.object(executor, 'live_process', side_effect=FileNotFoundError('coordenador encerrado')):
+            with self.assertRaises(FileNotFoundError):
+                executor.attest_scope(unit, 42)
+
+    def test_partial_or_divergent_marker_does_not_change_cleanup_proof(self):
+        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        group = '/user.slice/' + unit
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a'*32)
+        path = str(executor.ROOT / group.lstrip('/'))
+        members = [{'pid': 42, 'ppid': os.getpid(), 'ticks': 123, 'cgroup': path},
+                   {'pid': 43, 'ppid': 42, 'ticks': 124, 'cgroup': path},
+                   {'pid': 44, 'ppid': 43, 'ticks': 125, 'cgroup': path}]
+        record = {'scope_cgroup': path, 'memory_max': str(64*1024*1024), 'members': members}
+        self.assertTrue(synthetic.validate_marker(record, proof))
+        self.assertFalse(synthetic.validate_marker({}, proof))
+        bad = dict(record, members=members[:2])
+        self.assertFalse(synthetic.validate_marker(bad, proof))
+        bad = dict(record, scope_cgroup='/wrong')
+        self.assertFalse(synthetic.validate_marker(bad, proof))
+        self.assertEqual(proof.launcher_ticks, 123)
+
+    def test_missing_or_divergent_marker_still_requests_owned_cleanup(self):
+        token = '0123456789abcdef'
+        unit = 'neurons-v03-f1-cleanup-' + token + '.scope'
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, '/user.slice/' + unit, 'a'*32)
+        for payload in (b'', b'SYNTH_SCOPE_READY={"scope_cgroup":"/wrong","members":[]}\n'):
+            process = mock.Mock(pid=42, stdin=io.BytesIO())
+            process.poll.return_value = 77
+            with mock.patch.object(synthetic.subprocess, 'Popen', return_value=process), \
+                 mock.patch.object(synthetic.secrets, 'token_hex', return_value=token), \
+                 mock.patch.object(executor, 'attest_scope', return_value=proof), \
+                 mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO'}) as stop, \
+                 mock.patch.object(synthetic.os, 'pread', return_value=payload), \
+                 mock.patch.object(synthetic.time, 'monotonic', side_effect=[0, 0, 0 if payload else 6, 6, 7, 8]), \
+                 mock.patch('sys.stdout', new_callable=io.StringIO):
+                self.assertEqual(synthetic.host_test(), 1)
+            stop.assert_called_once_with(unit, proof)
+
+    def test_failed_ownership_never_releases_or_stops_scope(self):
+        token = '0123456789abcdef'
+        unit = 'neurons-v03-f1-cleanup-' + token + '.scope'
+        channel = mock.Mock(closed=False)
+        process = mock.Mock(pid=42, stdin=channel)
+        process.poll.return_value = 77
+        with mock.patch.object(synthetic.subprocess, 'Popen', return_value=process), \
+             mock.patch.object(synthetic.secrets, 'token_hex', return_value=token), \
+             mock.patch.object(executor, 'attest_scope', side_effect=FileNotFoundError('processo terminou')), \
+             mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO'}) as stop, \
+             mock.patch('sys.stdout', new_callable=io.StringIO):
+            self.assertEqual(synthetic.host_test(), 1)
+        channel.write.assert_not_called()
+        stop.assert_called_once_with(unit, None)
+
+    def test_survivor_identity_distinguishes_pid_reuse(self):
+        expected = {'pid': 42, 'ticks': 100}
+        self.assertEqual(synthetic.classify_pid(expected, {'pid': 42, 'ticks': 100}), 'original')
+        self.assertEqual(synthetic.classify_pid(expected, {'pid': 42, 'ticks': 101}), 'pid_reutilizado')
+        with self.assertRaises(ValueError):
+            synthetic.classify_pid(expected, {'pid': 43, 'ticks': 100})
 
     def test_real_active_descendant_and_cleanup(self):
         script = ("import subprocess,sys; c=subprocess.Popen([sys.executable,'-c','import time; time.sleep(8)']); "

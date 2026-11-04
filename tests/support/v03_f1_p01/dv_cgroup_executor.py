@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Executor D/V prospectivo; nenhuma opção admite F ou painel final."""
 import argparse
+from dataclasses import dataclass
 import glob
 import hashlib
 import json
@@ -106,12 +107,51 @@ def read_test_ready(stream, deadline):
     raise TimeoutError('timeout aguardando V03TEST_READY')
 
 
-def stop_owned_scope(unit, ownership_confirmed=False):
+@dataclass(frozen=True)
+class ScopeOwnership:
+    unit: str
+    supervisor_pid: int
+    launcher_pid: int
+    launcher_ticks: int
+    cgroup: str
+    invocation_id: str
+
+
+def attest_scope(unit, launcher_pid):
+    """Prova independente do marcador: PID lançado, /proc e unidade systemd viva."""
+    if not re.fullmatch(r'neurons-v03-f1-(?:dv|cleanup)-[0-9a-f]{16}\.scope', unit):
+        raise ValueError('nome fora do escopo próprio')
+    before_parent, before_ticks, before_group = live_process(launcher_pid)
+    shown = subprocess.run(['systemctl', '--user', 'show', unit, '--property=LoadState',
+                            '--property=ActiveState', '--property=ControlGroup', '--property=InvocationID'],
+                           capture_output=True, text=True, timeout=3)
+    props = dict(x.split('=', 1) for x in shown.stdout.splitlines() if '=' in x)
+    after_parent, after_ticks, after_group = live_process(launcher_pid)
+    invocation = props.get('InvocationID', '')
+    group = props.get('ControlGroup', '')
+    if (shown.returncode != 0 or props.get('LoadState') != 'loaded'
+            or props.get('ActiveState') != 'active' or not re.fullmatch(r'[0-9a-f]{32}', invocation)
+            or invocation == '0' * 32 or not group.startswith('/') or Path(group).name != unit
+            or before_parent != os.getpid() or after_parent != os.getpid()
+            or before_ticks <= 0 or before_ticks != after_ticks
+            or before_group != str(ROOT / group.lstrip('/')) or after_group != before_group):
+        raise ValueError('propriedade do scope não comprovada')
+    return ScopeOwnership(unit, os.getpid(), launcher_pid, before_ticks, group, invocation)
+
+
+def stop_owned_scope(unit, proof=None):
     """Não envia sinais por PID nem age sobre unidades fora do namespace próprio."""
-    if (not ownership_confirmed
+    if (not isinstance(proof, ScopeOwnership) or proof.unit != unit or proof.supervisor_pid != os.getpid()
             or not re.fullmatch(r'neurons-v03-f1-(?:dv|cleanup)-[0-9a-f]{16}\.scope', unit)):
-        return {'status': 'INCONCLUSIVO', 'reason': 'identidade de unidade inválida'}
+        return {'status': 'INCONCLUSIVO', 'reason': 'prova de propriedade ausente ou divergente; stop não emitido'}
     try:
+        prior = subprocess.run(['systemctl', '--user', 'show', unit, '--property=LoadState',
+                                '--property=ActiveState', '--property=ControlGroup', '--property=InvocationID'],
+                               capture_output=True, text=True, timeout=5)
+        current = dict(x.split('=', 1) for x in prior.stdout.splitlines() if '=' in x)
+        if (prior.returncode != 0 or current.get('InvocationID') != proof.invocation_id
+                or current.get('ControlGroup') != proof.cgroup):
+            return {'status': 'INCONCLUSIVO', 'reason': 'unidade mudou, desapareceu ou não verificável; stop não emitido', 'properties': current}
         stopped = subprocess.run(['systemctl', '--user', 'stop', unit], capture_output=True, text=True, timeout=5)
         shown = subprocess.run(['systemctl', '--user', 'show', unit, '--property=LoadState',
                                 '--property=ActiveState', '--property=ControlGroup', '--property=Result'],
@@ -296,7 +336,7 @@ def supervisor():
                       'command': command, 'executor_sha256': sha256(Path(__file__))}), flush=True)
     stderr_file = tempfile.TemporaryFile(mode='w+t')
     proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=stderr_file)
-    chunks, pending, verified, timed_out = [], b'', False, False
+    chunks, pending, verified, timed_out, proof = [], b'', False, False, None
     try:
         with selectors.DefaultSelector() as selector:
             selector.register(proc.stdout, selectors.EVENT_READ)
@@ -318,12 +358,14 @@ def supervisor():
                                 if verified:
                                     raise ValueError('marcador duplicado')
                                 ready = json.loads(line.split(b'=', 1)[1])
+                                proof = attest_scope(unit + '.scope', proc.pid)
                                 shown = subprocess.run(['systemctl', '--user', 'show', unit + '.scope',
                                                         '--property=LoadState', '--property=ActiveState',
                                                         '--property=ControlGroup'], capture_output=True, text=True, timeout=3)
                                 props = dict(x.split('=', 1) for x in shown.stdout.splitlines() if '=' in x)
                                 path = Path(ready['path'])
-                                verified = (shown.returncode == 0 and validate_scope(path, unit, ready['pid'], props)
+                                verified = (ready['pid'] == proof.launcher_pid and shown.returncode == 0
+                                            and validate_scope(path, unit, ready['pid'], props)
                                             and ready['before']['max'] == str(LIMIT) and free_home() >= MIN_FREE)
                                 if not verified:
                                     raise ValueError('teto, scope ou disco não verificados')
@@ -336,7 +378,7 @@ def supervisor():
     except subprocess.TimeoutExpired:
         timed_out = True
         try:
-            print(json.dumps({'timeout_cleanup': stop_owned_scope(unit + '.scope', verified)}), flush=True)
+            print(json.dumps({'timeout_cleanup': stop_owned_scope(unit + '.scope', proof)}), flush=True)
         finally:
             try:
                 proc.wait(timeout=5)
@@ -358,7 +400,7 @@ def supervisor():
         props = {'query_error': str(exc)}
         cleanup = False
     if not cleanup:
-        print(json.dumps({'cleanup_attempt': stop_owned_scope(unit + '.scope', verified)}), flush=True)
+        print(json.dumps({'cleanup_attempt': stop_owned_scope(unit + '.scope', proof)}), flush=True)
     print(json.dumps({'status': 'INCONCLUSIVO', 'scope_exit': proc.returncode, 'timeout': timed_out,
                       'scope_verified': verified, 'cleanup_observed': cleanup, 'properties': props,
                       'supervisor_elapsed_s': time.monotonic() - started}), flush=True)

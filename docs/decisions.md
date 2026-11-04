@@ -724,3 +724,7 @@ Base `03747ce5e81307391650e85ab8db94a711d58343`. [Registro](V03-F1-P01_preparaca
 ## V03-F1-P01 — Supervisão e limpeza externas
 
 Base `e55209f77a5cba0fcbbe8502b8e408c99ee0083f`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): espera por identidade com prazo e `stderr` sem pipe bloqueante; stop e reconsulta restritos a scope próprio, com falhas inconclusivas. Preparado teste sintético separado de falha abrupta, não executado por barramento systemd inacessível no sandbox. Testes seguros passaram; limpeza em scope real, D/V e homologação pendentes; F não autorizado e congelamento não aprovado.
+
+## V03-F1-P01 — Recuperação do scope sintético
+
+Base `ee45ec24088c378248e9d349f46222211e1986c0`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): propriedade do scope é atestada independentemente de marcadores dos descendentes, antes da liberação; limpeza após falha parcial requer prova de PID/ticks, cgroup e `InvocationID`, e reconsulta da mesma unidade. Falhas são inconclusivas; permanece corrida entre consulta e stop. Testes seguros sem scope real; validação real, D/V e homologação pendentes, congelamento não aprovado e F não autorizado.
