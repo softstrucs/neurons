@@ -44,7 +44,7 @@ class SafeExecutor(unittest.TestCase):
     def test_scope_stop_failure_and_failed_state(self):
         unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
         group = '/user.slice/' + unit
-        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a' * 32)
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a' * 32, 42, 123, os.getpid())
         prior = mock.Mock(returncode=0, stdout='InvocationID=' + 'a' * 32 + '\nControlGroup=' + group + '\n', stderr='')
         changed = mock.Mock(returncode=0, stdout='InvocationID=' + 'b' * 32 + '\nControlGroup=' + group + '\n', stderr='')
         ok = mock.Mock(returncode=0, stdout='ActiveState=inactive\nControlGroup=\n', stderr='')
@@ -73,21 +73,72 @@ class SafeExecutor(unittest.TestCase):
         path = str(executor.ROOT / group.lstrip('/'))
         shown = mock.Mock(returncode=0, stdout='LoadState=loaded\nActiveState=active\nControlGroup=' + group + '\nInvocationID=' + 'a'*32 + '\n')
         with mock.patch.object(executor.subprocess, 'run', return_value=shown), \
-             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, path)]*2):
+             mock.patch.object(executor, 'discover_coordinator', return_value=(42, 123, os.getpid())), \
+             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, path)]*3):
             proof = executor.attest_scope(unit, 42)
         self.assertEqual(proof.launcher_ticks, 123)
         with mock.patch.object(executor.subprocess, 'run', return_value=shown), \
-             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, path), (os.getpid(), 124, path)]):
+             mock.patch.object(executor, 'discover_coordinator', return_value=(42, 123, os.getpid())), \
+             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, path), (os.getpid(), 124, path), (os.getpid(), 123, path)]):
             with self.assertRaises(ValueError):
                 executor.attest_scope(unit, 42)
         with mock.patch.object(executor, 'live_process', side_effect=FileNotFoundError('coordenador encerrado')):
             with self.assertRaises(FileNotFoundError):
                 executor.attest_scope(unit, 42)
 
+    def test_distinct_launcher_and_coordinator(self):
+        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        group = '/user.slice/' + unit
+        path = str(executor.ROOT / group.lstrip('/'))
+        shown = mock.Mock(returncode=0, stdout='LoadState=loaded\nActiveState=active\nControlGroup=' + group + '\nInvocationID=' + 'a'*32 + '\n')
+        with mock.patch.object(executor.subprocess, 'run', return_value=shown), \
+             mock.patch.object(executor, 'discover_coordinator', return_value=(43, 124, 42)), \
+             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, '/outside')]*2 + [(42, 124, path)]):
+            proof = executor.attest_scope(unit, 42)
+        self.assertEqual((proof.launcher_pid, proof.coordinator_pid), (42, 43))
+        members = [{'pid': 43, 'ticks': 124, 'ppid': 42, 'cgroup': path},
+                   {'pid': 44, 'ticks': 125, 'ppid': 43, 'cgroup': path},
+                   {'pid': 45, 'ticks': 126, 'ppid': 44, 'cgroup': path}]
+        self.assertTrue(synthetic.validate_marker({'members': members, 'scope_cgroup': path,
+                                                  'memory_max': str(64*1024*1024)}, proof))
+
+    def test_coordinator_exits_during_attestation(self):
+        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        group = '/user.slice/' + unit
+        shown = mock.Mock(returncode=0, stdout='LoadState=loaded\nActiveState=active\nControlGroup=' + group + '\nInvocationID=' + 'a'*32 + '\n')
+        with mock.patch.object(executor.subprocess, 'run', return_value=shown), \
+             mock.patch.object(executor, 'discover_coordinator', return_value=(43, 124, 42)), \
+             mock.patch.object(executor, 'live_process', side_effect=[(os.getpid(), 123, '/outside')]*2 + [FileNotFoundError('coordenador saiu')]):
+            with self.assertRaises(FileNotFoundError):
+                executor.attest_scope(unit, 42)
+
+    def test_discovery_kernel_evidence_and_ambiguity(self):
+        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        group = '/user.slice/' + unit
+        path = str(executor.ROOT / group.lstrip('/'))
+        argv = b'\0'.join(os.fsencode(x) for x in [sys.executable,
+                    str(Path(executor.__file__).resolve().with_name('synthetic_scope_cleanup.py')), '--coordinator']) + b'\0'
+        with mock.patch.object(Path, 'read_text', return_value='43'), \
+             mock.patch.object(Path, 'read_bytes', return_value=argv), \
+             mock.patch.object(executor, 'live_process', return_value=(42, 124, path)):
+            self.assertEqual(executor.discover_coordinator(unit, 42, group), (43, 124, 42))
+        for identity, command in [((99, 124, path), argv), ((42, 124, '/wrong'), argv),
+                                  ((42, 124, path), b'forged\0')]:
+            with mock.patch.object(Path, 'read_text', return_value='43'), \
+                 mock.patch.object(Path, 'read_bytes', return_value=command), \
+                 mock.patch.object(executor, 'live_process', return_value=identity):
+                with self.assertRaises(ValueError):
+                    executor.discover_coordinator(unit, 42, group)
+        with mock.patch.object(Path, 'read_text', return_value='43 44'), \
+             mock.patch.object(Path, 'read_bytes', return_value=argv), \
+             mock.patch.object(executor, 'live_process', return_value=(42, 124, path)):
+            with self.assertRaises(ValueError):
+                executor.discover_coordinator(unit, 42, group)
+
     def test_partial_or_divergent_marker_does_not_change_cleanup_proof(self):
         unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
         group = '/user.slice/' + unit
-        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a'*32)
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a'*32, 42, 123, os.getpid())
         path = str(executor.ROOT / group.lstrip('/'))
         members = [{'pid': 42, 'ppid': os.getpid(), 'ticks': 123, 'cgroup': path},
                    {'pid': 43, 'ppid': 42, 'ticks': 124, 'cgroup': path},
@@ -104,7 +155,7 @@ class SafeExecutor(unittest.TestCase):
     def test_missing_or_divergent_marker_still_requests_owned_cleanup(self):
         token = '0123456789abcdef'
         unit = 'neurons-v03-f1-cleanup-' + token + '.scope'
-        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, '/user.slice/' + unit, 'a'*32)
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, '/user.slice/' + unit, 'a'*32, 42, 123, os.getpid())
         for payload in (b'', b'SYNTH_SCOPE_READY={"scope_cgroup":"/wrong","members":[]}\n'):
             process = mock.Mock(pid=42, stdin=io.BytesIO())
             process.poll.return_value = 77

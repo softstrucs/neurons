@@ -115,6 +115,32 @@ class ScopeOwnership:
     launcher_ticks: int
     cgroup: str
     invocation_id: str
+    coordinator_pid: int
+    coordinator_ticks: int
+    coordinator_parent: int
+
+
+def discover_coordinator(unit, launcher_pid, group):
+    """Descobre pelo kernel; nenhum PID vem do marcador do processo testado."""
+    path = ROOT / group.lstrip('/')
+    script = 'synthetic_scope_cleanup.py' if '-cleanup-' in unit else 'dv_cgroup_executor.py'
+    flag = '--coordinator' if '-cleanup-' in unit else '--internal-worker'
+    expected = [sys.executable, str(Path(__file__).resolve().with_name(script)), flag]
+    candidates = []
+    for pid in map(int, (path / 'cgroup.procs').read_text().split()):
+        try:
+            before = live_process(pid)
+            argv = Path(f'/proc/{pid}/cmdline').read_bytes().rstrip(b'\0').split(b'\0')
+            after = live_process(pid)
+        except (FileNotFoundError, ProcessLookupError):
+            continue
+        if (before == after and before[1] > 0 and before[2] == str(path)
+                and argv == [os.fsencode(x) for x in expected]
+                and before[0] == (os.getpid() if pid == launcher_pid else launcher_pid)):
+            candidates.append((pid, before[1], before[0]))
+    if len(candidates) != 1:
+        raise ValueError('coordenador vivo único não comprovado por cgroup, argv e parentesco')
+    return candidates[0]
 
 
 def attest_scope(unit, launcher_pid):
@@ -126,7 +152,13 @@ def attest_scope(unit, launcher_pid):
                             '--property=ActiveState', '--property=ControlGroup', '--property=InvocationID'],
                            capture_output=True, text=True, timeout=3)
     props = dict(x.split('=', 1) for x in shown.stdout.splitlines() if '=' in x)
+    group = props.get('ControlGroup', '')
+    if not group.startswith('/') or '..' in Path(group).parts or Path(group).name != unit:
+        raise ValueError('cgroup da unidade inválido')
+    coordinator = discover_coordinator(unit, launcher_pid, group)
     after_parent, after_ticks, after_group = live_process(launcher_pid)
+    if live_process(coordinator[0]) != (coordinator[2], coordinator[1], str(ROOT / group.lstrip('/'))):
+        raise ValueError('coordenador mudou durante atestação')
     invocation = props.get('InvocationID', '')
     group = props.get('ControlGroup', '')
     if (shown.returncode != 0 or props.get('LoadState') != 'loaded'
@@ -134,9 +166,9 @@ def attest_scope(unit, launcher_pid):
             or invocation == '0' * 32 or not group.startswith('/') or Path(group).name != unit
             or before_parent != os.getpid() or after_parent != os.getpid()
             or before_ticks <= 0 or before_ticks != after_ticks
-            or before_group != str(ROOT / group.lstrip('/')) or after_group != before_group):
+            or before_group != after_group):
         raise ValueError('propriedade do scope não comprovada')
-    return ScopeOwnership(unit, os.getpid(), launcher_pid, before_ticks, group, invocation)
+    return ScopeOwnership(unit, os.getpid(), launcher_pid, before_ticks, group, invocation, *coordinator)
 
 
 def stop_owned_scope(unit, proof=None):
@@ -359,12 +391,13 @@ def supervisor():
                                     raise ValueError('marcador duplicado')
                                 ready = json.loads(line.split(b'=', 1)[1])
                                 proof = attest_scope(unit + '.scope', proc.pid)
+                                print(json.dumps({'ownership_proof': vars(proof)}), flush=True)
                                 shown = subprocess.run(['systemctl', '--user', 'show', unit + '.scope',
                                                         '--property=LoadState', '--property=ActiveState',
                                                         '--property=ControlGroup'], capture_output=True, text=True, timeout=3)
                                 props = dict(x.split('=', 1) for x in shown.stdout.splitlines() if '=' in x)
                                 path = Path(ready['path'])
-                                verified = (ready['pid'] == proof.launcher_pid and shown.returncode == 0
+                                verified = (ready['pid'] == proof.coordinator_pid and shown.returncode == 0
                                             and validate_scope(path, unit, ready['pid'], props)
                                             and ready['before']['max'] == str(LIMIT) and free_home() >= MIN_FREE)
                                 if not verified:

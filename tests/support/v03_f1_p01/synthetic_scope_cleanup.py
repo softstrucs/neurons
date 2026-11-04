@@ -70,8 +70,8 @@ def validate_marker(record, proof):
                 and len(members) == 3 and len({x['pid'] for x in members}) == 3
                 and all(type(x['pid']) is int and x['pid'] > 0 and type(x['ticks']) is int
                         and x['ticks'] > 0 and x['cgroup'] == group for x in members)
-                and members[0]['pid'] == proof.launcher_pid and members[0]['ticks'] == proof.launcher_ticks
-                and members[0]['ppid'] == proof.supervisor_pid
+                and members[0]['pid'] == proof.coordinator_pid and members[0]['ticks'] == proof.coordinator_ticks
+                and members[0]['ppid'] == proof.coordinator_parent
                 and members[1]['ppid'] == members[0]['pid'] and members[2]['ppid'] == members[1]['pid'])
     except (KeyError, TypeError, ValueError):
         return False
@@ -106,7 +106,9 @@ def host_test():
                     time.sleep(0.05)
             if proof is None:
                 raise RuntimeError('propriedade do scope não confirmada; trabalho não liberado')
-            release = {'release': True, 'pid': proof.launcher_pid, 'ticks': proof.launcher_ticks,
+            print(json.dumps({'launch_identity': {'supervisor_pid': os.getpid(), 'launcher_pid': proc.pid},
+                              'ownership_proof': vars(proof)}), flush=True)
+            release = {'release': True, 'pid': proof.coordinator_pid, 'ticks': proof.coordinator_ticks,
                        'unit': proof.unit, 'cgroup': str(executor.ROOT / proof.cgroup.lstrip('/'))}
             proc.stdin.write((json.dumps(release) + '\n').encode())
             proc.stdin.flush()

@@ -728,3 +728,7 @@ Base `e55209f77a5cba0fcbbe8502b8e408c99ee0083f`. [Registro](V03-F1-P01_preparaca
 ## V03-F1-P01 — Recuperação do scope sintético
 
 Base `ee45ec24088c378248e9d349f46222211e1986c0`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): propriedade do scope é atestada independentemente de marcadores dos descendentes, antes da liberação; limpeza após falha parcial requer prova de PID/ticks, cgroup e `InvocationID`, e reconsulta da mesma unidade. Falhas são inconclusivas; permanece corrida entre consulta e stop. Testes seguros sem scope real; validação real, D/V e homologação pendentes, congelamento não aprovado e F não autorizado.
+
+## V03-F1-P01 — Identidades de lançamento e coordenação
+
+Base `2e471c79aafd3ece5d9b3b7552f13390ab67ed5d`. [Registro](V03-F1-P01_preparacao_executor_dv_cgroup.md): auditoria upstream v252 identifica exec com preservação de PID no scope local. Ainda assim, prova separa lançador e coordenador, descobrindo este por cgroup.procs e verificando argumentos, parentesco e geração em /proc; suporta filho direto com PID distinto sem exigir lançador no scope. Marcadores não criam prova de propriedade; prova concluída é preservada para limpeza após falha de comunicação, com revalidação de InvocationID/cgroup. Sem identificação suficiente, não libera nem para unidade. Corrida consulta/stop e validação real permanecem pendentes. 19 testes Python seguros, dois Rust sintéticos e regressão filtrada aprovados; nenhum scope real ou D/V executado, D04-E03 não homologada, congelamento não aprovado e F não autorizado.
