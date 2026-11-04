@@ -12,6 +12,7 @@ import time
 
 import cgroup_controls as common
 import dv_cgroup_executor as executor
+import scope_cleanup_evidence as evidence
 
 
 def process_identity(pid):
@@ -33,7 +34,7 @@ def coordinator():
     if memory_max != str(64 * 1024 * 1024):
         raise RuntimeError('limite sintético não confirmado')
     # Trabalho sintético só começa após liberação independente do supervisor.
-    release = json.loads(executor.read_limited_line(sys.stdin, time.monotonic() + 4))
+    release = json.loads(executor.read_limited_line(sys.stdin, time.monotonic() + 7))
     identity = process_identity(os.getpid())
     if (not isinstance(release, dict) or release.get('release') is not True or release.get('pid') != identity['pid']
             or release.get('ticks') != identity['ticks'] or release.get('cgroup') != str(path)
@@ -83,19 +84,20 @@ def classify_pid(expected, live):
 def host_test():
     unit = 'neurons-v03-f1-cleanup-' + secrets.token_hex(8) + '.scope'
     command = ['systemd-run', '--user', '--scope', '--quiet', '--unit=' + unit,
-               '--property=MemoryMax=67108864', sys.executable, str(Path(__file__).resolve()), '--coordinator']
+               *evidence.launch_properties(), sys.executable, str(Path(__file__).resolve()), '--coordinator']
     started = time.monotonic()
     print(json.dumps({'unit': unit, 'supervisor_pid': os.getpid(), 'command': command}), flush=True)
     with tempfile.TemporaryFile(mode='w+t') as log:
-        proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log)
+        proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=log, stderr=log, bufsize=0)
         record = None
         proof = None
+        observations = []
         try:
             # O supervisor usa seu próprio PID lançado, /proc e systemd, nunca o marcador filho.
             until = started + 4
             while time.monotonic() < until:
                 try:
-                    proof = executor.attest_scope(unit, proc.pid)
+                    proof = executor.attest_scope(unit, proc.pid, query_timeout=min(1, max(0.001, until - time.monotonic())))
                     break
                 except (OSError, ValueError, subprocess.TimeoutExpired):
                     if proc.poll() is not None:
@@ -103,16 +105,23 @@ def host_test():
                     time.sleep(0.05)
             if proof is None:
                 raise RuntimeError('propriedade do scope não confirmada; trabalho não liberado')
+            policy = evidence.verify_preflight(unit, proof, executor.ROOT)
+            observations.append(evidence.collect_population(executor.ROOT / proof.cgroup.lstrip('/'), time.monotonic() + 0.25))
+            print(json.dumps({'policy_preflight': policy, 'population_before_release': observations[-1]}), flush=True)
+            if (observations[-1]['status'] != 'COLETA_COMPLETA'
+                    or not any(x['pid'] == proof.coordinator_pid and x['ticks'] == proof.coordinator_ticks
+                               for x in observations[-1]['identities'])):
+                raise RuntimeError('população inicial/coordenador não observável; trabalho recusado')
             print(json.dumps({'launch_identity': {'supervisor_pid': os.getpid(), 'launcher_pid': proc.pid},
                               'ownership_proof': vars(proof)}), flush=True)
             release = {'release': True, 'pid': proof.coordinator_pid, 'ticks': proof.coordinator_ticks,
                        'unit': proof.unit, 'cgroup': str(executor.ROOT / proof.cgroup.lstrip('/'))}
-            proc.stdin.write((json.dumps(release) + '\n').encode())
-            proc.stdin.flush()
+            evidence.send_release(proc.stdin, (json.dumps(release) + '\n').encode(), time.monotonic() + 0.25)
             proc.stdin.close()
             print(json.dumps({'ownership_proof': vars(proof), 'work_release': True}), flush=True)
-            until = started + 5
+            until = started + 9
             while time.monotonic() < until:
+                observations.append(evidence.collect_population(executor.ROOT / proof.cgroup.lstrip('/'), min(until, time.monotonic() + 0.25)))
                 lines = os.pread(log.fileno(), 1_048_576, 0).decode('utf-8', errors='replace').splitlines()
                 matches = [x for x in lines if x.startswith('SYNTH_SCOPE_READY=')]
                 if len(matches) == 1:
@@ -134,7 +143,7 @@ def host_test():
         except (OSError, ValueError, KeyError, IndexError, RuntimeError, TimeoutError, subprocess.TimeoutExpired) as exc:
             print(json.dumps({'stage': 'preflight', 'status': 'INCONCLUSIVO', 'reason': str(exc)}), flush=True)
         finally:
-            finalization = executor.finish_owned_scope(unit, proof, proc.stdin)
+            finalization = executor.finish_owned_scope(unit, proof, proc.stdin, observations=observations)
             cleanup = finalization['cleanup']
         survivors, unknown_processes, reused_pids = [], [], []
         if isinstance(record, dict) and isinstance(record.get('members'), list):

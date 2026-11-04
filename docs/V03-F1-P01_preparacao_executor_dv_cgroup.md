@@ -115,3 +115,64 @@ Outros caminhos examinados: `read_test_ready()` tem deadline e teto de saída, `
 Antes de autorizar scope real: auditoria independente do commit, decisão sobre suficiência da prova de limpeza e risco de corrida, revisão dos prazos restantes, confirmação no terminal Debian 12 de versões, barramento, delegação, limites efetivos, política de interrupção, observabilidade e recuperação manual de unidade própria. O comando sintético histórico é apenas referência; esta correção não autoriza sua execução. Controles de memória aprovados anteriormente não substituem a validação real de limpeza.
 
 **Estado: controles sintéticos aprovados no hospedeiro conforme evidência anterior; limpeza após falha abrupta com validação real pendente; D/V não executado; D04-E03 integral não homologada; congelamento não aprovado; painel F não autorizado.**
+
+## Política de parada, prazos e população independente
+
+Base `1483a166cef63ade4f42e5f7602ca093aaa36941`. **IMPLEMENTADO e VALIDADO POR TESTES SEGUROS; PENDENTE DE VALIDAÇÃO REAL.** Nenhum scope, ensaio no hospedeiro, D/V, F, EC-10 R3, checkpoint D/V ou pressão/OOM foi executado nesta atividade. A falha abrupta permanece exclusivamente a saída 77 do coordenador; morte do supervisor externo não faz parte do ensaio.
+
+### Auditoria systemd v252 e política própria
+
+Fontes upstream: [cliente de propriedades](https://github.com/systemd/systemd/blob/v252/src/shared/bus-unit-util.c), [D-Bus de scope](https://github.com/systemd/systemd/blob/v252/src/core/dbus-scope.c), [contexto de sinais](https://github.com/systemd/systemd/blob/v252/src/core/dbus-kill.c) e [propriedades cgroup](https://github.com/systemd/systemd/blob/v252/src/core/dbus-cgroup.c). O cliente UNIT_SCOPE aceita propriedades de cgroup, kill e scope; `TimeoutStopSec` é convertido para `TimeoutStopUSec`. O gerenciador admite essas propriedades no estado de criação da unidade transitória. Não se deduziu a política a partir de um scope alheio nem se alterou unidade histórica.
+
+| Propriedade | Configuração proposta no lançamento | Verificação da própria unidade |
+|---|---|---|
+| MemoryMax | 67108864 | MemoryMax e leitura independente de memory.max |
+| KillMode | control-group | Igualdade exata; process/mixed/none recusados |
+| KillSignal | SIGTERM | KillSignal=15 |
+| FinalKillSignal | SIGKILL | FinalKillSignal=9 |
+| SendSIGKILL | yes | Igualdade exata |
+| TimeoutStopSec | 2s | TimeoutStopUSec=2s na saída systemctl show |
+| OOMPolicy | Não configurada | Não aparece no caminho de propriedades de scope upstream v252; ausência registrada como INDISPONIVEL_NAO_REQUERIDA neste ensaio sem pressão |
+| Id, InvocationID, ControlGroup, estados e Result | Somente observação; não são prova por nome isolado | Confrontados com a prova independente |
+
+Os defaults do gerenciador seriam usados para valores omitidos; a política de parada acima é explicitamente solicitada, não herdada de outra unidade. Não se alega que um barramento ou pacote específico aceitará a solicitação: recusa ou propriedade ausente/divergente impede liberação e registra inconclusão. A prova PID/PPID/ticks/cgroup/InvocationID foi preservada. Antes da liberação, a consulta da unidade, memory.max e identidade/cgroup do supervisor externo são conferidos. A coleta inicial deve ser completa e conter PID/ticks do coordenador. O supervisor deve estar fora do scope e de seus subgrupos.
+
+### Orçamento temporal do ensaio sintético
+
+| Fase | Orçamento configurado |
+|---|---|
+| Descoberta/atestação | Até 4 s desde início; cada consulta limitada ao restante ou 1 s |
+| Política e liberação | Consulta 1 s, coleta inicial 0,25 s e escrita não bloqueante 0,25 s; coordenador espera liberação por até 7 s desde sua entrada |
+| Marcador de trabalho | Até 9 s desde início; leitura local do marcador do filho tem 3 s |
+| Confirmação da falha abrupta | wait de até 2 s, exigindo saída 77 |
+| Coleta anterior ao stop | Até 2 s |
+| Reconsulta da unidade | Até 1 s |
+| Solicitação de stop | systemctl --user --no-block stop; cliente limitado a 1 s |
+| Conclusão | Até 5 s após a solicitação; consultas de até 1 s ou restante e amostras de até 0,25 s |
+| Verificação final | Até 2 s compartilhados entre coleta e identidades conhecidas |
+
+O caminho nominal de supervisão tem orçamento aproximado de 22 s, com margem operacional proposta de 24 s para revisão humana; essa margem não é um watchdog externo implementado nem garantia de tempo real. Os 5 s de conclusão excedem o TimeoutStopSec solicitado de 2 s, deixando margem para a escalada e comunicação; o comportamento real ainda deve ser confirmado. Timeout do cliente não significa conclusão nem cancelamento do job: o gerenciador pode continuar a parada. Falha de solicitação, consulta, estado failed ou prazo sem conclusão comprovada permanece INCONCLUSIVO, mesmo que uma consulta posterior mostre inatividade.
+
+A escrita da liberação sintética usa descritor não bloqueante, mensagem de até 4096 bytes, deadline e pipe sem buffering; não há threads auxiliares novas. Leituras de população são limitadas a 16 KiB por arquivo, 64 grupos e 512 IDs por amostra, e 4096 identidades acumuladas na verificação final; excesso é evidência incompleta. Chamadas de filesystem/proc, criação de processos, escrita dos relatórios e escalonamento do kernel não têm garantia de latência absoluta. Prazos de espaço de usuário não resolvem processo em estado ininterruptível nem morte do supervisor. Não se declara deadline universal do sistema.
+
+### Coleta e classificação
+
+O novo `scope_cleanup_evidence.py` coleta cgroup.procs, cgroup.threads, cgroup.events/populated e subdiretórios, independentemente do marcador de filho/neto: antes da liberação, durante a espera pelo marcador, imediatamente antes do stop, durante a conclusão e na verificação final. Registra timestamps monotônicos e civis, caminho, inode, processos/threads, PID/PPID/ticks/estado/cgroup e erros. Releitura de diretórios e população detecta mudanças observáveis; a varredura é não atômica. Erros, limites excedidos, identidades instáveis ou grupos que desaparecem geram INDISPONIVEL. A política e a unidade consultadas ficam junto das evidências de parada. Processos conhecidos são confrontados por PID/ticks após a tentativa, com classes AUSENTE, SOBREVIVENTE, ZUMBI, PID_REUTILIZADO e NAO_IDENTIFICAVEL. Nenhum sinal individual é enviado pelo coletor.
+
+A classificação local VAZIO_DO_CGROUP_OBSERVADO exige todas as amostras completas, mesmo inode, estado final inactive da mesma InvocationID, ControlGroup vazio, solicitação aceita sem timeout, coleta final com populated=0 e listas de processos/threads vazias em todos os grupos, e nenhuma identidade conhecida sobrevivente, zumbi ou desconhecida. Essa classificação NÃO significa limpeza integral de toda linhagem: escape ou descendentes nunca observados não são excluídos. O resultado geral do ensaio continua INCONCLUSIVO e retorna 1 para auditoria humana. Sem marcador, a coleta de população continua, mas a falha abrupta prevista e a lista do harness não são presumidas.
+
+Se o cgroup ou a unidade desaparecer antes da leitura final, o relatório preserva as observações anteriores e os resultados de PID/ticks; o desaparecimento não substitui a evidência final vazia. Assim, até uma remoção normal e rápida pelo systemd pode produzir INCONCLUSIVO. Trata-se de limitação conservadora conhecida, não de prova de falha do kernel nem de sobreviventes. Zumbi não é processo executando, mas impede declarar recolhimento completo. PID reutilizado não é o processo original e não autoriza sinal. Falha de leitura impede conclusão positiva.
+
+### Segurança e recuperação futura
+
+`stop_owned_scope()` preserva a validação tipada e do namespace próprio; para o scope sintético, delega ao protocolo de parada com evidências, revalidando Id, InvocationID, cgroup ativo e política imediatamente antes da solicitação. Prova ausente ou divergente recusa stop. Consulta e solicitação são chamadas separadas: a janela de substituição entre elas permanece não atômica. A nova política é restrita a neurons-v03-f1-cleanup; o caminho D/V prospectivo anterior não foi promovido à mesma validação operacional.
+
+Em futura execução especificamente autorizada, preservar saída completa, commit/hashes, versões, prova de propriedade, propriedades da unidade, limites, todas as coletas e códigos/tempos de parada. Se inconclusivo, no terminal do hospedeiro consultar somente o nome completo registrado: `systemctl --user show NOME_EXATO.scope --property=Id --property=InvocationID --property=ControlGroup --property=ActiveState --property=KillMode --property=SendSIGKILL --property=TimeoutStopUSec`. Conferir a prova independente e a mesma InvocationID/cgroup antes de qualquer ação. Só então o operador poderá solicitar `systemctl --user stop NOME_EXATO.scope` sob a autorização específica da recuperação e coletar novamente estado, população e identidades. Se a prova estiver ausente ou divergente, não parar por nome isolado. Não usar curingas, slices, PIDs individuais ou reset-failed; não tocar em scopes históricos. Esse procedimento não foi executado aqui.
+
+Comando de referência futuro, NÃO EXECUTADO e NÃO AUTORIZADO por esta alteração: `python3 -B tests/support/v03_f1_p01/synthetic_scope_cleanup.py --run-host-synthetic`.
+
+### Verificações e parecer
+
+Passaram **27 testes Python seguros do executor, 19 do protocolo de evidências e 10 dos controles**. Cobrem política válida/ausente/divergente, supervisor dentro do scope, recusa de unidade externa, stop concluído, timeout de solicitação/conclusão/consulta, falha de stop, unidade desaparecida/substituída antes/depois da solicitação, população vazia/residual, subgrupos e threads sem marcador, PID reutilizado, zumbi, falha de leitura, coleta incompleta, orçamento excedido, canal fechado/timeout de escrita e falha simultânea de canal/limpeza. Só mocks, arquivos temporários, pipes e processos locais seguros; nenhum scope real. Passaram dois testes Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão filtrada: **102 aprovados, zero falhos e 93 filtrados**; três avisos históricos EC-04 permanecem. Contagens dos testes específicos Rust não devem ser somadas como cobertura independente da regressão.
+
+**Parecer: APTO PARA AUDITORIA DE AUTORIZAÇÃO DO ENSAIO**, para avaliar a política e o procedimento conservador com as limitações acima, não autorização de execução nem compromisso de conclusão positiva. Aceitação das limitações, infraestrutura e permissão real no Debian 12 continuam dependentes de auditoria/decisão posterior. **Estado: controles sintéticos anteriores aprovados no hospedeiro; limpeza após falha abrupta com validação real pendente; D/V não executado; D04-E03 não homologada; congelamento não aprovado; painel F não autorizado.**

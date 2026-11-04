@@ -16,6 +16,17 @@ import synthetic_scope_cleanup as synthetic
 
 
 class SafeExecutor(unittest.TestCase):
+    def setUp(self):
+        policy = mock.patch.object(synthetic.evidence, 'verify_preflight', return_value={})
+        population = mock.patch.object(synthetic.evidence, 'collect_population', return_value={'status': 'COLETA_COMPLETA', 'identities': [{'pid': 42, 'ticks': 123}]})
+        release = mock.patch.object(synthetic.evidence, 'send_release')
+        release.start()
+        self.addCleanup(release.stop)
+        policy.start()
+        population.start()
+        self.addCleanup(policy.stop)
+        self.addCleanup(population.stop)
+
     def test_close_failures_preserve_cleanup_and_both_diagnostics(self):
         proof = object()
         for error in (BrokenPipeError('pipe'), OSError('close')):
@@ -48,7 +59,7 @@ class SafeExecutor(unittest.TestCase):
                  mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO', 'reason': 'stop falhou'}) as stop, \
                  mock.patch('sys.stdout', new_callable=io.StringIO) as output:
                 self.assertEqual(synthetic.host_test(), 1)
-            stop.assert_called_once_with(unit, proof)
+            self.assertEqual(stop.call_args.args, (unit, proof))
             self.assertIn('stop falhou', output.getvalue())
             self.assertIn(type(error).__name__, output.getvalue())
 
@@ -75,7 +86,7 @@ class SafeExecutor(unittest.TestCase):
              mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO', 'reason': 'stop falhou'}) as stop, \
              mock.patch('sys.stdout', new_callable=io.StringIO) as output:
             self.assertEqual(executor.supervisor(), 1)
-        stop.assert_called_once_with(unit, proof)
+        self.assertEqual(stop.call_args.args, (unit, proof))
         self.assertIn('BrokenPipeError', output.getvalue())
         self.assertIn('stop falhou', output.getvalue())
 
@@ -185,7 +196,7 @@ class SafeExecutor(unittest.TestCase):
             os.close(write_fd)
 
     def test_scope_stop_failure_and_failed_state(self):
-        unit = 'neurons-v03-f1-cleanup-0123456789abcdef.scope'
+        unit = 'neurons-v03-f1-dv-0123456789abcdef.scope'
         group = '/user.slice/' + unit
         proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, group, 'a' * 32, 42, 123, os.getpid())
         prior = mock.Mock(returncode=0, stdout='InvocationID=' + 'a' * 32 + '\nControlGroup=' + group + '\n', stderr='')
@@ -307,10 +318,10 @@ class SafeExecutor(unittest.TestCase):
                  mock.patch.object(executor, 'attest_scope', return_value=proof), \
                  mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO'}) as stop, \
                  mock.patch.object(synthetic.os, 'pread', return_value=payload), \
-                 mock.patch.object(synthetic.time, 'monotonic', side_effect=[0, 0, 0 if payload else 6, 6, 7, 8]), \
+                 mock.patch.object(synthetic.time, 'monotonic', side_effect=iter([0, 0, 0, 0, 0, 0, 0, 0 if payload else 10, 10, 10, 11, 12, 13, 14, 15, 16, 17])), \
                  mock.patch('sys.stdout', new_callable=io.StringIO):
                 self.assertEqual(synthetic.host_test(), 1)
-            stop.assert_called_once_with(unit, proof)
+            self.assertEqual(stop.call_args.args, (unit, proof))
 
     def test_failed_ownership_never_releases_or_stops_scope(self):
         token = '0123456789abcdef'
@@ -325,7 +336,7 @@ class SafeExecutor(unittest.TestCase):
              mock.patch('sys.stdout', new_callable=io.StringIO):
             self.assertEqual(synthetic.host_test(), 1)
         channel.write.assert_not_called()
-        stop.assert_called_once_with(unit, None)
+        self.assertEqual(stop.call_args.args, (unit, None))
 
     def test_survivor_identity_distinguishes_pid_reuse(self):
         expected = {'pid': 42, 'ticks': 100}

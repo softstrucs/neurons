@@ -17,6 +17,7 @@ import threading
 import time
 
 import cgroup_controls as common
+import scope_cleanup_evidence as cleanup_evidence
 
 LIMIT = 268435456
 DEADLINE = 30.0
@@ -134,11 +135,12 @@ def close_channel(stream):
         return {'status': 'INCONCLUSIVO', 'reason': str(exc), 'error_type': type(exc).__name__}
 
 
-def finish_owned_scope(unit, proof, stream):
+def finish_owned_scope(unit, proof, stream, observations=None):
     """Falha de canal nunca suprime a tentativa independente de limpeza própria."""
     channel = close_channel(stream)
     try:
-        cleanup = stop_owned_scope(unit, proof)
+        cleanup = (stop_owned_scope(unit, proof) if observations is None
+                   else stop_owned_scope(unit, proof, observations=observations))
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         cleanup = {'status': 'INCONCLUSIVO', 'reason': str(exc), 'error_type': type(exc).__name__}
     return {'channel_close': channel, 'cleanup': cleanup}
@@ -213,14 +215,14 @@ def discover_coordinator(unit, launcher_pid, group):
     return candidates[0]
 
 
-def attest_scope(unit, launcher_pid):
+def attest_scope(unit, launcher_pid, query_timeout=3):
     """Prova independente do marcador: PID lançado, /proc e unidade systemd viva."""
     if not re.fullmatch(r'neurons-v03-f1-(?:dv|cleanup)-[0-9a-f]{16}\.scope', unit):
         raise ValueError('nome fora do escopo próprio')
     before_parent, before_ticks, before_group = live_process(launcher_pid)
     shown = subprocess.run(['systemctl', '--user', 'show', unit, '--property=LoadState',
                             '--property=ActiveState', '--property=ControlGroup', '--property=InvocationID'],
-                           capture_output=True, text=True, timeout=3)
+                           capture_output=True, text=True, timeout=query_timeout)
     props = dict(x.split('=', 1) for x in shown.stdout.splitlines() if '=' in x)
     group = props.get('ControlGroup', '')
     if not group.startswith('/') or '..' in Path(group).parts or Path(group).name != unit:
@@ -241,11 +243,13 @@ def attest_scope(unit, launcher_pid):
     return ScopeOwnership(unit, os.getpid(), launcher_pid, before_ticks, group, invocation, *coordinator)
 
 
-def stop_owned_scope(unit, proof=None):
+def stop_owned_scope(unit, proof=None, *, observations=None):
     """Não envia sinais por PID nem age sobre unidades fora do namespace próprio."""
     if (not isinstance(proof, ScopeOwnership) or proof.unit != unit or proof.supervisor_pid != os.getpid()
             or not re.fullmatch(r'neurons-v03-f1-(?:dv|cleanup)-[0-9a-f]{16}\.scope', unit)):
         return {'status': 'INCONCLUSIVO', 'reason': 'prova de propriedade ausente ou divergente; stop não emitido'}
+    if '-cleanup-' in unit:
+        return cleanup_evidence.stop_with_evidence(unit, proof, ROOT, observations or ())
     try:
         prior = subprocess.run(['systemctl', '--user', 'show', unit, '--property=LoadState',
                                 '--property=ActiveState', '--property=ControlGroup', '--property=InvocationID'],
