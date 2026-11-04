@@ -78,10 +78,80 @@ def live_process(pid):
     return int(suffix[1]), int(suffix[19]), str(common.cgroup_path(pid))
 
 
+def cgroup_relative(value):
+    """Forma canônica do kernel: caminho absoluto dentro da hierarquia cgroup."""
+    value = os.fspath(value)
+    if not value.startswith('/') or any(x in ('.', '..') for x in value.split('/')):
+        raise ValueError('caminho cgroup inválido')
+    path = Path(value)
+    if path == ROOT or ROOT in path.parents:
+        return '/' + str(path.relative_to(ROOT)) if path != ROOT else '/'
+    return str(path)
+
+
+def verify_live_test_ready(line, run_id, pid, parent_pid, expected_group):
+    ppid, ticks, group = live_process(pid)
+    if (ppid != parent_pid or cgroup_relative(group) != cgroup_relative(expected_group)
+            or not verify_test_ready(line, run_id, pid, ppid, ticks, group)):
+        raise RuntimeError('identidade ou pertencimento divergente; nenhuma consulta liberada')
+    return ppid, ticks, cgroup_relative(group)
+
+
+def read_limited_line(stream, deadline, max_bytes=65536):
+    """Leitura sem threads: prazo inclui linha parcial e escritor ainda aberto."""
+    fd = stream.fileno()
+    blocking = os.get_blocking(fd)
+    data = bytearray()
+    os.set_blocking(fd, False)
+    try:
+        with selectors.DefaultSelector() as selector:
+            selector.register(fd, selectors.EVENT_READ)
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0 or not selector.select(remaining):
+                    raise TimeoutError('deadline aguardando linha completa')
+                try:
+                    chunk = os.read(fd, 1)
+                except BlockingIOError:
+                    continue
+                if not chunk:
+                    raise EOFError('EOF com linha parcial' if data else 'EOF antes da linha')
+                data.extend(chunk)
+                if len(data) > max_bytes:
+                    raise ValueError('linha excede limite de bytes')
+                if chunk == b'\n':
+                    return data.decode('utf-8', errors='strict')
+    finally:
+        os.set_blocking(fd, blocking)
+
+
+def close_channel(stream):
+    try:
+        if stream is not None and not stream.closed:
+            stream.close()
+        return {'status': 'CANAL_FECHADO'}
+    except (OSError, ValueError) as exc:
+        return {'status': 'INCONCLUSIVO', 'reason': str(exc), 'error_type': type(exc).__name__}
+
+
+def finish_owned_scope(unit, proof, stream):
+    """Falha de canal nunca suprime a tentativa independente de limpeza própria."""
+    channel = close_channel(stream)
+    try:
+        cleanup = stop_owned_scope(unit, proof)
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        cleanup = {'status': 'INCONCLUSIVO', 'reason': str(exc), 'error_type': type(exc).__name__}
+    return {'channel_close': channel, 'cleanup': cleanup}
+
+
 def verify_test_ready(line, run_id, pid, parent_pid, ticks, group):
     marker = line.find('V03TEST_READY|')
-    return (marker >= 0 and line[marker:].strip().split('|')
-            == ['V03TEST_READY', run_id, str(pid), str(parent_pid), str(ticks), group])
+    fields = line[marker:].strip().split('|') if marker >= 0 else []
+    try:
+        return (len(fields) == 6 and fields[:5] == ['V03TEST_READY', run_id, str(pid), str(parent_pid), str(ticks)]
+                and cgroup_relative(fields[5]) == cgroup_relative(group))
+    except (TypeError, ValueError):
+        return False
 
 
 def only_coordinator(pids, coordinator_pid):
@@ -264,8 +334,8 @@ def worker():
     path = common.cgroup_path(os.getpid())
     before = snapshot(path)
     print('DV_READY=' + json.dumps({'pid': os.getpid(), 'path': str(path), 'before': before}), flush=True)
-    release = json.loads(sys.stdin.readline())
-    if (release.get('release') is not True or release.get('pid') != os.getpid()
+    release = json.loads(read_limited_line(sys.stdin, started + DEADLINE))
+    if (not isinstance(release, dict) or release.get('release') is not True or release.get('pid') != os.getpid()
             or release.get('path') != str(path) or before['max'] != str(LIMIT)):
         raise RuntimeError('liberação externa ou teto não verificado; D/V não iniciados')
     if free_home() < MIN_FREE:
@@ -303,10 +373,8 @@ def worker():
                 raise RuntimeError('processo fora da contenção')
             prefix = read_test_ready(proc.stdout, started + DEADLINE)
             line = next(x for x in prefix.splitlines() if 'V03TEST_READY|' in x)
-            ppid, start_ticks, group = live_process(proc.pid)
-            if (ppid != os.getpid() or group != env['NEURONS_V03_TRACE_CGROUP']
-                    or not verify_test_ready(line, run_id, proc.pid, ppid, start_ticks, group)):
-                raise RuntimeError('identidade do teste divergente; nenhuma consulta liberada')
+            ppid, start_ticks, group = verify_live_test_ready(
+                line, run_id, proc.pid, os.getpid(), env['NEURONS_V03_TRACE_CGROUP'])
             entered_ns = time.time_ns()
             entered_monotonic_ns = time.monotonic_ns()
             proc.stdin.write(f'V03TEST_GO|{run_id}|{proc.pid}|{start_ticks}\n')
@@ -406,20 +474,19 @@ def supervisor():
                                 proc.stdin.flush()
                             except (OSError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as exc:
                                 print('preflight_inconclusivo=' + str(exc), file=sys.stderr, flush=True)
-                                proc.stdin.close()
+                                print(json.dumps({'channel_close': close_channel(proc.stdin)}), flush=True)
         proc.wait(timeout=max(0.01, DEADLINE - (time.monotonic() - started)))
     except subprocess.TimeoutExpired:
         timed_out = True
-        try:
-            print(json.dumps({'timeout_cleanup': stop_owned_scope(unit + '.scope', proof)}), flush=True)
-        finally:
-            try:
-                proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                print('launcher_still_active_inconclusivo', file=sys.stderr, flush=True)
+    except (OSError, ValueError, RuntimeError) as exc:
+        print('supervisor_inconclusivo=' + str(exc), file=sys.stderr, flush=True)
     finally:
-        if proc.stdin and not proc.stdin.closed:
-            proc.stdin.close()
+        finalization = finish_owned_scope(unit + '.scope', proof, proc.stdin)
+        print(json.dumps({'finalization': finalization}), flush=True)
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            print('launcher_still_active_inconclusivo', file=sys.stderr, flush=True)
     stderr_file.seek(0)
     print(b''.join(chunks).decode('utf-8', errors='replace'), end='')
     print(stderr_file.read(), end='', file=sys.stderr)
@@ -432,8 +499,6 @@ def supervisor():
     except (OSError, subprocess.TimeoutExpired) as exc:
         props = {'query_error': str(exc)}
         cleanup = False
-    if not cleanup:
-        print(json.dumps({'cleanup_attempt': stop_owned_scope(unit + '.scope', proof)}), flush=True)
     print(json.dumps({'status': 'INCONCLUSIVO', 'scope_exit': proc.returncode, 'timeout': timed_out,
                       'scope_verified': verified, 'cleanup_observed': cleanup, 'properties': props,
                       'supervisor_elapsed_s': time.monotonic() - started}), flush=True)

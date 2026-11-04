@@ -16,6 +16,149 @@ import synthetic_scope_cleanup as synthetic
 
 
 class SafeExecutor(unittest.TestCase):
+    def test_close_failures_preserve_cleanup_and_both_diagnostics(self):
+        proof = object()
+        for error in (BrokenPipeError('pipe'), OSError('close')):
+            channel = mock.Mock(closed=False)
+            channel.close.side_effect = error
+            with mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO', 'reason': 'stop falhou'}) as stop:
+                result = executor.finish_owned_scope('unit', proof, channel)
+            stop.assert_called_once_with('unit', proof)
+            self.assertEqual(result['channel_close']['status'], 'INCONCLUSIVO')
+            self.assertEqual(result['cleanup']['reason'], 'stop falhou')
+        channel = mock.Mock(closed=True)
+        with mock.patch.object(executor, 'stop_owned_scope', side_effect=OSError('bus ausente')) as stop:
+            result = executor.finish_owned_scope('unit', proof, channel)
+        channel.close.assert_not_called()
+        stop.assert_called_once_with('unit', proof)
+        self.assertEqual(result['cleanup']['status'], 'INCONCLUSIVO')
+
+    def test_host_close_failure_does_not_suppress_owned_stop(self):
+        token = '0123456789abcdef'
+        unit = 'neurons-v03-f1-cleanup-' + token + '.scope'
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, '/user.slice/' + unit, 'a'*32, 42, 123, os.getpid())
+        for error in (BrokenPipeError('pipe'), OSError('close')):
+            channel = mock.Mock(closed=False)
+            channel.close.side_effect = error
+            proc = mock.Mock(pid=42, stdin=channel)
+            proc.poll.return_value = 77
+            with mock.patch.object(synthetic.subprocess, 'Popen', return_value=proc), \
+                 mock.patch.object(synthetic.secrets, 'token_hex', return_value=token), \
+                 mock.patch.object(executor, 'attest_scope', return_value=proof), \
+                 mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO', 'reason': 'stop falhou'}) as stop, \
+                 mock.patch('sys.stdout', new_callable=io.StringIO) as output:
+                self.assertEqual(synthetic.host_test(), 1)
+            stop.assert_called_once_with(unit, proof)
+            self.assertIn('stop falhou', output.getvalue())
+            self.assertIn(type(error).__name__, output.getvalue())
+
+    def test_dv_supervisor_close_failure_still_attempts_owned_cleanup(self):
+        unit = 'neurons-v03-f1-dv-0123456789abcdef.scope'
+        proof = executor.ScopeOwnership(unit, os.getpid(), 42, 123, '/user.slice/' + unit, 'a'*32, 42, 123, os.getpid())
+        ready = b'DV_READY={"pid":42,"path":"/fake.scope","before":{"max":"268435456"}}\n'
+        channel = mock.Mock(closed=False)
+        channel.close.side_effect = BrokenPipeError('close falhou')
+        proc = mock.Mock(pid=42, stdin=channel, returncode=1)
+        selector = mock.MagicMock()
+        selector.__enter__.return_value = selector
+        selector.get_map.side_effect = [True, False]
+        selector.select.return_value = [(mock.Mock(fd=88), None)]
+        shown = mock.Mock(returncode=0, stdout='ActiveState=active\nControlGroup=/fake.scope\n', stderr='')
+        with mock.patch.object(executor, 'free_home', return_value=executor.MIN_FREE), \
+             mock.patch.object(executor.secrets, 'token_hex', return_value='0123456789abcdef'), \
+             mock.patch.object(executor.subprocess, 'Popen', return_value=proc), \
+             mock.patch.object(executor.subprocess, 'run', return_value=shown), \
+             mock.patch.object(executor.selectors, 'DefaultSelector', return_value=selector), \
+             mock.patch.object(executor.os, 'read', return_value=ready), \
+             mock.patch.object(executor, 'attest_scope', return_value=proof), \
+             mock.patch.object(executor, 'validate_scope', return_value=True), \
+             mock.patch.object(executor, 'stop_owned_scope', return_value={'status': 'INCONCLUSIVO', 'reason': 'stop falhou'}) as stop, \
+             mock.patch('sys.stdout', new_callable=io.StringIO) as output:
+            self.assertEqual(executor.supervisor(), 1)
+        stop.assert_called_once_with(unit, proof)
+        self.assertIn('BrokenPipeError', output.getvalue())
+        self.assertIn('stop falhou', output.getvalue())
+
+    def test_limited_line_partial_open_writer_timeout_and_mode_restore(self):
+        r, w = os.pipe()
+        try:
+            with os.fdopen(r, 'rb') as stream:
+                os.write(w, b'partial')
+                started = time.monotonic()
+                with self.assertRaises(TimeoutError):
+                    executor.read_limited_line(stream, started + 0.05)
+                self.assertLess(time.monotonic() - started, 1)
+                self.assertTrue(os.get_blocking(stream.fileno()))
+        finally:
+            os.close(w)
+
+    def test_limited_line_eof_partial_invalid_and_size(self):
+        for payload, error in [(b'', EOFError), (b'par', EOFError),
+                               (b'abcde\n', ValueError), (b'\xff\n', UnicodeDecodeError)]:
+            r, w = os.pipe()
+            os.write(w, payload)
+            os.close(w)
+            with os.fdopen(r, 'rb') as stream:
+                with self.assertRaises(error):
+                    executor.read_limited_line(stream, time.monotonic() + 1, 4)
+        r, w = os.pipe()
+        os.write(w, b'ok\nnext\n')
+        os.close(w)
+        with os.fdopen(r, 'rb') as stream:
+            self.assertEqual(executor.read_limited_line(stream, time.monotonic() + 1), 'ok\n')
+            self.assertEqual(executor.read_limited_line(stream, time.monotonic() + 1), 'next\n')
+            with self.assertRaises(EOFError):
+                executor.read_limited_line(stream, time.monotonic() + 1)
+
+    def test_limited_line_short_processes_are_reaped(self):
+        for program, error in [("import os,time; os.write(1,b'part'); time.sleep(2)", TimeoutError),
+                               ("import os; os.write(1,b'part')", EOFError),
+                               ("print('ok',flush=True)", None)]:
+            proc = subprocess.Popen([sys.executable, '-c', program], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+            try:
+                if error:
+                    with self.assertRaises(error):
+                        executor.read_limited_line(proc.stdout, time.monotonic() + 0.3)
+                else:
+                    self.assertEqual(executor.read_limited_line(proc.stdout, time.monotonic() + 1), 'ok\n')
+            finally:
+                if proc.poll() is None:
+                    proc.kill()
+                proc.wait(timeout=2)
+                proc.stdout.close()
+            self.assertFalse(Path(f'/proc/{proc.pid}').exists())
+
+    def test_invalid_release_content_cannot_spawn(self):
+        for content in ('{broken\n', '[]\n', '{"release":false}\n'):
+            with mock.patch.object(executor.common, 'cgroup_path', return_value=Path('/fake.scope')), \
+                 mock.patch.object(Path, 'read_text', return_value=str(64*1024*1024)), \
+                 mock.patch.object(executor, 'read_limited_line', return_value=content), \
+                 mock.patch.object(synthetic, 'process_identity', return_value={'pid': 42, 'ticks': 123}), \
+                 mock.patch.object(synthetic.subprocess, 'Popen') as spawn:
+                with self.assertRaises((ValueError, RuntimeError)):
+                    synthetic.coordinator()
+                spawn.assert_not_called()
+
+    def test_live_membership_canonical_paths_and_identity(self):
+        group = '/user.slice/test.scope'
+        absolute = str(executor.ROOT / group.lstrip('/'))
+        for live_group in (group, absolute):
+            for marker_group in (group, absolute):
+                line = f'V03TEST_READY|run|42|7|123|{marker_group}\n'
+                with mock.patch.object(executor, 'live_process', return_value=(7, 123, live_group)):
+                    self.assertEqual(executor.verify_live_test_ready(line, 'run', 42, 7, group), (7, 123, group))
+        for live, line in [((7, 123, '/outside'), f'V03TEST_READY|run|42|7|123|/outside\n'),
+                           ((8, 123, group), f'V03TEST_READY|run|42|8|123|{group}\n'),
+                           ((7, 124, group), f'V03TEST_READY|run|42|7|123|{group}\n'),
+                           ((7, 123, group), f'V03TEST_READY|run|99|7|123|{group}\n'),
+                           ((7, 123, group), 'V03TEST_READY|run|42|7|123|/wrong\n')]:
+            with mock.patch.object(executor, 'live_process', return_value=live):
+                with self.assertRaises(RuntimeError):
+                    executor.verify_live_test_ready(line, 'run', 42, 7, group)
+        for invalid in ('relative/path', '/scope/../other', '/scope/./child'):
+            with self.assertRaises(ValueError):
+                executor.cgroup_relative(invalid)
+
     def test_ready_pipe_deadline_and_closed(self):
         read_fd, write_fd = os.pipe()
         try:
@@ -270,7 +413,7 @@ class SafeExecutor(unittest.TestCase):
     def test_worker_without_release_cannot_launch(self):
         with mock.patch.object(executor.common, 'cgroup_path', return_value=Path('/fake.scope')), \
              mock.patch.object(executor, 'snapshot', return_value={'max': str(executor.LIMIT)}), \
-             mock.patch('sys.stdin', io.StringIO('{"release":false}\n')), \
+             mock.patch.object(executor, 'read_limited_line', return_value='{"release":false}\n'), \
              mock.patch.object(executor.subprocess, 'Popen') as spawn, \
              mock.patch('sys.stdout', new_callable=io.StringIO):
             with self.assertRaises(RuntimeError):

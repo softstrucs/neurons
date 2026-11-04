@@ -5,7 +5,6 @@ import json
 import os
 from pathlib import Path
 import secrets
-import select
 import subprocess
 import sys
 import tempfile
@@ -34,20 +33,18 @@ def coordinator():
     if memory_max != str(64 * 1024 * 1024):
         raise RuntimeError('limite sintético não confirmado')
     # Trabalho sintético só começa após liberação independente do supervisor.
-    if not select.select([sys.stdin], [], [], 4)[0]:
-        raise TimeoutError('liberação do supervisor ausente')
-    release = json.loads(sys.stdin.readline())
+    release = json.loads(executor.read_limited_line(sys.stdin, time.monotonic() + 4))
     identity = process_identity(os.getpid())
-    if (release.get('release') is not True or release.get('pid') != identity['pid']
+    if (not isinstance(release, dict) or release.get('release') is not True or release.get('pid') != identity['pid']
             or release.get('ticks') != identity['ticks'] or release.get('cgroup') != str(path)
             or release.get('unit') != path.name):
         raise RuntimeError('liberação do supervisor inválida; trabalho não iniciado')
     proc = subprocess.Popen([sys.executable, __file__, '--child'], stdout=subprocess.PIPE, text=True)
     try:
         # O filho emite uma única linha; o supervisor global também aplica prazo.
-        if not select.select([proc.stdout], [], [], 3)[0]:
-            raise TimeoutError('filho sintético não identificado')
-        line = proc.stdout.readline()
+        line = executor.read_limited_line(proc.stdout, time.monotonic() + 3)
+        if not line.startswith('CHILD='):
+            raise ValueError('marcador de filho inválido')
         data = json.loads(line.removeprefix('CHILD='))
         members = [process_identity(os.getpid()), process_identity(data['pid']), process_identity(data['grandchild'])]
         if any(item['cgroup'] != str(path) for item in members):
@@ -137,9 +134,8 @@ def host_test():
         except (OSError, ValueError, KeyError, IndexError, RuntimeError, TimeoutError, subprocess.TimeoutExpired) as exc:
             print(json.dumps({'stage': 'preflight', 'status': 'INCONCLUSIVO', 'reason': str(exc)}), flush=True)
         finally:
-            if proc.stdin and not proc.stdin.closed:
-                proc.stdin.close()
-            cleanup = executor.stop_owned_scope(unit, proof)
+            finalization = executor.finish_owned_scope(unit, proof, proc.stdin)
+            cleanup = finalization['cleanup']
         survivors, unknown_processes, reused_pids = [], [], []
         if isinstance(record, dict) and isinstance(record.get('members'), list):
             for item in record['members']:
@@ -163,7 +159,7 @@ def host_test():
             unknown_processes.append({'reason': 'marcador ausente; descendentes não enumerados'})
         output = os.pread(log.fileno(), 1_048_576, 0).decode('utf-8', errors='replace')
         print(output, end='')
-        print(json.dumps({'status': 'INCONCLUSIVO', 'cleanup': cleanup, 'survivors': survivors,
+        print(json.dumps({'status': 'INCONCLUSIVO', 'cleanup': cleanup, 'channel_close': finalization['channel_close'], 'survivors': survivors,
                           'unknown_processes': unknown_processes,
                           'reused_pids': reused_pids,
                           'scope_exit': proc.poll(), 'elapsed_s': time.monotonic()-started}), flush=True)
