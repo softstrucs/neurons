@@ -775,3 +775,136 @@ Comandos: Python com PYTHONDONTWRITEBYTECODE=1 e `python3 -B -m unittest discove
 **Parecer: C2-A-R2 APROVADA PARA AUDITORIA**, para seleção e correlação isoladas/simuladas. O alinhamento do alvo USER foi implementado; correspondência operacional com a instância real, runtime/socket/credenciais, emissão/serial, isolamento e prazos permanecem pendentes. Passar nos testes não autoriza integração nem comprova execução experimental.
 
 B2 CONCLUÍDA; C1 PRESERVADA. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Nenhuma integração ou etapa posterior iniciada.
+
+## C2-B — Contratos preparatórios de observação e identidade
+
+Base inicial confirmada: `5bfa736df3dcd34660320a3d3d564106a5a39582`, softstrucs/neurons, devs e árvore limpa. Mantidos executor --user, C1, B2 e transporte C2-A-R2 byte a byte; nenhum componente operacional importa C2-B. Os únicos novos componentes são `systemd_observation_contracts.py` e sua suíte segura. Não há backend, relógio, filesystem, conexão, subscrição ou envio reais nesta camada.
+
+### Separação de contratos e graus de evidência
+
+| Contrato | Responsabilidade e limites |
+|---|---|
+| ManagerContract | ManagerTarget USER/SYSTEM, UID/endereço esperados, conexão, serviço fixo org.freedesktop.systemd1, proprietário único, confirmação temporal da subscrição, continuidade e Origin |
+| RuntimeContract | Expectativas de caminho/tipo/UID/permissões; avalia somente ObjectFixture fornecido explicitamente |
+| ObjectFixture | Caminho declarado/canônico, tipo, UID, modo, device/inode, tempo fornecido, symlink e proveniência; não é resultado de stat |
+| UnitSnapshot | Unidade, caminho D-Bus, InvocationID opcional, caminho/inode do cgroup, estado da unidade/job, timestamp fornecido, manager/conexão, origem, autenticação não comprovada e continuidade |
+| EmissionContract | Intenção StopUnit, unidade, conexão/gerenciador, serial declarado, tempo/janela e origem; não contém implementação de envio |
+| ReplyEvidence/EventEvidence | Resposta C1 ou JobRemoved, sempre com gerenciador e origem explícitos; preservam ReplySerial, remetente, ID/caminho/unidade/resultado e tempo de recepção declarado |
+| ObservationalContracts | Interface pura que recebe esses contratos, avalia contexto/continuidade, preserva histórico e fornece correlação C1 exclusivamente simulada |
+
+ManagerContract.experimental(uid) seleciona USER explicitamente com UID fornecido pelo contexto de preparação; não consulta UID, ambiente ou barramento do hospedeiro. SYSTEM continua representável e distinto. ManagerTarget C2-A-R2 continua a definir endereços canônicos; a correspondência real entre broker, gerenciador --user e executor não é demonstrada por um contrato.
+
+Verification representa NAO_VERIFICADO, VALIDADO_SINTATICAMENTE, OBSERVADO_SIMULADAMENTE, AUTENTICADO_OPERACIONALMENTE e INVALIDADO. O estado operacional é reservado: não há construtor/factory capaz de produzi-lo nesta etapa. Origin aceita apenas Provenance.SIMULADA, DECLARADA, INCONCLUSIVA ou INVALIDADA. OBSERVADA_NATIVAMENTE e AUTENTICADA existem no vocabulário da interface futura, mas são recusadas nas entradas C2-B. Strings em lugar do enum também são recusadas. O texto source não concede autoridade, mesmo que contenha a palavra AUTENTICADA.
+
+Os contratos são imutáveis, possuem estados derivados e não aceitam argumentos públicos authentication/state para atribuir autenticação ou emissão comprovada. ManagerContract e UnitSnapshot sempre expõem autenticação NAO_VERIFICADO. EmissionContract deriva somente EMISSAO_NAO_COMPROVADA ou EMISSAO_DECLARADA. O enum também descreve EMISSAO_NATIVA_COMPROVADA, RESPOSTA_CORRELACIONADA e JOB_CONCLUIDO_OBSERVADO, mas estes últimos não são atalhos de construção de uma emissão comprovada. As verificações da API não constituem sandbox contra código Python arbitrário/reflexão; esta camada jamais deve servir como fronteira operacional de autorização. Por isso a saída operacional permanece fechada independentemente das alegações dos dados.
+
+A saída distingue explicitamente:
+
+- manager/state e authentication: configuração/validação/proveniência não equivalem a autenticação.
+- snapshots: identidade declarada da unidade/instância, estados, tempos e origens preservados, com authentication não comprovada.
+- emission_details/emission_state: intenção e serial declarado, native_proven=false.
+- simulated_c1: classificação de fixtures, nunca evidência de uma operação real.
+- operational: AUTENTICADO_OPERACIONALMENTE, EMISSAO_NATIVA_COMPROVADA, PARADA_CONFIRMADA, POPULACAO_VAZIA_OBSERVADA e LIMPEZA_INTEGRAL_COMPROVADA sempre false; LIMPEZA_INTEGRAL_INCONCLUSIVA sempre true.
+
+inputs_complete significa que os insumos requeridos foram fornecidos e aceitos; não significa autenticidade ou homologação. assessment_inconclusive permanece true para a avaliação operacional. Uma consulta intermediária com snapshot ausente não inventa timestamp nem destrói a possibilidade de completar posteriormente a fixture.
+
+### Runtime, socket e condições de corrida
+
+RuntimeContract preserva UID/runtime/socket esperados no namespace USER ou SYSTEM. Para USER, espera diretório canônico do UID e modo privado 0700. O modo esperado do socket exige política explícita do contrato: ausência dessa política produz inconclusão/erro, sem inventar um modo obrigatório para o hospedeiro. A fixture de testes escolhe 0600 exclusivamente para exercitar comparação de permissões; isso NÃO recomenda alterar permissões do bus real nem declara seu modo efetivo.
+
+A avaliação sintética verifica caminho absoluto/canônico, tipo directory/socket, propriedade e modo esperado, identidade device/inode, timestamp e origem SIMULADA. Symlinks ou redirecionamentos divergentes são recusados pela política conservadora. previous_runtime/previous_socket permitem detectar troca sintética de objeto entre observações, origem anterior insuficiente e ordem temporal inválida. Entradas originais e erros permanecem no resultado; um segundo registro de runtime não substitui silenciosamente o primeiro.
+
+CAMINHO DECLARADO, VALIDADO SINTATICAMENTE, OBJETO/PROPRIEDADE/SOCKET VERIFICADOS e CONEXÃO AUTENTICADA não são equivalentes. As chaves simulated_object_verified, simulated_ownership_verified e simulated_socket_verified dizem respeito somente à fixture. operational_object_verified e connection_authenticated permanecem false, inclusive se todos os metadados sintéticos coincidirem.
+
+Não se consultou o filesystem real, não se executou stat do runtime e não se abriu socket. Uma futura implementação precisa avaliar contexto/namespace, UID efetivo, ambiente, diretório e ancestrais, symlinks/redirecionamentos, tipo/propriedade/permissões e credenciais do peer/serviço. Deve comparar identidades de objetos e tratar substituição durante o processo como inconclusiva. Uma verificação de caminho ou mesmo duas leituras de inode não elimina a corrida entre inspeção e conexão; socket autenticado tampouco autentica automaticamente a identidade da unidade.
+
+### Unidade, instância e snapshots
+
+UnitSnapshot reúne identidade observacional da unidade e do snapshot, sem supor que nome/caminho seja uma geração permanente. O contexto compara ManagerTarget, conexão, proprietário único, subscrição e continuidade. Snapshots de outro gerenciador/conexão são retidos no histórico de entrada, mas recusados para correlação. Snapshot anterior precisa preceder o pedido; posterior precisa estar na janela declarada desta fixture. Tempos ausentes, não inteiros/positivos ou regressivos e lacunas explícitas invalidam as conclusões dependentes. Não há relógio interno nem preenchimento automático de tempos.
+
+Mudança de nome/caminho, InvocationID ou identidade do cgroup é diagnosticada separadamente; InvocationID alterado permite sinalizar nome reutilizado/instância divergente. InvocationID indisponível após remoção não é tratado como prova de troca nem de parada: permanece diagnóstico de instância alterada OU indisponível. Antes ausente ou posterior ausente mantém a avaliação inconclusiva. Unidade not-found não cria populated=0.
+
+Unidade identificada, instância identificada, job identificado/correlacionado, parada corroborada, população vazia e limpeza integral continuam categorias distintas. C1 pode identificar/correlacionar um job simulado e corroborar snapshots simulados; seus resultados permanecem em simulated_c1. A saída operacional não converte isso em parada corroborada/confirmada. B2 não é chamado nem recebe amostras derivadas do job. A ausência dos processos conhecidos também continua evidência independente.
+
+### Emissão, resposta, continuidade e limites
+
+A interface permite descrever o pedido e associar serial, mas não emite mensagem. Serial informado pelo chamador, snapshot, endereço ou UID não comprovam emissão nativa. A futura integração terá de obter o serial efetivamente atribuído pela biblioteca na mesma conexão dedicada, instalar subscrição/filtros/buffer antes do envio, confirmar remetente e relacionar ReplySerial com o serial daquela chamada. A [API dbus-python](https://dbus.freedesktop.org/doc/dbus-python/dbus.connection.html) oferece os mecanismos de mensagem/conexão estudados anteriormente; nenhuma captura nativa foi implementada ou validada aqui. Não se deve aproveitar serial de outro cliente ou confundir serial próprio da resposta com ReplySerial.
+
+C1 permanece o correlacionador puro: eventos podem preceder a resposta; ID/caminho/unidade/remetente/conexão/janela devem coincidir. Duplicatas iguais são contabilizadas; conflitos não certificam done. Respostas ausentes/incompatíveis, jobs/unidades divergentes e timeout não produzem sucesso. A correlação positiva é habilitada somente quando todas as entradas pertinentes têm origem SIMULADA e não há falha de contexto/completude. Um dado DECLARADO não é promovido automaticamente nem a observação simulada positiva. Mesmo um resultado C1 simulado done não vincula atomicamente JobRemoved ao InvocationID e não comprova estado operacional.
+
+O histórico contém até 128 registros tipados de snapshots/pedido/resposta/eventos; portanto o número admissível de eventos pode ser menor que 128 quando houver outros registros. Eventos também têm limite de 256 KiB estimados por buffer e tamanho/campos limitados (unidade/caminho 255, resultado 64, origem 128 caracteres); permanecem 32 diagnósticos armazenados, com contador total, e janela de pedido até cinco segundos. Não se aumentaram limites C2-A. Falhas/overflow preservam o prefixo anterior e bloqueiam sucesso, sem retries/reconexão. Não se promete memória absoluta de todo o processo/biblioteca nem prazo absoluto nativo.
+
+record_manager representa verificação declarada/simulada de conexão, proprietário e subscrição. record_runtime, record_snapshot, declare_emission, receive_reply e receive_job_removed somente recebem dados. fail registra diagnósticos com timestamp fornecido ou explicitamente ausente, sem fabricar tempo; close encerra apenas a aceitação lógica de entradas. Falha de fechamento preserva histórico e não prova liberação de recurso externo. Falhas de runtime, socket, UID, conexão/proprietário/subscrição, identidade, tempo, overflow, evento perdido, GLib indisponível e timeout não comprovado são representáveis e permanecem inconclusivas/invalidadas. Não há conexão externa a encerrar nesta implementação.
+
+### Matriz C2-B e regressões
+
+| Caso | Cenário | Resultado |
+|---|---|---|
+| T01 | Contrato USER e padrão experimental explícito | PASSOU |
+| T02 | SYSTEM distinto | PASSOU |
+| T03 | UID incompatível | PASSOU |
+| T04 | Runtime divergente/ausente | PASSOU |
+| T05 | Socket divergente | PASSOU |
+| T06 | Caminho relativo recusado | PASSOU |
+| T07 | Symlink sintético recusado | PASSOU |
+| T08 | Troca de runtime/socket por device/inode | PASSOU |
+| T09 | Permissão inadequada | PASSOU |
+| T10 | Propriedade e ambiente divergentes | PASSOU |
+| T11 | Runtime sintético não autentica conexão; política ausente inconclusiva | PASSOU |
+| T12 | Proprietário único válido, sem autenticação real | PASSOU |
+| T13 | Proprietário alterado | PASSOU |
+| T14 | Conexão divergente | PASSOU |
+| T15 | Subscrição ausente | PASSOU |
+| T16 | Subscrição simulada; confirmação divergente recusada | PASSOU |
+| T17 | Unidade identificada somente na fixture C1 | PASSOU |
+| T18 | Nome reutilizado/InvocationID alterado | PASSOU |
+| T19 | InvocationID indisponível/removido não comprova vazio | PASSOU |
+| T20 | Snapshot anterior com origem e tempo explícitos | PASSOU |
+| T21 | Snapshot posterior consistente | PASSOU |
+| T22 | Snapshot ausente; consulta intermediária não inventa observação | PASSOU |
+| T23 | Snapshot de outro gerenciador | PASSOU |
+| T24 | Snapshot de outra conexão | PASSOU |
+| T25 | Timestamp ausente/inválido/fora de ordem | PASSOU |
+| T26 | Emissão apenas declarada | PASSOU |
+| T27 | Serial declarado não autentica emissão | PASSOU |
+| T28 | ReplySerial correspondente | PASSOU |
+| T29 | ReplySerial divergente | PASSOU |
+| T30 | JobRemoved correspondente | PASSOU |
+| T31 | Outro job | PASSOU |
+| T32 | Outra unidade | PASSOU |
+| T33 | Evento anterior à resposta | PASSOU |
+| T34 | Evento duplicado | PASSOU |
+| T35 | Evento conflitante | PASSOU |
+| T36 | Overflow com histórico anterior preservado | PASSOU |
+| T37 | Perda de evento, lacuna de snapshot, GLib/timeout/conexão indisponíveis | PASSOU |
+| T38 | Falha de fechamento com histórico preservado | PASSOU |
+| T39 | Construtor/campo/texto não promove autenticação operacional | PASSOU |
+| T40 | Construtor não promove emissão nativa comprovada | PASSOU |
+| T41 | Nenhuma promoção de PARADA_CONFIRMADA | PASSOU |
+| T42 | Nenhuma promoção de POPULACAO_VAZIA_OBSERVADA | PASSOU |
+| T43 | Nenhuma promoção de LIMPEZA_INTEGRAL_COMPROVADA | PASSOU |
+| T44 | Sem conexão real ou stat do runtime | PASSOU |
+| T45 | Sem API operacional StopUnit | PASSOU |
+| T46 | Sem scope, subprocesso ou abertura de conexão | PASSOU |
+| T47 | Executor sem importação C2-B | PASSOU |
+| T48 | C1 preservado | PASSOU |
+| T49 | B2 preservado e independente | PASSOU |
+| T50 | Compatibilidade de classificações com transporte C2-A-R2 inteiramente simulado | PASSOU |
+
+Passaram 50 testes C2-B e 318 testes Python seguros totais, incluindo C2-A/R1/R2, C1 e B2. Dois Rust sintéticos aprovados (cinco filtrados); regressão Rust filtrada com 102 aprovados, zero falhos e 93 filtrados. cargo fmt --check, cargo check --offline --all-targets e git diff --check passaram. Permanecem três avisos históricos dead_code EC-04 e ImportWarning de PyGObject, sem falhas. Nenhuma dependência instalada/alterada.
+
+Comandos efetivos:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_systemd_observation_contracts_safe.py'
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_*_safe.py'
+cargo fmt --check
+cargo check --offline --all-targets
+env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1 cargo test --offline --test v03_f1_p01_instruments trace::tests::safe_ -- --test-threads=1
+env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1 cargo test --offline -- --skip development --skip validation --skip frozen --skip final --skip panel --skip protocol
+git diff --check
+```
+
+**Parecer: C2-B APROVADA PARA AUDITORIA**, exclusivamente para contratos preparatórios e avaliação sintética. Uma futura autorização exigirá auditoria independente desses contratos, implementação de produtores nativos de evidência sem aceitar alegações do chamador, preflight de runtime/socket/credenciais/gerenciador e unidade, subscrição e emissão/serial comprovadas, política de continuidade/perdas e revisão dos limites/isolamento. Não se presume que passar nos mocks satisfaça qualquer dessas condições.
+
+Não foram abertos barramentos/sockets, executados stat de runtime, Subscribe, StopUnit, systemd-run/systemctl operacionais ou experimentos. Executor, C1, B2, C2-A-R2, src/, dependências, políticas e critérios científicos preservados. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Nenhuma integração ou etapa posterior iniciada.
