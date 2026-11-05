@@ -356,3 +356,92 @@ Diagnósticos estruturados: SEQUENCIA_CONTINUA_OBSERVADA, SEQUENCIA_INTERROMPIDA
 Passaram **20 testes B2 pertinentes** e a suíte completa de **103 testes Python seguros** (inclui os 20), dois testes Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão Rust filtrada: **102 aprovados, zero falhos e 93 filtrados**. PYTHONDONTWRITEBYTECODE=1 foi usado nos testes; variáveis opcionais D/V/checkpoint/trace foram removidas do ambiente dos comandos Rust. Permanecem três avisos históricos EC-04. Não se somam os dois testes Rust específicos como cobertura independente da regressão.
 
 **Parecer: APTO PARA AUDITORIA DE AUTORIZAÇÃO DO SEGUNDO ENSAIO.** Isso não autoriza executá-lo. Primeiro ensaio preservado: PARADA CORROBORADA, LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio NÃO AUTORIZADO. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Não avançar automaticamente.
+
+## C1 — Evidência independente de resultado de job systemd
+
+Referência `46ad822f78aff948d3b1b8d8a7842302187d3e9c`. Confirmados origin softstrucs/neurons, branch devs, HEAD esperado e árvore limpa antes das alterações; B1/B2 e a decisão D04-E03 foram examinados. O pacote observado é systemd `252.39-1~deb12u2`, Python 3.11.2. **C1 implementa somente modelo puro com dados simulados; não integra transporte D-Bus nem altera o fluxo de parada.** Nenhum scope, StopUnit real, ensaio, recuperação, pressão/OOM, D/V, F ou EC-10 R3 foi executado. A única interação com o gerenciador foi introspecção de leitura da interface Manager; nenhuma unidade histórica foi consultada ou modificada.
+
+### Interfaces investigadas e evidência de compatibilidade
+
+Fontes compatíveis: [API v252](https://www.freedesktop.org/software/systemd/man/252/org.freedesktop.systemd1.html), [dbus-manager.c](https://github.com/systemd/systemd/blob/v252/src/core/dbus-manager.c), [dbus-job.c](https://github.com/systemd/systemd/blob/v252/src/core/dbus-job.c), [dbus-unit.c](https://github.com/systemd/systemd/blob/v252/src/core/dbus-unit.c), [resultados em job.c](https://github.com/systemd/systemd/blob/v252/src/core/job.c) e [geração de InvocationID em unit.c](https://github.com/systemd/systemd/blob/v252/src/core/unit.c). A introspecção efetiva no gerenciador de usuário instalado confirmou:
+
+| Interface Manager | Entrada / saída observadas | Utilidade e limite |
+|---|---|---|
+| StopUnit | ss / o | Resposta fornece objeto de job, não conclusão nem InvocationID |
+| JobRemoved | sinal uoss | ID, caminho do job, unidade e resultado; sem InvocationID |
+| Subscribe / Unsubscribe | sem argumentos | Controle da emissão dos sinais; precisa conexão persistente |
+| GetJob | u / o | Resolve job ainda disponível; pode desaparecer após remoção |
+| GetUnit | s / o | Resolve unidade carregada; caminho não é geração da instância |
+| GetUnitByPID | u / o | Associação enquanto PID existe; não resolve retroativamente pai encerrado |
+| GetUnitByInvocationID | ay / o | Resolve ciclo ainda disponível; não torna StopUnit por nome condicional ao ID |
+| RefUnit / UnrefUnit | s / sem saída | Possível retenção de referência por conexão, não garantia de retenção do cgroup |
+
+Também foram observados GetUnitByControlGroup e GetUnitProcesses. Não foram chamados StopUnit, Subscribe, RefUnit ou qualquer método operacional. As propriedades Unit/Job foram investigadas na documentação e código v252, sem criar um Job de inspeção. Job expõe Id, Unit, JobType e State; estado running/waiting não substitui o resultado final recebido. O resultado é transitório: GetJob posterior pode não recuperá-lo. UnitRemoved representa descarregamento do objeto; nome/caminho podem ser reutilizados. InvocationID/propriedades podem ficar indisponíveis após descarregamento.
+
+A [descrição v252 de InvocationID](https://www.freedesktop.org/software/systemd/man/252/systemd.exec.html#%24INVOCATION_ID) identifica um ciclo de execução por ID aleatório de 128 bits, renovado na ativação. Para esta camada, sua fonte deve ser propriedade do gerenciador, não variável/declaração de um filho. Não é credencial assinada nem parâmetro de comparação atômica de StopUnit. O código de JobRemoved em dbus-job.c confirma o corpo uoss e a ausência de InvocationID. O caminho do objeto Unit deriva da unidade, não prova uma geração particular.
+
+### Modelo implementado e correlação formal
+
+O novo `tests/support/v03_f1_p01/systemd_job_evidence.py` importa somente dataclasses e re: não abre arquivos, conecta ao barramento, cria processos ou solicita parada. DTOs imutáveis representam StopRequest, Subscription, StopReply, JobRemoved e UnitIdentity. `correlate_stop_job()` avalia um snapshot limitado de eventos sintéticos. Não é mecanismo de autorização de stop. O fluxo operacional atual e o classificador B2 não importam esse módulo.
+
+Os campos incluem stop_request_id local, unidade/caminho, InvocationID e inode anteriores, serial da chamada, identificador da conexão e nome único do remetente do gerenciador, status/instante da subscrição, objeto/ID/resultado do job, tempos monotônicos de pedido/resposta/recepção e snapshots de identidade. O resultado preserva eventos correspondentes, eventos não correlacionados, duplicatas, conflitos, timeout, diagnóstico de identidade e limitações. O ID local da solicitação não é campo do sinal D-Bus nem autenticação criptográfica.
+
+Para certificar resultado de job simulado, são exigidos:
+
+1. Pedido registrado como emitido, tempos válidos e serial de chamada positivo; resposta aceita na mesma conexão/remetente, reply_serial igual ao serial da chamada, caminho canônico de job com ID uint32 correspondente, dentro da janela observada.
+2. Subscrição confirmada antes do pedido na mesma conexão/gerenciador. Em integração futura isso deverá representar confirmação de AddMatch e Subscribe, não mera intenção de subscrever.
+3. Evento Manager.JobRemoved no caminho /org/freedesktop/systemd1 com mesmo ID/caminho retornado e unidade solicitada, origem/conexão correspondentes e timestamp monotônico de recepção dentro da janela. O transporte futuro deverá verificar remetente D-Bus, proprietário do nome, cabeçalhos, serial de resposta e epoch da conexão. Estes metadados são fixtures nesta etapa, não autenticação real executada pelo modelo.
+4. Resultado único, sem conflito ou overflow do buffer; ausência de perda de subscrição até o maior instante entre resposta e evento. Limite de 128 eventos por snapshot; resultados textuais limitados a 64 caracteres. Excesso não certifica conclusão.
+
+O futuro adaptador deve registrar match/subscrição antes do pedido e bufferizar sinais até obter a resposta. O sinal pode ser recebido antes dela: não se exige signal_time >= response_time. Só a resposta correlacionada fixa o job escolhido; evento por nome isolado ou sem resposta não é suficiente. Os tempos representam recepção local, não o instante de conclusão interna do systemd.
+
+Duplicatas idênticas são contadas sem duplicar a conclusão. Resultados conflitantes do mesmo job ou ordem temporal inconsistente desse job impedem certificação; não são reordenados para escolher o resultado desejado. Jobs de outras unidades ficam separados. Eventos antigos, fora da janela, de outro remetente/conexão ou com ID/caminho divergente não são correlacionados. Desconexão/reinício do gerenciador precisa invalidar o vínculo; um nome único/ID de job não é garantia universal entre barramentos/gerações. Perda posterior à janela já certificada não apaga resultado recebido, mas permanece limitação para evidência posterior.
+
+`done` produz JOB_CONCLUIDO_OBSERVADO apenas para o job correlacionado. `failed`, timeout e demais falhas explícitas conhecidas são separados de canceled. skipped/collected/once não são tratados como sucesso de parada; resultado novo é preservado e classificado como desconhecido. Canceled não prova que toda operação subjacente tenha sido cancelada. Sem resposta/evento ou com subscrição indisponível, permanece resultado desconhecido; timeout da observação não autoriza reenviar ou cancelar um job.
+
+### Identidade: o que não é comprovado
+
+Snapshot anterior exige nome, caminho Unit, InvocationID, inode, origem/conexão, estado ativo e tempo anterior ao pedido coerentes com a referência. Snapshot posterior correspondente pode corroborar a persistência da identidade; remoção com InvocationID ausente enfraquece esse vínculo sem apagar um resultado de job já correlacionado. A correspondência de snapshots é observacional, não transforma JobRemoved em mensagem autenticada pelo InvocationID.
+
+O modelo distingue PRE_STOP_VERIFICADA_SEM_VINCULO_ATOMICO_AO_JOB, PRE_E_POS_CORROBORADAS e INCONCLUSIVA. **instance_proven_by_job permanece false, IDENTIDADE_INSTANCIA_INCONCLUSIVA permanece true e esta camada nunca promove PARADA_CONFIRMADA.** Uma correlação de job válida pode existir mesmo sem identidade prévia suficiente: comprova o resultado desse job, não sua atribuição incontestável ao ciclo anteriormente observado. O transporte e as decisões de autorização não podem usar esse fato para contornar a atestação operacional existente.
+
+StopUnit por nome não recebe InvocationID como precondição; há corrida entre a leitura e a chamada. GetUnit/caminho do objeto e sinal JobRemoved não eliminam essa janela. Jobs podem ser mesclados/coalescidos: a resposta associa a chamada ao job retornado, não prova autoria exclusiva da parada. Um evento antigo de instância anterior não pode ser identificado por um InvocationID inexistente no sinal: janela/conexão/job rejeitam casos observáveis, mas a atribuição de instância continua explicitamente limitada. Não se inventou esse campo em fixtures de JobRemoved.
+
+O journal, estado posterior e ausência de PIDs são corroborativos, não substitutos da correlação. Nome isolado, resposta ausente e mensagem não correlacionada são insuficientes. Unidade inativa/removida é registrada separadamente. Resultado de job done não comprova populated=0, recolhimento de todos os descendentes, ausência de escape ou limpeza integral. C1 não avalia POPULACAO_VAZIA_OBSERVADA nem AUSENCIA_DOS_PROCESSOS_CONHECIDOS e não altera B2. Os campos C1 devem permanecer em namespace próprio numa integração futura, sem sobrescrever classificações operacionais já existentes.
+
+### Testes sintéticos C1
+
+| Teste | Caso e resultado verificado |
+|---|---|
+| T01 | done correlacionado: job concluído observado; PARADA_CONFIRMADA permanece false |
+| T02 | failed: JOB_FALHOU |
+| T03 | canceled: JOB_CANCELADO, sem sucesso |
+| T04 | Resultado novo: preservado/desconhecido |
+| T05 | ID de job ou serial de resposta divergente: não correlacionado |
+| T06 | Caminho do job divergente: não correlacionado |
+| T07 | Nome de unidade divergente: não correlacionado |
+| T08 | InvocationID indisponível: instância inconclusiva, sem promoção |
+| T09 | InvocationID divergente: snapshot prévio recusado |
+| T10 | Duplicata idêntica contada; conflito/overflow não certificam resultado |
+| T11 | Evento ausente: job identificado sem resultado comprovado |
+| T12 | Evento antes da resposta: correlacionado após conhecer caminho retornado |
+| T13 | Evento após resposta: correlacionado |
+| T14 | Tempos inválidos/fora de ordem: sem conclusão certificada |
+| T15 | Timeout da observação: resultado desconhecido |
+| T16 | Barramento indisponível simulado: sem aceite/job identificado |
+| T17 | Unidade removida antes da consulta posterior: job preservado, identidade não promovida |
+| T18 | Journal por nome sem vínculo: somente corroborativo |
+| T19 | Job done sem zero: B não avaliado/promovido |
+| T20 | B positivo com eventos sintéticos sem conclusão do job: evidências independentes |
+| T21 | PIDs conhecidos ausentes sem job: não conclui job |
+| T22 | Jobs concorrentes, envelope/conexão divergentes: somente alvo válido correlacionado |
+| T23 | Evento antigo/outro remetente e instância posterior divergente: sem confirmação da instância |
+| T24 | Subscrição ausente/tardia/perdida: não certifica janela interrompida |
+
+Passaram **24 testes C1** e a suíte V03-F1-P01 com **127 testes Python seguros**, incluindo C1, além dos dois testes Rust sintéticos. cargo fmt --check, cargo check --offline --all-targets e git diff --check passaram. Regressão Rust filtrada: **102 aprovados, zero falhos e 93 filtrados**; três avisos históricos EC-04 permanecem. PYTHONDONTWRITEBYTECODE=1 foi usado; variáveis opcionais de caso/checkpoint/trace removidas dos comandos Rust. A introspecção de leitura não fez parte de teste mutável. Nenhuma fixture é resultado operacional real.
+
+### Integração futura pendente e parecer
+
+Não se substituiu systemctl --no-block nem se integrou nova chamada StopUnit. Uma etapa posterior especificamente autorizada deverá escolher biblioteca/transporte disponível sem instalações presumidas; definir ciclo de vida de conexão e subscrição, autenticação do proprietário/cabeçalhos, buffer limitado antes da resposta, timers, reconexão, duplicatas e associação do job. Deverá preservar a atestação de propriedade/política, a observação B2 e o fechamento/recolhimento de recursos. Precisará ainda decidir como manter referência de Unit e tratar a corrida de instância sem prometer atomicidade inexistente. Primeiro validar adaptador com mocks; nenhuma chamada real ou terceiro ensaio fica autorizada aqui.
+
+**Parecer: C1 APROVADA PARA AUDITORIA**, no escopo documental e de modelo simulado. Integração operacional e confirmação de identidade de instância por job permanecem pendentes/limitadas. Primeiro ensaio: parada corroborada, limpeza integral inconclusiva. Segundo ensaio: parada corroborada, população vazia não observada, limpeza integral inconclusiva. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO.
