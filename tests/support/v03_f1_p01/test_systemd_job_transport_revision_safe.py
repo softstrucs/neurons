@@ -39,7 +39,8 @@ class SafeRevision(unittest.TestCase):
         bus.send_message_with_reply_and_block.side_effect = call
         factory = self.enterContext(patch('dbus.bus.BusConnection', return_value=bus))
         loop = self.enterContext(patch('dbus.mainloop.glib.DBusGMainLoop', return_value=object()))
-        backend = t.NativeTransport(enabled=True, clock=lambda: self.now)
+        backend = t.NativeTransport(enabled=True, clock=lambda: self.now,
+                                    target=t.ManagerTarget(t.Manager.SYSTEM))
         self.addCleanup(backend.close)
         return backend, bus, factory, loop
 
@@ -74,7 +75,7 @@ class SafeRevision(unittest.TestCase):
         second_bus.get_is_connected.return_value = True
         second_bus.send_message_with_reply_and_block.side_effect = first_bus.send_message_with_reply_and_block.side_effect
         factory.side_effect = [first_bus, second_bus]
-        second = t.NativeTransport(enabled=True)
+        second = t.NativeTransport(enabled=True, target=t.ManagerTarget(t.Manager.SYSTEM))
         self.addCleanup(second.close)
         first.open()
         second.open()

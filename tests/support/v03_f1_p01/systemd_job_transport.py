@@ -6,6 +6,8 @@ SimulatedTransport nunca autentica um barramento real. Tempos são locais.
 from collections import deque
 from dataclasses import asdict, dataclass, replace
 import re
+import os
+from enum import Enum
 import time
 import uuid
 
@@ -26,6 +28,71 @@ DISPATCH_SECONDS = 0.05
 UNIQUE = re.compile(r':[0-9]+\.[0-9]+\Z')
 
 
+class Manager(str, Enum):
+    USER = 'USER'
+    SYSTEM = 'SYSTEM'
+
+
+@dataclass(frozen=True)
+class ManagerTarget:
+    """Seleção sintática Debian 12; não autentica runtime, socket ou serviço."""
+    manager: Manager
+    uid: int | None = None
+    runtime_dir: str | None = None
+    address: str | None = None
+
+    def __post_init__(self):
+        if not isinstance(self.manager, Manager):
+            raise ValueError('gerenciador deve ser explícito')
+        if self.manager is Manager.USER:
+            if type(self.uid) is not int or not 0 <= self.uid < 4294967295:
+                raise ValueError('UID inválido')
+            runtime = '/run/user/' + str(self.uid)
+            address = 'unix:path=' + runtime + '/bus'
+            if self.runtime_dir not in (None, runtime) or self.address not in (None, address):
+                raise ValueError('runtime/endereço USER divergente ou não canônico')
+            object.__setattr__(self, 'runtime_dir', runtime)
+        else:
+            if self.uid is not None or self.runtime_dir is not None:
+                raise ValueError('SYSTEM não recebe UID/runtime de usuário')
+            address = SYSTEM_BUS_ADDRESS
+            if self.address not in (None, address):
+                raise ValueError('endereço SYSTEM divergente')
+        object.__setattr__(self, 'address', address)
+
+    @classmethod
+    def experimental(cls):
+        # UID efetivo local, não valor fixo nem inferido de ambiente.
+        return cls(Manager.USER, os.geteuid())
+
+    def validate_environment(self, environment):
+        """Valida snapshot explícito; ambiente nunca seleciona o endereço."""
+        if self.manager is Manager.USER:
+            expected = {'XDG_RUNTIME_DIR': self.runtime_dir,
+                        'DBUS_SESSION_BUS_ADDRESS': self.address}
+        else:
+            expected = {'DBUS_SYSTEM_BUS_ADDRESS': self.address}
+        for key, value in expected.items():
+            if key in environment and environment[key] != value:
+                raise ValueError('ambiente divergente: ' + key)
+
+    def report(self):
+        return dict(manager=self.manager.value, uid=self.uid, runtime_dir=self.runtime_dir,
+                    address=self.address, address_configured=True,
+                    address_status='VALIDADO_SINTATICAMENTE',
+                    runtime_ownership_verified=False, socket_verified=False,
+                    real_authentication_proven=False, manager_identity_proven=False,
+                    unit_correlated=False)
+
+
+@dataclass(frozen=True)
+class ScopedEvidence:
+    """Namespace externo a C1 para pedidos/snapshots declarados no contexto."""
+    target: ManagerTarget
+    connection_id: str
+    evidence: object
+
+
 @dataclass(frozen=True)
 class Envelope:
     """Cabeçalhos do backend; o corpo nunca define remetente ou timestamp."""
@@ -38,6 +105,8 @@ class Envelope:
     member: str = 'JobRemoved'
     reply_serial: int = 0
     message_serial: int = 0
+    target: ManagerTarget | None = None
+    connection_id: str | None = None
 
 
 def message_size(message):
@@ -65,7 +134,10 @@ class SimulatedTransport:
     """Backend determinístico sem I/O. Asserções de identidade são fixtures."""
     provenance = 'SIMULADO_SEM_AUTENTICACAO_REAL'
 
-    def __init__(self, *, owner=':1.10', available=True, subscribe_ok=True):
+    def __init__(self, *, owner=':1.10', available=True, subscribe_ok=True, target=None):
+        self.target = target if target is not None else ManagerTarget.experimental()
+        if not isinstance(self.target, ManagerTarget):
+            raise ValueError('alvo inválido')
         self.connection_id = 'simulated-' + uuid.uuid4().hex
         self.owner = owner
         self.available = available
@@ -100,6 +172,7 @@ class Observation:
         if type(max_events) is not int or not 1 <= max_events <= MAX_EVENTS:
             raise ValueError('limite de eventos inválido')
         self.transport = transport
+        self.target = transport.target
         self.clock = clock
         self.max_events = max_events
         self.connection_id = None
@@ -123,6 +196,20 @@ class Observation:
         if len(self.errors) < MAX_ERRORS:
             self.errors.append(reason)
 
+    def unscoped(self, evidence):
+        if isinstance(evidence, ScopedEvidence):
+            if evidence.target != self.target or evidence.connection_id != self.connection_id:
+                self.fault('EVIDENCIA_DE_OUTRO_GERENCIADOR_OU_CONEXAO')
+                return (replace(evidence.evidence, emitted=False)
+                        if isinstance(evidence.evidence, c1.StopRequest) else None)
+            return evidence.evidence
+        # DTO legado: declarado no contexto, nunca autenticado por esta conversão.
+        return evidence
+
+    def check_target(self):
+        if self.transport.target != self.target:
+            self.fault('ALVO_DO_TRANSPORTE_ALTERADO')
+
     def timestamp(self):
         now = self.clock()
         if type(now) is not int or now <= 0 or now < self.last_time:
@@ -136,6 +223,9 @@ class Observation:
             self.fault('CICLO_JA_INICIADO_OU_ENCERRADO')
             return
         self.started = True
+        self.check_target()
+        if self.broken:
+            return
         try:
             self.connection_id, self.owner = self.transport.open()
             if not self.connection_id or not isinstance(self.owner, str) or not UNIQUE.fullmatch(self.owner):
@@ -154,6 +244,8 @@ class Observation:
         if self.request is not None or self.closed:
             self.fault('SOLICITACAO_REPETIDA_OU_ENCERRADA')
             return
+        self.check_target()
+        request = self.unscoped(request)
         now = self.timestamp()
         # O início é registrado aqui; o timestamp declarado pelo chamador não
         # autentica emissão real. Esta etapa só observa/prepara solicitações.
@@ -178,10 +270,15 @@ class Observation:
             self.fault('EVENTO_APOS_ENCERRAMENTO')
             return
         self.received += 1
+        self.check_target()
         if now is None:
             return
         try:
             size = message_size(envelope)
+            if ((envelope.target is not None and envelope.target != self.target)
+                    or (envelope.connection_id is not None and envelope.connection_id != self.connection_id)):
+                self.fault('EVENTO_DE_OUTRO_GERENCIADOR_OU_CONEXAO')
+                return
             if envelope.kind in ('disconnect', 'owner-change', 'lost'):
                 # Somente o backend interpreta eventos do bus daemon/local.
                 self.fault('CONTINUIDADE_PERDIDA:' + envelope.kind)
@@ -245,6 +342,8 @@ class Observation:
     def result(self, *, before=None, after=None):
         if self.request is None:
             raise ValueError('nenhuma solicitação observada')
+        self.check_target()
+        before, after = self.unscoped(before), self.unscoped(after)
         if isinstance(self.transport, NativeTransport) and self.transport.loss:
             if not self.broken:
                 self.fault('CONTINUIDADE_NATIVA_PERDIDA')
@@ -268,7 +367,8 @@ class Observation:
                                    closed=self.closed, subscription_ready_ns=self.ready,
                                    reply_envelope=asdict(self.reply) if self.reply else None,
                                    native_gaps=list(getattr(self.transport, "gaps", ())),
-                                   bus_target='SYSTEM' if isinstance(self.transport, NativeTransport) else 'SIMULATED',
+                                   bus_target=self.target.manager.value,
+                                   selected_target=self.target.report(),
                                    call_binding_status='DECLARADO_SEM_EMISSAO_COMPROVADA',
                                    absolute_deadline_guaranteed=False,
                                    total_memory_bound_guaranteed=False)
@@ -301,9 +401,12 @@ class NativeTransport:
     """
     provenance = 'DBUS_PYTHON_NATIVO_NAO_VALIDADO_OPERACIONALMENTE'
 
-    def __init__(self, *, enabled=False, clock=time.monotonic_ns):
+    def __init__(self, *, enabled=False, clock=time.monotonic_ns, target=None):
         if not enabled:
             raise RuntimeError('transporte real desativado')
+        self.target = target if target is not None else ManagerTarget.experimental()
+        if not isinstance(self.target, ManagerTarget):
+            raise ValueError('alvo inválido')
         self.clock = clock
         self.connection_id = 'dedicated-' + uuid.uuid4().hex
         self.bus = None
@@ -315,6 +418,7 @@ class NativeTransport:
         self.expected_reply_serial = None
         self.closed = False
         self.subscribed = False
+        self.opened_target = None
         self.last_dispatch = None
 
     def expect_declared_reply(self, serial):
@@ -331,6 +435,9 @@ class NativeTransport:
                    (self.owner, PATH, INTERFACE, 'Subscribe')}
         if (destination, path, interface, member) not in allowed or self.bus is None or self.closed:
             raise ValueError('operação proibida ou conexão indisponível')
+        if self.opened_target != self.target:
+            self.mark_loss('ALVO_ALTERADO_APOS_ABERTURA')
+            raise ValueError('alvo da conexão alterado')
         from dbus.lowlevel import MethodCallMessage, MESSAGE_TYPE_METHOD_RETURN
         message = MethodCallMessage(destination, path, interface, member)
         message.append(*args, signature=signature)
@@ -353,7 +460,14 @@ class NativeTransport:
         import dbus.bus
         from dbus.mainloop.glib import DBusGMainLoop
         try:
-            self.bus = dbus.bus.BusConnection(SYSTEM_BUS_ADDRESS,
+            if self.target.manager is Manager.USER:
+                if self.target.uid != os.geteuid():
+                    raise ValueError('UID efetivo diverge do alvo USER')
+                # O ambiente é somente uma verificação de consistência do
+                # contexto --user; jamais determina ou substitui o endereço.
+                self.target.validate_environment(os.environ)
+            self.opened_target = self.target
+            self.bus = dbus.bus.BusConnection(self.target.address,
                                               mainloop=DBusGMainLoop(set_as_default=False))
             self.bus.set_exit_on_disconnect(False)
             self.bus.add_message_filter(self._filter)
@@ -459,6 +573,14 @@ class NativeTransport:
             self.gaps.append(dict(reason=reason, monotonic_ns=self.clock()))
 
     def _enqueue(self, envelope):
+        if self.opened_target is not None and self.opened_target != self.target:
+            self.mark_loss('ALVO_ALTERADO_APOS_ABERTURA')
+            raise ValueError('alvo da conexão alterado')
+        if ((envelope.target is not None and envelope.target != self.target)
+                or (envelope.connection_id is not None and envelope.connection_id != self.connection_id)):
+            raise ValueError('origem de outro alvo/conexão')
+        # Metadados locais do backend; não são campos do corpo D-Bus.
+        envelope = replace(envelope, target=self.target, connection_id=self.connection_id)
         size = message_size(envelope)
         if len(self.queue) >= MAX_EVENTS or self.queue_bytes + size > MAX_BUFFER_BYTES:
             raise ValueError('overflow')

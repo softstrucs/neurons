@@ -664,3 +664,114 @@ git diff --check
 **Parecer: C2-A-R1 APROVADA PARA AUDITORIA**, no escopo de correções e validação simulada. Integração operacional continua bloqueada pela divergência de gerenciador, ausência de ponte comprovada de emissão/serial, ausência de prazo absoluto e isolamento nativo não validado. É necessária decisão específica sobre o gerenciador alvo, revisão independente de segurança/identidade/prazos, snapshots autenticados e testes de integração autorizados separadamente. Nenhuma dessas pendências foi declarada resolvida pelos mocks.
 
 B2 CONCLUÍDA; C1 PRESERVADA. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Nenhuma etapa posterior iniciada.
+
+## C2-A-R2 — Alinhamento do gerenciador USER
+
+Base inicial confirmada: `3e681881b8612042dc041b4d7fc76a67d6876e67`, softstrucs/neurons, devs e árvore limpa. O executor, synthetic_scope_cleanup e scope_cleanup_evidence selecionam explicitamente systemd-run --user/systemctl --user. A decisão desta etapa é manter esse gerenciador; não migrar unidades, ensaios ou política para SYSTEM. O alvo SYSTEM introduzido na R1 permanece representável, mas deixa de ser o padrão experimental. As seções anteriores são registros históricos; esta decisão substitui a divergência arquitetural de R1, sem declarar integração operacional pronta.
+
+### Seleção e endereço
+
+Manager distingue USER e SYSTEM. ManagerTarget é imutável e valida sua configuração sem abrir conexão, consultar barramento ou inspecionar o hospedeiro. ManagerTarget.experimental seleciona explicitamente USER com os.geteuid(), não UID fixo, variável USER ou UID real presumido. Os construtores dos transportes isolados usam esse padrão quando não recebem alvo; SYSTEM exige seleção explícita.
+
+| Alvo | Configuração admitida |
+|---|---|
+| USER | UID inteiro de 0 a 4294967294, runtime `/run/user/<UID>`, endereço `unix:path=/run/user/<UID>/bus` |
+| SYSTEM | Sem UID/runtime de usuário, endereço `unix:path=/run/dbus/system_bus_socket` |
+
+Esta é uma política canônica conservadora para Debian 12. Recusa UID booleano, negativo, textual ou sentinela; caminho relativo, runtime de outro UID, normalizações com ../ ou barra final, endereço arbitrário, autolaunch, TCP, socket abstrato, listas de endereços ou endereço de outro gerenciador. Não descobre endereço alternativo nem faz fallback USER/SYSTEM. Não se armazenam identificadores reais do hospedeiro no repositório; UIDs dos testes são fixtures.
+
+O construtor dbus-python BusConnection recebe o endereço literal validado, nunca BUS_SESSION/BUS_SYSTEM nem uma escolha pelo ambiente. A API instalada 1.3.2 foi examinada por código/docstrings e é compatível com [BusConnection(address_or_type, mainloop)](https://dbus.freedesktop.org/doc/dbus-python/dbus.bus.html). A conexão é dedicada, sem singleton compartilhado.
+
+validate_environment avalia um snapshot fornecido explicitamente: para USER, XDG_RUNTIME_DIR e DBUS_SESSION_BUS_ADDRESS, quando presentes, precisam coincidir exatamente com runtime/endereço configurados. NativeTransport.open aplica essa verificação e exige UID efetivo igual ao alvo antes de chamar a factory de conexão. Variáveis ausentes não impedem construir o alvo, mas também não comprovam runtime ou serviço disponível. O ambiente não seleciona nem substitui endereço. Um valor divergente causa recusa, não correção do ambiente nem fallback. Endereços possivelmente equivalentes com parâmetros adicionais, como guid, são recusados conservadoramente até revisão específica; não há normalização permissiva. SYSTEM continua usando seu endereço fixo sem passar a selecionar sessão.
+
+### USER não é sinônimo de BUS_SESSION
+
+O nome BUS_SESSION é uma categoria da biblioteca, não identificação do gerenciador systemd de uma unidade. O [código systemd v252](https://github.com/systemd/systemd/blob/v252/src/libsystemd/sd-bus/sd-bus.c) mostra que a escolha de barramento do usuário pode considerar DBUS_SESSION_BUS_ADDRESS e XDG_RUNTIME_DIR. Um ambiente divergente pode apontar para outro barramento; por isso esta implementação não replica a seleção aberta por ambiente. A [documentação pam_systemd v252](https://www.freedesktop.org/software/systemd/man/252/pam_systemd.html) descreve runtime por usuário e gerenciador compartilhado pelas sessões daquele usuário. Sessões interativas distintas não justificam aceitar qualquer endereço de sessão.
+
+O socket de usuário `/run/user/<UID>/bus` é a proposta de barramento broker para localizar org.freedesktop.systemd1. Não é o socket privado systemd/private nem um endereço peer-to-peer intercambiável: a camada depende de GetNameOwner, AddMatch e nomes únicos do broker. Não se demonstrou nesta etapa qual rota cada processo cliente real utilizará nem que o broker e uma rota privada exponham a mesma instância no contexto concreto. Sem sessão interativa, runtime/bus podem não existir; linger ou outro mecanismo de manutenção não é presumido nem configurado. Outras distribuições, namespaces, containers, runtimes alternativos e barramentos por sessão podem exigir nova política explícita, sem fallback automático.
+
+### Estados de evidência e pré-condições pendentes
+
+O relatório separa endereço configurado (address_configured), endereço VALIDADO_SINTATICAMENTE e indicadores que permanecem false: runtime_ownership_verified, socket_verified, real_authentication_proven, manager_identity_proven e unit_correlated. A existência de um caminho ou correspondência numérica de UID não autentica conexão, serviço ou unidade. Fixtures de autenticação não promovem esses estados.
+
+Antes de qualquer futura abertura autorizada, será necessário comprovar, no contexto efetivo do executor e observador:
+
+1. Mesmo UID efetivo e mesmo contexto local/namespace esperado, com ambiente coerente; não inferir identidade do cliente por variável de ambiente.
+2. Runtime existente, diretório canônico pertencente ao UID correto, permissões privadas adequadas (normalmente 0700), ausência de redirecionamentos não autorizados e socket de barramento com tipo/propriedade/permissões adequados. Nada disso foi consultado ou aprovado por esta revisão; uma inspeção prévia também não elimina corridas de substituição até a conexão.
+3. Broker disponível, credenciais/autenticação efetivas da conexão e serviço org.freedesktop.systemd1 correspondente ao gerenciador --user pretendido. UID do cliente, credenciais do broker, credenciais do serviço e identidade da unidade são evidências distintas.
+4. Proprietário único e ciclo de conexão, AddMatch/Subscribe confirmados e vínculo autenticado dos snapshots da unidade/InvocationID/cgroup à mesma instância usada pelo executor.
+5. Estratégia de emissão/serial na mesma conexão, limites e isolamento operacional revisados; autorização específica para a integração e qualquer teste real.
+
+Não foram acrescentadas verificações reais de filesystem ou credenciais do serviço, nem se implementou preflight operacional. O código opt-in de conexão permanece desativado por padrão; esses requisitos pendentes não podem ser substituídos por enabled=True ou por um teste com factory falsa.
+
+### Namespace, subscrição e correlação
+
+Observation conserva o ManagerTarget selecionado. ScopedEvidence associa pedidos/snapshots declarados ao alvo e ao epoch da conexão sem alterar C1. Alvo/epoch divergentes invalidam continuidade; snapshot rejeitado não é passado como identidade válida a C1 e pedido rejeitado não se torna emissão comprovada. Envelopes podem carregar alvo/conexão: divergência é recusada mesmo que nome único, unidade, serial, job ID e caminho sejam idênticos nos dois gerenciadores. A fila nativa acrescenta esses metadados localmente, não a partir do corpo D-Bus. Guarda também o alvo de abertura; tentativa de relabelar a conexão depois de aberta é recusada. Eventos de conexão anterior não são reutilizados.
+
+DTOs C1 e envelopes legados sem namespace, nos testes simulados, continuam declarações do próprio contexto selecionado, não evidência autenticada de origem externa. ScopedEvidence também é metadado declarado em fixtures; não constitui autenticação por si só. No caminho nativo, o vínculo de origem continua dependendo da conexão dedicada, dos cabeçalhos libdbus e do proprietário descoberto; a instância real do serviço permanece não comprovada nesta entrega. C1 e B2 permanecem byte a byte inalterados.
+
+Preservados AddMatch/Subscribe, ACK anterior ao pedido, remetente único, serial/ReplySerial, janela, buffer de eventos anteriores à resposta, jobs concorrentes, duplicatas, conflitos, overflow, mudanças de proprietário e desconexões. O caminho nativo mantém emitted=false: serial declarado ainda não é serial de envio comprovado. Nenhuma API de envio StopUnit foi adicionada. Identidade de gerenciador não prova propriedade da unidade; nome/caminho de unidade não prova geração. JobRemoved não contém vínculo atômico com InvocationID. done não promove PARADA_CONFIRMADA nem cria populated=0 ou limpeza integral.
+
+### Recursos e restrições preservados
+
+Mantidos 128 eventos, 256 KiB estimados por buffer Python, 64 KiB por mensagem estimada, 32 diagnósticos armazenados, janela até cinco segundos e despacho cooperativo de 32 iterações/50 ms. A seleção USER não aumenta os limites. Permanecem ausência de prazo absoluto comprovado para conexão/biblioteca/callbacks, contexto GLib padrão compartilhável e memória interna libdbus fora do orçamento Python. Fechamento dedicado idempotente, sem retries, reconexão, threads, subprocessos, supervisor, systemctl externo ou recuperação operacional novos.
+
+### Matriz segura C2-A-R2
+
+| Caso | Cenário | Resultado |
+|---|---|---|
+| T01 | USER e endereço literal correspondente | PASSOU |
+| T02 | SYSTEM explicitamente selecionado | PASSOU |
+| T03 | Padrão experimental USER pelo UID efetivo | PASSOU |
+| T04 | Falha USER sem fallback SYSTEM | PASSOU |
+| T05 | Falha SYSTEM sem fallback USER | PASSOU |
+| T06 | UIDs válidos e recusa de conexão com UID efetivo diferente | PASSOU |
+| T07 | UIDs inválidos e gerenciador não explícito | PASSOU |
+| T08 | Runtime/endereço absoluto canônico | PASSOU |
+| T09 | Caminhos relativos/não canônicos recusados | PASSOU |
+| T10 | Endereço arbitrário, lista, abstract, TCP ou autolaunch recusados | PASSOU |
+| T11 | XDG_RUNTIME_DIR inconsistente recusado | PASSOU |
+| T12 | Ambiente divergente recusado antes da conexão | PASSOU |
+| T13 | Endereço sintático não implica autenticação/runtime/serviço | PASSOU |
+| T14 | Autenticação simulada não é autenticação real | PASSOU |
+| T15 | Proprietário único no contexto selecionado | PASSOU |
+| T16 | Proprietário ausente | PASSOU |
+| T17 | Proprietário/remetente divergente | PASSOU |
+| T18 | Troca de proprietário | PASSOU |
+| T19 | Desconexão | PASSOU |
+| T20 | Subscrição confirmada com respostas falsas | PASSOU |
+| T21 | Subscrição recusada | PASSOU |
+| T22 | Subscrição tardia | PASSOU |
+| T23 | Evento anterior à resposta | PASSOU |
+| T24 | Evento posterior à resposta | PASSOU |
+| T25 | ReplySerial correspondente e serial da resposta distinto | PASSOU |
+| T26 | ReplySerial divergente | PASSOU |
+| T27 | Job de outro gerenciador, nos dois sentidos; relabel nativo recusado | PASSOU |
+| T28 | Snapshot/pedido de outro gerenciador recusados | PASSOU |
+| T29 | Evento de conexão anterior recusado | PASSOU |
+| T30 | Job concorrente | PASSOU |
+| T31 | Evento duplicado | PASSOU |
+| T32 | Resultado conflitante | PASSOU |
+| T33 | Overflow preserva eventos anteriores | PASSOU |
+| T34 | Falha de decodificação | PASSOU |
+| T35 | Falha de despacho | PASSOU |
+| T36 | Fechamento idempotente | PASSOU |
+| T37 | Factory falsa e transporte desativado por padrão | PASSOU |
+| T38 | Subscribe somente em conexão falsa | PASSOU |
+| T39 | StopUnit proibido no adaptador | PASSOU |
+| T40 | Sem criação de scope/processo | PASSOU |
+| T41 | Executor continua --user e sem importar o transporte | PASSOU |
+| T42 | Classificações C1 compatíveis, sem modificar seu modelo | PASSOU |
+| T43 | B2 independente | PASSOU |
+| T44 | done não promove PARADA_CONFIRMADA | PASSOU |
+| T45 | Nenhum populated=0 fabricado | PASSOU |
+
+45 testes C2-A-R2 aprovados; 268 testes Python seguros totais, incluindo 45 R1 e 51 C2-A anteriores, C1 e B2. Fixtures SYSTEM da suíte R1 passaram a selecionar SYSTEM explicitamente; seus testes de barramento fixo continuam pertinentes a esse alvo. Toda factory nativa exercitada na nova suíte foi substituída, assim como mensagens/contextos; nenhuma conexão USER ou SYSTEM real foi aberta.
+
+Dois testes Rust sintéticos aprovados (cinco filtrados); regressão Rust filtrada: 102 aprovados, zero falhas, 93 filtrados. cargo fmt --check, cargo check --offline --all-targets e git diff --check passaram. Três avisos históricos dead_code EC-04 e ImportWarning de PyGObject permaneceram, sem falhas ou instalação de pacotes.
+
+Comandos: Python com PYTHONDONTWRITEBYTECODE=1 e `python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_systemd_job_transport_user_safe.py'`, depois o padrão `test_*_safe.py`; cargo fmt --check; cargo check --offline --all-targets. Rust sintético e regressão usaram `env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1`, respectivamente com `cargo test --offline --test v03_f1_p01_instruments trace::tests::safe_ -- --test-threads=1` e `cargo test --offline -- --skip development --skip validation --skip frozen --skip final --skip panel --skip protocol`. Logs temporários de regressão ficaram exclusivamente em /tmp; nenhum artefato foi incorporado ao commit.
+
+**Parecer: C2-A-R2 APROVADA PARA AUDITORIA**, para seleção e correlação isoladas/simuladas. O alinhamento do alvo USER foi implementado; correspondência operacional com a instância real, runtime/socket/credenciais, emissão/serial, isolamento e prazos permanecem pendentes. Passar nos testes não autoriza integração nem comprova execução experimental.
+
+B2 CONCLUÍDA; C1 PRESERVADA. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Nenhuma integração ou etapa posterior iniciada.
