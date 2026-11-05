@@ -445,3 +445,105 @@ Passaram **24 testes C1** e a suíte V03-F1-P01 com **127 testes Python seguros*
 Não se substituiu systemctl --no-block nem se integrou nova chamada StopUnit. Uma etapa posterior especificamente autorizada deverá escolher biblioteca/transporte disponível sem instalações presumidas; definir ciclo de vida de conexão e subscrição, autenticação do proprietário/cabeçalhos, buffer limitado antes da resposta, timers, reconexão, duplicatas e associação do job. Deverá preservar a atestação de propriedade/política, a observação B2 e o fechamento/recolhimento de recursos. Precisará ainda decidir como manter referência de Unit e tratar a corrida de instância sem prometer atomicidade inexistente. Primeiro validar adaptador com mocks; nenhuma chamada real ou terceiro ensaio fica autorizada aqui.
 
 **Parecer: C1 APROVADA PARA AUDITORIA**, no escopo documental e de modelo simulado. Integração operacional e confirmação de identidade de instância por job permanecem pendentes/limitadas. Primeiro ensaio: parada corroborada, limpeza integral inconclusiva. Segundo ensaio: parada corroborada, população vazia não observada, limpeza integral inconclusiva. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO.
+
+## C2-A — Transporte isolado e correlação de evidências
+
+Base: `e8cb52e693087d1c12abeeff0735e4f51ff23cd3`, branch devs e árvore limpa conferidas antes das alterações. C1 e B2 permanecem byte a byte inalterados; o executor não importa o transporte novo. Não há integração operacional, mudança de política, limite de memória ou critérios científicos.
+
+### Arquitetura e proveniência
+
+`systemd_job_transport.py` separa Envelope, SimulatedTransport, Observation e NativeTransport. Observation coordena um ciclo de subscrição/uma solicitação observada, buffer, continuidade e adaptação para C1. Nenhum componente envia StopUnit. O modelo C1 recebe seus DTOs originais; B2 não recebe dados deste módulo.
+
+SimulatedTransport não faz I/O e identifica sua proveniência como SIMULADO_SEM_AUTENTICACAO_REAL. O relatório registra real_authentication_proven=false inclusive nesta entrega do adaptador nativo: testes de mensagens falsas não comprovam autenticação no hospedeiro. Campos do corpo não definem remetente, conexão, serial ou tempo. receive permite injeção somente no backend simulado; entrega nativa passa por poll_native/drain e cabeçalhos lidos pelo filtro da biblioteca. Os snapshots fornecidos ao correlacionador continuam evidências de entrada, sem nova coleta/autenticação operacional nesta etapa.
+
+Dependências locais encontradas, sem instalação: dbus-python 1.3.2, PyGObject/gi e jeepney; dbus_next ausente. Escolhido dbus-python, com importação tardia. NativeTransport() recusa ativação por padrão; enabled=True só prepara o objeto. open seria uma conexão de sessão dedicada BusConnection, não SessionBus compartilhada. O código exige get_is_authenticated/get_is_connected, instala filtros/matches, consulta GetNameOwner ao bus daemon, exige nome único e fixa esse proprietário. Subscribe é dirigido ao proprietário único; ACK deve vir desse remetente e ter assinatura vazia. Nenhum open/Subscribe real ocorreu nos testes ou nesta atividade.
+
+Origem nativa depende das garantias de libdbus/bus daemon, não de strings declaradas em fixtures. O filtro lê get_sender, get_reply_serial, assinatura, caminho/interface/member e argumentos. NameOwnerChanged do serviço só é aceito como tal quando proveniente do bus daemon no caminho/interface corretos; desconexão e alteração invalidam o ciclo. Não se reconecta nem troca automaticamente o proprietário. Um envelope injetado no modo simulado jamais passa a ser autenticação real.
+
+### Semântica, subscrição e correlação
+
+A documentação [systemd 252](https://www.freedesktop.org/software/systemd/man/252/org.freedesktop.systemd1.html) especifica Manager, Subscribe, StopUnit ss/o e JobRemoved uoss. A [API dbus-python](https://dbus.freedesktop.org/doc/dbus-python/dbus.connection.html) oferece filtros de mensagens, conexão autenticada, chamadas com timeout e fechamento. As APIs usadas também foram verificadas na biblioteca instalada. Compatibilidade de interfaces não equivale a validação operacional do adaptador no Debian 12.
+
+Os matches precedem a descoberta do proprietário e o ACK Subscribe; Observation registra confirmação monotônica local antes da solicitação. O início observado do pedido é registrado localmente e não prova que StopUnit tenha sido emitido. A resposta observada conserva reply_serial, conexão e remetente; C1 exige correlação com call_serial. O adaptador nativo pode decodificar respostas com esse serial quando uma futura integração autorizada realmente as produzir na mesma conexão, mas não existe API de envio StopUnit nesta entrega. O evento pode chegar antes da resposta: fica no buffer em ordem de recepção, com timestamp do filtro, não do drain posterior.
+
+JobRemoved é validado como uoss, com ID uint32 positivo, caminho canônico, unidade e resultado limitados. Eventos concorrentes válidos permanecem separados por ID/caminho/unidade. C1 contabiliza duplicatas/conflitos e não reordena mensagens para produzir sucesso. Assinatura, remetente, serial, janela ou identidade divergentes não criam resultado positivo indevido. JobRemoved não inclui InvocationID; snapshots e inode anteriores/posteriores continuam apenas corroborativos, sem vínculo atômico ao job. PARADA_CONFIRMADA permanece false nesta camada mesmo com done.
+
+### Limites e encerramento
+
+| Recurso | Limite implementado |
+|---|---|
+| Eventos por buffer | 128; Observation pode reduzir para 1–128 |
+| Mensagem decodificada | 65.536 bytes de estimativa de aplicação |
+| Bytes por buffer | 262.144; fila nativa e Observation têm orçamentos separados |
+| Diagnósticos armazenados | 32; contador total preservado |
+| Unidade/resultado | 255/64 caracteres |
+| Janela de pedido | positiva e no máximo 5 segundos |
+| Chamadas de configuração nativas | timeout de cliente 1 segundo por chamada; uma tentativa |
+| Despacho GLib por poll | até 32 iterações, orçamento cooperativo 50 ms, sem iteration bloqueante |
+| Retries/reconexão | nenhum |
+| Threads/processos próprios | nenhum |
+
+O limite de bytes é posterior à decodificação: não é limite rígido de memória da biblioteca nem do processo. Há overhead de objetos e do próprio barramento. O construtor/conexão inicial libdbus e um callback externo GLib não têm prazo absoluto demonstrado; não se promete preempção de I/O/escalonamento. O contexto GLib padrão pode compartilhar callbacks com a aplicação hospedeira. Esses são impedimentos à ativação operacional sem revisão adicional de isolamento e prazos; não afetam o executor existente, que não usa o adaptador. Não há espera infinita implementada no controlador simulado, mas também não há watchdog de sistema acrescentado por esta etapa.
+
+Overflow preserva registros anteriores, marca perda e impede classificação positiva do job. Falha de decodificação, origem inesperada, regressão temporal, perda de evento/subscrição, troca de proprietário ou desconexão têm o mesmo efeito conservador. O relatório preserva erros limitados, contador total e reply_envelope observado mesmo quando a continuidade invalida a classificação; resposta capturada não é ocultada nem confundida com conclusão comprovada. Ausência de resposta/evento e timeout permanecem desconhecidos. Uma perda posterior também invalida a classificação C2-A conservadoramente, sem reescrever os envelopes anteriores.
+
+close é idempotente; context manager encerra em exceção. Falha de subscrição tenta fechar e preserva também eventual falha de fechamento. A conexão dedicada é fechada e seus filtros/filas liberados; não se executa Unsubscribe numa conexão compartilhada. O proprietário do ciclo é o objeto dedicado. O fechamento da biblioteca não constitui comprovação de conclusão de qualquer job.
+
+### Matriz de validação segura
+
+Todos os casos abaixo usam fixtures, relógio simulado e transporte sem I/O. Os testes adicionais do decoder nativo usam mensagens/conexão falsas, nunca o barramento.
+
+| Caso | Evidência exercitada | Resultado |
+|---|---|---|
+| T01 | Identidade simulada explicitamente sem autenticação real | PASSOU |
+| T02 | Remetente único esperado | PASSOU |
+| T03 | Remetente divergente/bem conhecido recusado | PASSOU |
+| T04 | Proprietário alterado invalida continuidade | PASSOU |
+| T05 | Desconexão antes do pedido | PASSOU |
+| T06 | Desconexão durante a janela | PASSOU |
+| T07 | Subscrição confirmada antes do pedido | PASSOU |
+| T08 | Subscrição tardia | PASSOU |
+| T09 | Subscrição recusada | PASSOU |
+| T10 | Evento anterior à resposta preservado | PASSOU |
+| T11 | Evento posterior à resposta | PASSOU |
+| T12 | Duplicata contabilizada | PASSOU |
+| T13 | Resultado conflitante impede sucesso | PASSOU |
+| T14 | ID divergente | PASSOU |
+| T15 | Caminho do job divergente | PASSOU |
+| T16 | Unidade divergente | PASSOU |
+| T17 | Overflow invalida conclusão | PASSOU |
+| T18 | Mensagem excede limite | PASSOU |
+| T19 | Timeout de observação | PASSOU |
+| T20 | Resposta ausente | PASSOU |
+| T21 | Resultado done correlacionado | PASSOU |
+| T22 | Resultado failed | PASSOU |
+| T23 | Resultado canceled | PASSOU |
+| T24 | Resultado desconhecido | PASSOU |
+| T25 | Unidade removida antes do snapshot posterior | PASSOU |
+| T26 | InvocationID divergente | PASSOU |
+| T27 | Snapshot anterior ausente | PASSOU |
+| T28 | Evento anterior à janela/instância sem vínculo suficiente | PASSOU |
+| T29 | Perda explícita de continuidade | PASSOU |
+| T30 | Fechamento idempotente e evento tardio recusado | PASSOU |
+| T31 | Jobs concorrentes separados | PASSOU |
+| T32 | Ordem temporal inválida | PASSOU |
+| T33 | Buffer cheio preserva evidências anteriores | PASSOU |
+| T34 | Falha de decodificação | PASSOU |
+| T35 | Transporte indisponível | PASSOU |
+| T36 | Nenhum job cria populated=0 | PASSOU |
+| T37 | done não promove PARADA_CONFIRMADA | PASSOU |
+| T38 | Ausência de PIDs permanece independente | PASSOU |
+| T39 | Transporte nativo não ativado e StopUnit proibido | PASSOU |
+| T40 | Sem criação de scope/importação pelo executor | PASSOU |
+
+Onze testes adicionais verificam cabeçalhos/tempo locais, mudança de proprietário autenticada pelo cabeçalho do daemon em mock, overflow nativo, decoder, serial real do envelope, erro de resposta, fechamento em exceção, drain conservando tempo, serial divergente e falhas simultâneas. Nenhuma fixture comprova a identidade de uma instância anterior quando os metadados forem indistinguíveis; a limitação de atomicidade é preservada.
+
+Resultados: **51 testes C2-A**, **178 testes Python seguros no total**, **2 testes Rust sintéticos** (5 filtrados) e regressão Rust filtrada **102 aprovados/0 falhos/93 filtrados**. Passaram cargo fmt --check, cargo check --offline --all-targets e git diff --check. Permanecem três avisos históricos dead_code EC-04. Comandos Python usaram PYTHONDONTWRITEBYTECODE=1; variáveis opcionais D/V/checkpoint/trace foram removidas dos comandos Rust. Não houve scope, Subscribe real, StopUnit real, OOM ou ensaio.
+
+### Parecer e pendências
+
+**C2-A APROVADA PARA AUDITORIA**, no escopo de infraestrutura isolada e validação simulada. Implementado/validado por testes seguros não significa autenticado/validado no barramento real. As cinco responsabilidades pendentes de C1 — origem/conexão, subscrição, buffering, correlação e encerramento — têm implementação isolada e testes, com os limites nativos acima expressos.
+
+Integração operacional está DESATIVADA e PENDENTE DE AUTORIZAÇÃO. Exige revisão independente, isolamento/prazo da conexão inicial e do contexto GLib, estratégia autorizada de emissão/serial na mesma conexão, coleta autenticada de snapshots, tratamento de referência de Unit e corrida de substituição, além de testes de integração especificamente autorizados. Não remover o impedimento de vínculo atômico nem habilitar PARADA_CONFIRMADA por simples done. Não se propõe terceiro ensaio nesta entrega.
+
+B2 concluída e inalterada; C1 preservada. Controles sintéticos anteriores aprovados no hospedeiro conforme evidência anterior, sem nova comprovação aqui. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO.
