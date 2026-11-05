@@ -26,8 +26,24 @@ class PopulationObserver:
         self.dropped = 0
         self.instance_bound = False
         self.started_ns = None
+        self.read_index = 0
+        self.gap_epoch = 0
+        self.gap_events = []
+        self.gap_events_lost = 0
+        self.error_count = 0
+        self.deduplicated = 0
+        self.deduplicated_since_previous = 0
+
+    def gap(self, kind, timestamp):
+        self.gap_epoch += 1
+        if len(self.gap_events) < 64:
+            self.gap_events.append({'kind': kind, 'monotonic_ns': timestamp, 'read_index': self.read_index})
+        else:
+            self.gap_events_lost += 1
 
     def error(self, exc):
+        self.error_count += 1
+        self.gap('read_error', time.monotonic_ns())
         if len(self.errors) < 32:
             self.errors.append({'monotonic_ns': time.monotonic_ns(), 'type': type(exc).__name__, 'reason': str(exc)})
 
@@ -45,6 +61,7 @@ class PopulationObserver:
     def poll(self):
         if self.finished or time.monotonic() >= self.deadline or self.events is None:
             return
+        self.read_index += 1
         try:
             os.lseek(self.events, 0, os.SEEK_SET)
             data = os.read(self.events, 16385)
@@ -63,13 +80,19 @@ class PopulationObserver:
             if (self.samples and self.samples[-1]['events'] == events
                     and self.samples[-1]['path_inode'] == path_inode
                     and now - self.samples[-1]['monotonic_ns'] < LOG_INTERVAL_NS):
+                self.deduplicated += 1
+                self.deduplicated_since_previous += 1
                 return
             if len(self.samples) >= MAX_SAMPLES:
                 self.dropped += 1
+                self.gap('sample_limit', now)
                 return
             self.samples.append({'monotonic_ns': now, 'unix_ns': time.time_ns(),
                                  'path': str(self.path), 'inode': self.inode, 'path_inode': path_inode,
-                                 'invocation_id': self.invocation_id, 'events': events})
+                                 'invocation_id': self.invocation_id, 'events': events,
+                                 'read_index': self.read_index, 'gap_epoch': self.gap_epoch,
+                                 'deduplicated_since_previous': self.deduplicated_since_previous})
+            self.deduplicated_since_previous = 0
         except Exception as exc:
             self.error(exc)
 
@@ -90,17 +113,20 @@ class PopulationObserver:
                     except OSError as exc:
                         self.error(exc)
                     setattr(self, attr, None)
-        transitions = []
-        for previous, current in zip(self.samples, self.samples[1:]):
-            if previous['events']['populated'] == '1' and current['events']['populated'] == '0':
-                transitions.append({'from_ns': previous['monotonic_ns'], 'to_ns': current['monotonic_ns'],
-                                    'meaning': 'valores 1 e 0 lidos; instante exato entre leituras desconhecido'})
-        return {'started_ns': self.started_ns, 'first_sample_ns': self.samples[0]['monotonic_ns'] if self.samples else None,
+        result = {'started_ns': self.started_ns, 'first_sample_ns': self.samples[0]['monotonic_ns'] if self.samples else None,
                 'path': str(self.path), 'inode': self.inode,
-                'invocation_id': self.invocation_id, 'instance_bound': self.instance_bound, 'samples': self.samples, 'errors': self.errors,
-                'readings_1_then_0': transitions, 'transition_instant_observed': False, 'dropped_samples': self.dropped,
+                'invocation_id': self.invocation_id, 'instance_bound': self.instance_bound,
+                'samples': self.samples, 'errors': self.errors, 'error_count': self.error_count,
+                'gap_events': self.gap_events, 'gap_events_lost': self.gap_events_lost,
+                'deduplicated_samples': self.deduplicated,
+                'transition_instant_observed': False, 'dropped_samples': self.dropped,
                 'descriptors_closed': self.directory is None and self.events is None,
                 'scope': 'subárvore e janela lidas; não exclui processos escapados'}
+        sequence = population_sequences(result, self.invocation_id)
+        result['readings_1_then_0'] = [{'from_ns': x['one_ns'], 'to_ns': x['zero_ns'],
+               'meaning': 'leituras sem lacuna registrada; instante exato desconhecido'} for x in sequence['pairs']]
+        result['continuity'] = sequence['diagnostics']
+        return result
 
 
 def run_observed(command, timeout, observe):
@@ -158,69 +184,137 @@ def journal_evidence(record, proof):
             'reason': 'journal é corroborativo; requer origem e job/estado verificáveis'}
 
 
-def classifications(report):
-    observer = report.get('concurrent_population', {})
-    proof_invocation = report.get('invocation_id')
-    limitations = []
-    rejected = []
-    valid = []
-    started = report.get('request_started', {}).get('monotonic_ns')
-    finished = report.get('request_finished', {}).get('monotonic_ns')
+def population_sequences(observer, proof_invocation):
+    """Adjacência original + ausência de lacuna registrada, nunca continuidade física."""
     positive_ns = lambda value: type(value) is int and value > 0
-    request_time_valid = positive_ns(started) and positive_ns(finished) and finished >= started
-    accepted = report.get('request', {}).get('status') == 'ACEITA'
-    if not request_time_valid:
-        limitations.append('timestamps da solicitação ausentes ou inválidos')
     binding = (observer.get('instance_bound') is True and isinstance(proof_invocation, str)
                and len(proof_invocation) == 32 and all(x in '0123456789abcdef' for x in proof_invocation)
                and observer.get('invocation_id') == proof_invocation
                and type(observer.get('inode')) is int and observer['inode'] > 0)
-    if not binding:
-        limitations.append('vínculo de inode/InvocationID não comprovado')
+    rejected, entries, limitations = [], [], []
     previous_time = None
     ordered = True
     for index, sample in enumerate(observer.get('samples', [])):
+        reason = None
+        timestamp = sample.get('monotonic_ns') if isinstance(sample, dict) else None
         if not isinstance(sample, dict):
-            rejected.append({'index': index, 'reason': 'amostra inválida'})
-            continue
-        timestamp = sample.get('monotonic_ns')
-        if not positive_ns(timestamp):
+            reason = 'amostra inválida'
+        elif not positive_ns(timestamp):
+            reason = 'timestamp ausente/inválido'
             ordered = False
-            rejected.append({'index': index, 'reason': 'timestamp ausente/inválido'})
-            continue
-        if previous_time is not None and timestamp <= previous_time:
+        elif previous_time is not None and timestamp <= previous_time:
+            reason = 'timestamps fora de ordem ou repetidos'
             ordered = False
-            rejected.append({'index': index, 'reason': 'timestamps fora de ordem ou repetidos'})
+        else:
+            previous_time = timestamp
+            if (not binding or sample.get('invocation_id') != proof_invocation
+                    or type(sample.get('inode')) is not int or sample['inode'] != observer['inode']
+                    or sample.get('path_inode', observer['inode']) not in (None, observer['inode'])):
+                reason = 'inode/InvocationID divergente'
+            elif not isinstance(sample.get('events'), dict) or sample['events'].get('populated') not in ('0', '1'):
+                reason = 'populated ausente/inválido'
+        if reason:
+            rejected.append({'index': index, 'reason': reason})
+        else:
+            entries.append((index, sample))
+    raw_gaps = observer.get('gap_events', [])
+    errors = observer.get('errors', [])
+    gaps = list(raw_gaps) if isinstance(raw_gaps, list) else []
+    malformed_metadata = not isinstance(raw_gaps, list) or not isinstance(errors, list)
+    if not isinstance(errors, list):
+        errors = []
+    drops = observer.get('dropped_samples', 0)
+    error_count = observer.get('error_count', len(errors))
+    if type(error_count) is not int or error_count < len(errors):
+        malformed_metadata = True
+        error_count = len(errors)
+    unknown = malformed_metadata or bool(observer.get('gap_events_lost', 0))
+    recorded_errors = sum(isinstance(x, dict) and x.get('kind') == 'read_error' for x in gaps)
+    recorded_drops = sum(isinstance(x, dict) and x.get('kind') == 'sample_limit' for x in gaps)
+    # Logs antigos: erros com timestamp são posicionáveis; descartes agregados não são.
+    if recorded_errors > error_count:
+        unknown = True
+    if recorded_errors < error_count:
+        if recorded_errors == 0 and error_count == len(errors):
+            gaps.extend(dict(error, kind='read_error') if isinstance(error, dict) else {} for error in errors)
+        else:
+            unknown = True
+    if type(drops) is not int or drops < 0 or recorded_drops != drops:
+        unknown = True
+    if any(not isinstance(x, dict) or not positive_ns(x.get('monotonic_ns')) for x in gaps):
+        unknown = True
+    pairs, interrupted = [], []
+    for (left_index, left), (right_index, right) in zip(entries, entries[1:]):
+        # Filtragem é usada só para diagnóstico: índice original é obrigatório.
+        if left['events']['populated'] != '1' or right['events']['populated'] != '0':
             continue
-        previous_time = timestamp
-        if (not binding or sample.get('invocation_id') != proof_invocation
-                or type(sample.get('inode')) is not int or sample.get('inode') != observer.get('inode')
-                or sample.get('path_inode', observer.get('inode')) not in (None, observer.get('inode'))):
-            rejected.append({'index': index, 'reason': 'inode/InvocationID divergente'})
-            continue
-        if not isinstance(sample.get('events'), dict) or sample['events'].get('populated') not in ('0', '1'):
-            rejected.append({'index': index, 'reason': 'populated ausente/inválido'})
-            continue
-        valid.append(sample)
-    if not ordered:
-        limitations.append('ordem temporal incompleta; esvaziamento pós-solicitação não classificável')
-    if observer.get('errors'):
-        limitations.append('erros de leitura: ver concurrent_population.errors')
-    if observer.get('dropped_samples', 0):
-        limitations.append('amostras descartadas pelo limite de volume')
+        reasons = []
+        if right_index != left_index + 1:
+            reasons.append('AMOSTRA_INTERMEDIARIA_REJEITADA')
+        if unknown:
+            reasons.append('DESCARTE_COM_POSICAO_DESCONHECIDA')
+        if any(left['monotonic_ns'] <= x.get('monotonic_ns', 0) <= right['monotonic_ns']
+               for x in gaps if isinstance(x, dict) and positive_ns(x.get('monotonic_ns'))):
+            reasons.append('LACUNA_REGISTRADA_NO_INTERVALO')
+        epochs = (left.get('gap_epoch'), right.get('gap_epoch'))
+        if epochs != (None, None) and (any(type(x) is not int or x < 0 for x in epochs) or epochs[0] != epochs[1]):
+            reasons.append('EPOCA_DE_CONTINUIDADE_DIVERGENTE')
+        indexes = (left.get('read_index'), right.get('read_index'))
+        if indexes != (None, None):
+            dedup = right.get('deduplicated_since_previous')
+            if (any(type(x) is not int or x <= 0 for x in indexes)
+                    or type(dedup) is not int or dedup < 0 or indexes[1] - indexes[0] != dedup + 1):
+                reasons.append('LEITURAS_INTERMEDIARIAS_NAO_EXPLICADAS')
+        pair = {'one_ns': left['monotonic_ns'], 'zero_ns': right['monotonic_ns'],
+                'one_index': left_index, 'zero_index': right_index,
+                'interval_ns': right['monotonic_ns'] - left['monotonic_ns'],
+                'deduplicated_reads_between': right.get('deduplicated_since_previous'),
+                'physical_continuity_claimed': False}
+        if reasons:
+            interrupted.append(dict(pair, reasons=reasons))
+        else:
+            pairs.append(pair)
+    if not binding:
+        limitations.append('vínculo de inode/InvocationID não comprovado')
     if rejected:
-        limitations.append('amostras rejeitadas na classificação')
+        limitations.append('amostras rejeitadas interrompem adjacência original')
+    if errors:
+        limitations.append('erros de leitura registrados por intervalo quando posicionáveis')
+    if drops:
+        limitations.append('amostras não armazenadas por limite')
+    if unknown:
+        limitations.append('posição de descarte/erro desconhecida impede qualificar sequências')
+    diagnostics = {'SEQUENCIA_CONTINUA_OBSERVADA': bool(pairs),
+                   'SEQUENCIA_INTERROMPIDA': bool(interrupted or rejected or gaps or unknown),
+                   'AMOSTRA_INTERMEDIARIA_REJEITADA': any('AMOSTRA_INTERMEDIARIA_REJEITADA' in x['reasons'] for x in interrupted),
+                   'DESCARTE_COM_POSICAO_DESCONHECIDA': unknown,
+                   'ORDEM_TEMPORAL_INVALIDA': not ordered}
+    return {'valid': [x[1] for x in entries], 'pairs': pairs, 'interrupted_pairs': interrupted,
+            'rejected': rejected, 'ordered': ordered, 'limitations': limitations, 'diagnostics': diagnostics}
+
+
+def classifications(report):
+    observer = report.get('concurrent_population', {})
+    proof_invocation = report.get('invocation_id')
+    sequence = population_sequences(observer, proof_invocation)
+    valid = sequence['valid']
+    pairs = sequence['pairs']
+    rejected = sequence['rejected']
+    ordered = sequence['ordered']
+    limitations = list(sequence['limitations'])
+    started = report.get('request_started', {}).get('monotonic_ns')
+    finished = report.get('request_finished', {}).get('monotonic_ns')
+    request_time_valid = type(started) is int and started > 0 and type(finished) is int and finished >= started
+    accepted = report.get('request', {}).get('status') == 'ACEITA'
+    if not request_time_valid:
+        limitations.append('timestamps da solicitação ausentes ou inválidos')
     before = [x for x in valid if request_time_valid and x['monotonic_ns'] < started]
     after = [x for x in valid if request_time_valid and x['monotonic_ns'] > started]
     zero_before = [x['monotonic_ns'] for x in before if x['events']['populated'] == '0']
     one_before = [x['monotonic_ns'] for x in before if x['events']['populated'] == '1']
     zero_after = [x['monotonic_ns'] for x in after if x['events']['populated'] == '0']
-    pairs = [{'one_ns': one['monotonic_ns'], 'zero_ns': zero['monotonic_ns']}
-             for one, zero in zip(valid, valid[1:])
-             if one['events']['populated'] == '1' and zero['events']['populated'] == '0']
-    # B exige 1 prévio e 0 após INÍCIO do pedido aceito; não afirma causalidade/conclusão.
     anchored = [pair for pair in pairs if request_time_valid and pair['one_ns'] < started < pair['zero_ns']]
-    emptied_after_request = bool(accepted and request_time_valid and ordered and anchored)
+    emptied_after_request = bool(accepted and request_time_valid and anchored)
     if not accepted:
         limitations.append('stop não aceito; leituras não qualificam esvaziamento pós-solicitação')
     if zero_after and not anchored:
@@ -246,6 +340,7 @@ def classifications(report):
                 'zero_during_request_ns': [t for t in zero_after if t <= finished],
                 'zero_after_request_finished_ns': [t for t in zero_after if t > finished],
                 'readings_1_then_0': pairs, 'readings_1_before_0_after': anchored,
+                'continuity': sequence['diagnostics'], 'interrupted_pairs': sequence['interrupted_pairs'],
                 'exact_transition_instant_observed': False,
                 'removed_without_zero': bool(report.get('unit_removed') and not any(x['events']['populated'] == '0' for x in valid)),
                 'rejected_samples': rejected, 'limitations': limitations,

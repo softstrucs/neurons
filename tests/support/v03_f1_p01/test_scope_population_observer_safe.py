@@ -71,7 +71,8 @@ class SafePopulationObserver(unittest.TestCase):
         report['concurrent_population']['errors'] = [{'reason': 'leitura falhou'}]
         report['concurrent_population']['dropped_samples'] = 3
         result = observer.classifications(report)
-        self.assertTrue(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertFalse(result['POPULACAO_VAZIA_OBSERVADA'])
+        self.assertTrue(result['population_timing']['continuity']['DESCARTE_COM_POSICAO_DESCONHECIDA'])
         self.assertTrue(result['population_timing']['limitations'])
         self.assertTrue(result['LIMPEZA_INTEGRAL_INCONCLUSIVA'])
         report['concurrent_population']['samples'][1]['events'] = {}

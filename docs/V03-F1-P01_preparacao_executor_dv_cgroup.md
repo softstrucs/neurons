@@ -295,3 +295,64 @@ PARADA_CONFIRMADA continua dependendo do estado da mesma unidade/InvocationID; A
 Passaram **83 testes Python seguros** (27 executor, 29 evidências, 10 controles, 17 observador), dois Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão Rust filtrada: **102 aprovados, zero falhos e 93 filtrados**; três avisos históricos EC-04 permanecem. Foram cobertos os cenários da tabela, zero durante e após retorno do cliente, erros de leitura, amostras descartadas, estrutura incompleta e distinção entre A/B/C. Somente testes locais seguros; bytecode desabilitado. Critérios de propriedade e segurança da parada não foram modificados.
 
 **Estado preservado:** primeiro ensaio com PARADA CORROBORADA e LIMPEZA INTEGRAL INCONCLUSIVA. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Nenhuma etapa posterior ou nova tentativa real autorizada por esta correção.
+
+## B2 — Continuidade e integridade das sequências
+
+Base `48377b0f00020f48fb57cc20e68e74f05ee57107`. Verificação inicial: origin softstrucs/neurons, branch devs, HEAD igual à base e árvore limpa. **IMPLEMENTADO e VALIDADO POR TESTES SEGUROS; VALIDAÇÃO REAL PENDENTE.** Não houve scope, repetição do ensaio ou recuperação manual. Nenhuma política systemd, limite de 64 MiB, sinal, prazo, propriedade, revalidação ou solicitação de parada foi alterada.
+
+### Defeito e correção delimitada
+
+B1 formava pares com zip(valid, valid[1:]) após remover amostras rejeitadas. Isso podia aproximar duas leituras originalmente separadas por amostra inválida, identidade divergente ou informação temporal insuficiente. PopulationObserver.finish() também formava pares sem consultar erros e descartes. Descartes agregados eram apenas limitações textuais e não interrompiam qualificação. A asserção antiga que aceitava B positivo com descarte de posição desconhecida foi corrigida.
+
+O novo population_sequences() é compartilhado por finish() e classifications(). Toda leitura validada conserva o índice original. Só se qualifica par 1/0 quando seus índices originais são consecutivos, os timestamps são válidos e estritamente crescentes e ambos pertencem ao mesmo inode/InvocationID vinculado. Amostras rejeitadas nunca são removidas para reconstruir adjacência positiva: pares separados são registrados em interrupted_pairs com suas causas. A ordem original não é reordenada. B continua exigindo pedido aceito, timestamps válidos da solicitação, 1 anterior ao início e 0 posterior ao início; zero isolado não basta.
+
+Uma falha temporal ou amostra inválida interrompe o segmento correspondente. Um segmento posterior íntegro pode continuar qualificável, mesmo que outro segmento tenha sido interrompido; ORDEM_TEMPORAL_INVALIDA permanece explícita para o conjunto. Assim, o diagnóstico global não inventa continuidade através da falha nem descarta automaticamente uma sequência independente válida. São mantidas separadamente as leituras zero, as sequências qualificáveis e a confirmação da parada.
+
+### Tipos de observação e lacuna
+
+| Tipo | Registro e efeito |
+|---|---|
+| Amostra armazenada válida | Índice original, read_index, gap_epoch e deduplicated_since_previous |
+| Amostra rejeitada/inválida | Índice e causa; quebra de adjacência original |
+| Leitura que falhou | error_count e evento read_error com timestamp/read_index; incremento de gap_epoch |
+| Amostra válida não armazenada por MAX_SAMPLES | dropped_samples e evento sample_limit com posição; incremento de gap_epoch |
+| Leitura válida repetida deduplicada | Contador próprio e número desde a amostra anterior; não incrementa gap_epoch nem dropped_samples |
+| Intervalo sem leitura registrada | Intervalo entre timestamps preservado; nenhuma observação física ininterrupta é alegada |
+| Posição de erro/descarte desconhecida | Continuidade NÃO COMPROVADA; nenhum par é qualificado com base nesse log incompleto |
+
+Os eventos de lacuna têm limite de 64 registros; gap_events_lost conta excedentes. Os limites anteriores de amostras/erros permanecem; overflow ou divergência de contadores não vira ausência de falha. Logs antigos com erros timestampados podem localizar o erro; descarte somente agregado, erro sem timestamp ou contabilidade inconsistente mantém posição desconhecida. No coletor atual, read_index e gap_epoch também detectam leituras intermediárias não explicadas. Diferença de read_index entre amostras deve corresponder exatamente às deduplicações válidas mais a leitura corrente. Uma deduplicação contabilizada não é falha automática.
+
+Eventos de erro/descarte que intersectam o intervalo fechado entre as duas leituras bloqueiam o par. Erro comprovadamente anterior ou posterior ao intervalo fica como limitação, sem invalidar outro segmento íntegro. Se a posição não puder ser determinada, a regra é conservadora: não qualificar sequência. Ao atingir MAX_SAMPLES, uma leitura zero não armazenada não é inventada; um descarte posterior a um par já observado não o torna retroativamente inexistente quando a posição é conhecida. Qualquer perda de posição permanece conservadora.
+
+Diagnósticos estruturados: SEQUENCIA_CONTINUA_OBSERVADA, SEQUENCIA_INTERROMPIDA, AMOSTRA_INTERMEDIARIA_REJEITADA, DESCARTE_COM_POSICAO_DESCONHECIDA e ORDEM_TEMPORAL_INVALIDA. SEQUENCIA_INTERROMPIDA sinaliza que há interrupção no conjunto; interrupted_pairs localiza os pares candidatos atingidos. Pode coexistir com sequência íntegra independente. Os pares incluem índices originais, intervalo em ns e deduplicações conhecidas.
+
+**Adjacência significa ausência de lacuna registrada entre as leituras, não continuidade física da população.** Leituras e pausas entre chamadas não dão cobertura ininterrupta; a amostragem pode perder mudanças. physical_continuity_claimed e exact_transition_instant_observed permanecem false. B não prova instante exato, causalidade, ausência universal de escape ou limpeza integral. PARADA_CONFIRMADA, ausência de conhecidos, falha, unidade removida e limpeza integral inconclusiva continuam separadas. Nenhum critério científico D04-E03 foi alterado.
+
+### Matriz de testes B2
+
+| Teste | Caso | Resultado esperado e obtido |
+|---|---|---|
+| T01 | 1/0 válido, sem lacuna | Sequência qualificável |
+| T02 | Amostra inválida intermediária | Interrompida |
+| T03 | Timestamp inválido intermediário | Interrompida; ordem inválida |
+| T04 | Timestamp fora de ordem | Interrompida |
+| T05 | InvocationID intermediário divergente | Interrompida |
+| T06 | Inode intermediário divergente | Interrompida |
+| T07 | populated intermediário inválido | Interrompida |
+| T08 | Descarte posicionado entre 1/0 | Interrompida |
+| T09 | Descarte/contabilidade sem posição suficiente | Continuidade não comprovada |
+| T10 | Deduplicação válida | Sequência mantida; contador próprio |
+| T11 | Zero isolado após pedido | Sem B positivo |
+| T12 | Zero só antes do pedido | Sem B positivo |
+| T13 | Pedido recusado | Sem B positivo |
+| T14 | Pedido aceito com sequência íntegra | B positivo local; A/C não promovidos |
+| T15 | Remoção sem zero | Sem B positivo |
+| T16 | Erro de leitura entre amostras | Interrompida, também no finish() real com arquivo temporário |
+| T17 | Erro fora do intervalo | Segmento válido preservado; limitação registrada |
+| T18 | MAX_SAMPLES atingido | Zero descartado não inventado; descarte posterior posicionado não apaga par anterior |
+| T19 | Múltiplos segmentos válidos/interrompidos | Só o segmento íntegro pode qualificar |
+| T20 | Timestamps do pedido ausentes | Sem B positivo |
+
+Passaram **20 testes B2 pertinentes** e a suíte completa de **103 testes Python seguros** (inclui os 20), dois testes Rust sintéticos, cargo fmt --check, cargo check --offline --all-targets e git diff --check. Regressão Rust filtrada: **102 aprovados, zero falhos e 93 filtrados**. PYTHONDONTWRITEBYTECODE=1 foi usado nos testes; variáveis opcionais D/V/checkpoint/trace foram removidas do ambiente dos comandos Rust. Permanecem três avisos históricos EC-04. Não se somam os dois testes Rust específicos como cobertura independente da regressão.
+
+**Parecer: APTO PARA AUDITORIA DE AUTORIZAÇÃO DO SEGUNDO ENSAIO.** Isso não autoriza executá-lo. Primeiro ensaio preservado: PARADA CORROBORADA, LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio NÃO AUTORIZADO. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO. Não avançar automaticamente.
