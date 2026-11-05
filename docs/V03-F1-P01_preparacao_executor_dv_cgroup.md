@@ -547,3 +547,120 @@ Resultados: **51 testes C2-A**, **178 testes Python seguros no total**, **2 test
 Integração operacional está DESATIVADA e PENDENTE DE AUTORIZAÇÃO. Exige revisão independente, isolamento/prazo da conexão inicial e do contexto GLib, estratégia autorizada de emissão/serial na mesma conexão, coleta autenticada de snapshots, tratamento de referência de Unit e corrida de substituição, além de testes de integração especificamente autorizados. Não remover o impedimento de vínculo atômico nem habilitar PARADA_CONFIRMADA por simples done. Não se propõe terceiro ensaio nesta entrega.
 
 B2 concluída e inalterada; C1 preservada. Controles sintéticos anteriores aprovados no hospedeiro conforme evidência anterior, sem nova comprovação aqui. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO; D04-E03 NÃO HOMOLOGADA; CONGELAMENTO NÃO APROVADO; PAINEL F NÃO AUTORIZADO.
+
+## C2-A-R1 — Correção e endurecimento do adaptador
+
+Base inicial confirmada: `b0f4d4d7000296a0c3a4357de0503988dfdf4f66`, repositório softstrucs/neurons, branch devs, árvore limpa. Esta revisão substitui a escolha de barramento e as ressalvas de correlação descritas em C2-A, preservando seu registro histórico. C1, B2, executor operacional, política systemd, src/ e dependências Cargo permanecem inalterados.
+
+### R1: alvo explícito e divergência de integração
+
+NativeTransport agora seleciona o **barramento de sistema** por endereço literal `unix:path=/run/dbus/system_bus_socket`, socket canônico do Debian 12. Usar somente BUS_SYSTEM permitiria seleção do endereço pela variável DBUS_SYSTEM_BUS_ADDRESS; o endereço literal evita essa seleção implícita. Não há fallback para sessão, autolaunch ou endereço obtido do ambiente. Ausência do socket resulta em falha, sem adaptação do hospedeiro. O construtor BusConnection(address, mainloop=...) cria uma conexão dedicada; não se usa o singleton SystemBus/SessionBus. A seleção e as falhas foram testadas com factory substituída por mock, sem abrir socket.
+
+**Divergência encontrada:** o código operacional existente chama systemd-run --user e systemctl --user. Portanto suas unidades pertencem ao gerenciador de usuário; não há evidência de que pertençam ao gerenciador de sistema. O alvo de sistema foi implementado conforme o requisito explícito desta revisão, mas NÃO pode ser integrado como observador equivalente dessas unidades. Compatibilizar gerenciador, autorização e unidades exige decisão arquitetural futura, fora desta etapa; não se migrou executor nem ensaio para o gerenciador de sistema. Essa divergência é bloqueante para integração operacional, não para auditar o adaptador isolado.
+
+### R2: semântica de seriais e emissão não comprovada
+
+Conferidas as APIs locais de dbus-python 1.3.2 sem conexão: BusConnection.__new__, send_message, get_serial, get_reply_serial e DBusGMainLoop. A [especificação D-Bus](https://dbus.freedesktop.org/doc/dbus-specification.html) distingue o serial de cada mensagem de seu cabeçalho ReplySerial. A documentação [dbus-python](https://dbus.freedesktop.org/doc/dbus-python/dbus.bus.html) e as docstrings instaladas sustentam a API utilizada; a interface Manager permanece compatível com [systemd 252](https://www.freedesktop.org/software/systemd/man/252/org.freedesktop.systemd1.html).
+
+- call_serial identifica a chamada no espaço de seriais da conexão que a enviou.
+- message_serial identifica a própria mensagem de resposta e pode ser diferente do serial da chamada.
+- reply_serial referencia o serial da chamada correspondente; somente este é comparado com call_serial.
+- O corpo da resposta contém o caminho do job, cujo componente numérico determina o job ID. Nenhum desses números é equivalente ao serial D-Bus.
+- JobRemoved correlaciona ID/caminho/unidade e origem/janela. Seu corpo não contém serial da chamada nem InvocationID.
+
+O Envelope agora distingue message_serial e reply_serial. Observation recusa respostas sem pedido, com serial inválido/divergente, de outro remetente ou fora da janela; duplicatas invalidam a continuidade sem substituir a primeira resposta. Eventos anteriores à resposta permanecem no buffer. Ausência de resposta não comprova aceitação nem conclusão.
+
+expect_declared_reply valida o uint32 positivo e rejeita repetição, mas representa **DECLARADO_SEM_EMISSAO_COMPROVADA**. O DTO de entrada não é atestado de envio. Na saída nativa para C1, emitted é forçado a false: não há classificação positiva de pedido/job fundada apenas nesse serial declarado. O modelo C1 não foi alterado, e suas classificações simuladas permanecem exercitáveis no backend simulado com proveniência explícita.
+
+Em integração futura autorizada, o envio deverá ocorrer na mesma conexão dedicada com o proprietário previamente fixado, e o serial deverá vir do retorno efetivo de Connection.send_message(message), ou da mensagem efetivamente enviada e consultada por get_serial. Não usar get_serial antes do envio (pode ser zero), o serial da resposta, um contador inventado ou um cliente systemctl em outra conexão. Subscrição/filtro/buffer devem estar prontos antes do envio; conservar eventos que precedem a resposta. A ponte de emissão real e sua comprovação continuam NÃO IMPLEMENTADAS. Não foi acrescentada API de envio StopUnit.
+
+### R3: limites, despacho e falhas simultâneas
+
+Chamadas de configuração usam send_message_with_reply_and_block, com timeout de cliente de 1 segundo, uma tentativa e nenhuma reconexão. A biblioteca faz a associação pending-call/ReplySerial; o adaptador acrescenta lista fechada de destino/caminho/interface/método e valida tipo METHOD_RETURN, remetente e assinatura de todas as respostas de configuração, inclusive AddMatch. Falhas invalidam continuidade.
+
+DBusGMainLoop(set_as_default=False) evita alterar o mainloop global de novas conexões. A docstring instalada afirma que contextos GLib não padrão não são suportados. Portanto a conexão dedicada NÃO implica contexto de despacho dedicado. drain usa o contexto padrão, exige acquire sem espera, faz iteration(False), limita a 32 iterações e usa orçamento cooperativo de 50 ms. Falha de aquisição, pending, callback, despacho ou release é registrada e invalida continuidade; registros anteriores não são descartados por essas falhas. Quando despacho e release falham, preserva-se a exceção original e registram-se ambas.
+
+Esses limites não preemptam um callback. Um teste com relógio simulado demonstra que um despacho pode ultrapassar 50 ms e registra absolute_deadline_guaranteed=false. Construtor, handshake/autenticação inicial libdbus, callbacks compartilhados, chamadas da biblioteca e fechamento não têm prazo absoluto de processo comprovado nesta etapa. Timeout configurado não significa limite absoluto nem operação remota concluída.
+
+Permanecem 128 eventos e 262.144 bytes estimados por buffer, mensagem decodificada até 65.536 bytes e 32 diagnósticos armazenados. A fila nativa e Observation possuem buffers separados; overhead Python, buffers internos libdbus, decodificação e contexto GLib não são limitados por esses números. total_memory_bound_guaranteed=false é explícito. Overflow preserva os registros já retidos e invalida conclusão positiva. Não se adicionaram threads, subprocessos, retries ou watchdog operacional.
+
+Abertura malsucedida tenta fechamento; erros simultâneos são registrados sem ocultar a primeira causa. close é idempotente, tenta fechar a conexão mesmo se falhar a remoção do filtro, registra ambas as falhas e libera referências/filas Python. Falha de close continua significando que a liberação do recurso externo não foi comprovada; não se declara sucesso a partir da referência Python removida.
+
+Proposta futura, NÃO implementada: isolar o adaptador em processo próprio, com contexto padrão pertencente somente a ele, IPC limitado e supervisor externo com orçamento de vida. Isso permitiria controlar a vida do cliente, mas timeout/morte do cliente continuaria sem comprovar cancelamento/conclusão do job remoto. Exige autorização separada; não há supervisor ou subprocesso novo nesta etapa.
+
+### R4: identidade do gerenciador e da instância
+
+A evidência é vinculada ao socket de sistema fixo, epoch exclusivo da conexão e proprietário único obtido por GetNameOwner autenticado pela origem do bus daemon. Subscribe é dirigido ao proprietário único e somente seu ACK válido confirma subscrição. Respostas/sinais de outro remetente ou conexão são recusados. NameOwnerChanged válido do daemon para o serviço, desconexão, evento de proprietário malformado ou falha de decodificação invalidam continuidade. Não se reutiliza conexão fechada nem se reconecta preservando evidências anteriores.
+
+Essas verificações são implementadas e testadas com mocks, não autenticadas no barramento real nesta atividade. O proprietário do nome identifica o participante naquele barramento; não prova por si só PID 1, propriedade de uma unidade, identidade de um cgroup ou InvocationID. Nome/caminho da unidade pode ser reutilizado. JobRemoved não tem vínculo atômico com InvocationID; snapshots continuam evidências separadas. Evento de conexão/janela anterior não qualifica; se uma substituição de instância não puder ser distinguida pelos metadados disponíveis, a identidade permanece inconclusiva. done nunca promove PARADA_CONFIRMADA e não cria populated=0; B2 continua independente.
+
+### R5: matriz de testes simulados
+
+Todas as factories de conexão nativa, respostas, mensagens e contextos exercitados nesta revisão foram substituídos por mocks. Nenhuma conexão real, Subscribe real ou chamada systemd ocorreu.
+
+| Caso | Cenário | Resultado |
+|---|---|---|
+| T01 | Socket explícito do sistema e mainloop sem configuração global | PASSOU |
+| T02 | Ambiente divergente ignorado, sem fallback após falha | PASSOU |
+| T03 | Construtor dedicado por objeto/epoch diferente | PASSOU |
+| T04 | Falha de abertura e encerramento do ciclo | PASSOU |
+| T05 | Falha de autenticação antes das chamadas | PASSOU |
+| T06 | Proprietário único válido e ordem AddMatch/GetNameOwner | PASSOU |
+| T07 | Proprietário ausente | PASSOU |
+| T08 | Origem divergente na resposta do proprietário | PASSOU |
+| T09 | Mudança de proprietário | PASSOU |
+| T10 | Desconexão no despacho | PASSOU |
+| T11 | Serial declarado válido/inválido não comprova emissão nativa | PASSOU |
+| T12 | ReplySerial correspondente, serial da resposta distinto | PASSOU |
+| T13 | ReplySerial divergente | PASSOU |
+| T14 | Resposta de outro remetente | PASSOU |
+| T15 | Resposta duplicada preserva a primeira e invalida conclusão | PASSOU |
+| T16 | Resposta ausente | PASSOU |
+| T17 | JobRemoved anterior à resposta | PASSOU |
+| T18 | JobRemoved posterior; resposta fora da janela recusada | PASSOU |
+| T19 | Outro job | PASSOU |
+| T20 | Outra unidade | PASSOU |
+| T21 | Evento fora de ordem | PASSOU |
+| T22 | Epoch anterior/instância sem prova suficiente | PASSOU |
+| T23 | Subscrição confirmada por ACK | PASSOU |
+| T24 | Subscrição não confirmada | PASSOU |
+| T25 | Falha de AddMatch | PASSOU |
+| T26 | Falha de Subscribe com encerramento | PASSOU |
+| T27 | Overflow | PASSOU |
+| T28 | Mensagem acima do limite | PASSOU |
+| T29 | Falha de decodificação | PASSOU |
+| T30 | Despacho sem eventos, sem iteration bloqueante | PASSOU |
+| T31 | Eventos pendentes e limite de iterações | PASSOU |
+| T32 | Falhas/ocupação do contexto e release, preservando registros | PASSOU |
+| T33 | Timeout configurado e timeout de chamada simulado | PASSOU |
+| T34 | Orçamento ultrapassado sem alegar prazo absoluto | PASSOU |
+| T35 | Fechamento idempotente | PASSOU |
+| T36 | Falhas simultâneas de abertura/filtro/fechamento | PASSOU |
+| T37 | Perda de continuidade | PASSOU |
+| T38 | Eventos e envelope anteriores preservados | PASSOU |
+| T39 | done não promove PARADA_CONFIRMADA | PASSOU |
+| T40 | Nenhuma leitura populated=0 fabricada | PASSOU |
+| T41 | StopUnit fora da lista de operações | PASSOU |
+| T42 | Sem criação de scope | PASSOU |
+| T43 | Sem importação pelo executor | PASSOU |
+| T44 | Independência de B2/ausência de PIDs | PASSOU |
+| T45 | Classificações simuladas equivalentes ao modelo C1 | PASSOU |
+
+Resultados: 45 testes novos C2-A-R1; 51 C2-A existentes; 223 testes Python seguros totais (incluem C1/B2), todos aprovados. Dois Rust sintéticos aprovados, cinco filtrados; regressão filtrada: 102 aprovados, zero falhos, 93 filtrados. cargo fmt --check, cargo check --offline --all-targets e git diff --check aprovados. Três avisos históricos dead_code EC-04 e um ImportWarning de DynamicImporter/PyGObject apareceram, sem falhas. Não se modificaram dependências para suprimir avisos.
+
+Comandos efetivos de validação (logs temporários ficaram em /tmp):
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_systemd_job_transport_revision_safe.py'
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_systemd_job_transport_safe.py'
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_*_safe.py'
+cargo fmt --check
+cargo check --offline --all-targets
+env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1 cargo test --offline --test v03_f1_p01_instruments trace::tests::safe_ -- --test-threads=1
+env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1 cargo test --offline -- --skip development --skip validation --skip frozen --skip final --skip panel --skip protocol
+git diff --check
+```
+
+**Parecer: C2-A-R1 APROVADA PARA AUDITORIA**, no escopo de correções e validação simulada. Integração operacional continua bloqueada pela divergência de gerenciador, ausência de ponte comprovada de emissão/serial, ausência de prazo absoluto e isolamento nativo não validado. É necessária decisão específica sobre o gerenciador alvo, revisão independente de segurança/identidade/prazos, snapshots autenticados e testes de integração autorizados separadamente. Nenhuma dessas pendências foi declarada resolvida pelos mocks.
+
+B2 CONCLUÍDA; C1 PRESERVADA. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo ensaio: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Nenhuma etapa posterior iniciada.

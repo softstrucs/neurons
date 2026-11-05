@@ -11,6 +11,8 @@ import uuid
 
 import systemd_job_evidence as c1
 
+# Socket canônico Debian 12: não consulta DBUS_*_BUS_ADDRESS nem autolaunch.
+SYSTEM_BUS_ADDRESS = 'unix:path=/run/dbus/system_bus_socket'
 SERVICE = 'org.freedesktop.systemd1'
 PATH = '/org/freedesktop/systemd1'
 INTERFACE = SERVICE + '.Manager'
@@ -19,6 +21,8 @@ MAX_BUFFER_BYTES = 262144
 MAX_EVENTS = 128
 MAX_ERRORS = 32
 WAIT_SECONDS = 1.0
+MAX_DISPATCH = 32
+DISPATCH_SECONDS = 0.05
 UNIQUE = re.compile(r':[0-9]+\.[0-9]+\Z')
 
 
@@ -33,6 +37,7 @@ class Envelope:
     interface: str = INTERFACE
     member: str = 'JobRemoved'
     reply_serial: int = 0
+    message_serial: int = 0
 
 
 def message_size(message):
@@ -155,7 +160,7 @@ class Observation:
         self.request = replace(request, request_monotonic_ns=now or 0)
         request = self.request
         if isinstance(self.transport, NativeTransport):
-            self.transport.expected_reply_serial = request.call_serial
+            self.transport.expect_declared_reply(request.call_serial)
         if (self.ready is None or now is None or self.ready >= request.request_monotonic_ns
                 or request.connection_id != self.connection_id
                 or request.manager_owner != self.owner
@@ -185,7 +190,10 @@ class Observation:
                 self.fault('REMETENTE_DIVERGENTE')
                 return
             if envelope.kind == 'reply':
-                if (envelope.signature != 'o' or len(envelope.body) != 1
+                if (self.request is None or envelope.reply_serial != self.request.call_serial
+                        or not c1.positive(envelope.reply_serial) or envelope.reply_serial > 4294967295
+                        or not self.request.request_monotonic_ns <= now <= self.request.deadline_monotonic_ns
+                        or envelope.signature != 'o' or len(envelope.body) != 1
                         or c1.job_number(envelope.body[0]) is None
                         or type(envelope.reply_serial) is not int):
                     raise ValueError('resposta inválida')
@@ -246,7 +254,11 @@ class Observation:
         subscription = c1.Subscription(self.ready or 0, self.connection_id or '', self.owner or '',
                                        confirmed=self.ready is not None and not self.broken,
                                        available=not self.broken)
-        result = c1.correlate_stop_job(self.request, subscription, self.reply, self.events,
+        # DTO declarado não comprova emissão nativa. Nenhum serial operacional
+        # é certificado até existir integração autorizada na mesma conexão.
+        effective_request = (replace(self.request, emitted=False)
+                             if isinstance(self.transport, NativeTransport) else self.request)
+        result = c1.correlate_stop_job(effective_request, subscription, self.reply, self.events,
                                        now, before=before, after=after)
         result['transport'] = dict(provenance=self.transport.provenance,
                                    real_authentication_proven=False,
@@ -255,7 +267,11 @@ class Observation:
                                    retained=len(self.events), buffer_bytes=self.buffer_bytes,
                                    closed=self.closed, subscription_ready_ns=self.ready,
                                    reply_envelope=asdict(self.reply) if self.reply else None,
-                                   native_gaps=list(getattr(self.transport, "gaps", ())))
+                                   native_gaps=list(getattr(self.transport, "gaps", ())),
+                                   bus_target='SYSTEM' if isinstance(self.transport, NativeTransport) else 'SIMULATED',
+                                   call_binding_status='DECLARADO_SEM_EMISSAO_COMPROVADA',
+                                   absolute_deadline_guaranteed=False,
+                                   total_memory_bound_guaranteed=False)
         return result
 
     def __enter__(self):
@@ -298,27 +314,49 @@ class NativeTransport:
         self.queue_bytes = 0
         self.expected_reply_serial = None
         self.closed = False
+        self.subscribed = False
+        self.last_dispatch = None
+
+    def expect_declared_reply(self, serial):
+        """Filtro preparatório, não atestado de emissão ou autorização de stop."""
+        if not c1.positive(serial) or serial > 4294967295 or self.expected_reply_serial is not None:
+            self.mark_loss("SERIAL_DECLARADO_INVALIDO_OU_REPETIDO")
+            return
+        self.expected_reply_serial = serial
 
     def _call(self, destination, path, interface, member, signature='', args=()):
-        # Lista fechada: StopUnit não é uma operação deste adaptador.
-        if (destination, member) not in (('org.freedesktop.DBus', 'GetNameOwner'),
-                                         ('org.freedesktop.DBus', 'AddMatch'),
-                                         (self.owner, 'Subscribe')):
-            raise ValueError('operação proibida')
-        from dbus.lowlevel import MethodCallMessage
+        # Lista fechada de destino/caminho/interface/método. Sem StopUnit.
+        allowed = {('org.freedesktop.DBus', '/org/freedesktop/DBus', 'org.freedesktop.DBus', 'GetNameOwner'),
+                   ('org.freedesktop.DBus', '/org/freedesktop/DBus', 'org.freedesktop.DBus', 'AddMatch'),
+                   (self.owner, PATH, INTERFACE, 'Subscribe')}
+        if (destination, path, interface, member) not in allowed or self.bus is None or self.closed:
+            raise ValueError('operação proibida ou conexão indisponível')
+        from dbus.lowlevel import MethodCallMessage, MESSAGE_TYPE_METHOD_RETURN
         message = MethodCallMessage(destination, path, interface, member)
         message.append(*args, signature=signature)
-        return self.bus.send_message_with_reply_and_block(message, timeout_s=WAIT_SECONDS)
+        try:
+            # Pending-call da biblioteca vincula ReplySerial ao serial enviado.
+            # O timeout configurado não é um prazo absoluto de todo o processo.
+            reply = self.bus.send_message_with_reply_and_block(message, timeout_s=WAIT_SECONDS)
+            expected_signature = 's' if member == 'GetNameOwner' else ''
+            if (reply.get_type() != MESSAGE_TYPE_METHOD_RETURN or reply.get_sender() != destination
+                    or reply.get_signature() != expected_signature):
+                raise ValueError('origem/tipo/assinatura da resposta inválidos')
+            return reply
+        except Exception as exc:
+            self.mark_loss('CHAMADA:' + member + ':' + type(exc).__name__)
+            raise
 
     def open(self):
         if self.bus is not None or self.closed:
             raise RuntimeError('conexão já usada')
         import dbus.bus
         from dbus.mainloop.glib import DBusGMainLoop
-        self.bus = dbus.bus.BusConnection(dbus.bus.BUS_SESSION, mainloop=DBusGMainLoop())
-        self.bus.set_exit_on_disconnect(False)
-        self.bus.add_message_filter(self._filter)
         try:
+            self.bus = dbus.bus.BusConnection(SYSTEM_BUS_ADDRESS,
+                                              mainloop=DBusGMainLoop(set_as_default=False))
+            self.bus.set_exit_on_disconnect(False)
+            self.bus.add_message_filter(self._filter)
             if not self.bus.get_is_authenticated() or not self.bus.get_is_connected():
                 raise OSError("conexão não autenticada")
             # Match antes da descoberta: uma troca nesse intervalo invalida o ciclo.
@@ -336,16 +374,37 @@ class NativeTransport:
                 raise ValueError('proprietário inválido')
             return self.connection_id, self.owner
         except Exception:
-            self.close()
+            self.mark_loss('ABERTURA_FALHOU')
+            try:
+                self.close()
+            except Exception as close_error:
+                self.mark_loss('ENCERRAMENTO:' + type(close_error).__name__)
             raise
 
     def subscribe(self):
+        if self.closed or self.loss or self.bus is None or self.owner is None or self.subscribed:
+            raise RuntimeError('ciclo de subscrição inválido')
         reply = self._call(self.owner, PATH, INTERFACE, 'Subscribe')
         if reply.get_sender() != self.owner or reply.get_signature() != '':
+            self.mark_loss('ACK_SUBSCRIBE_INVALIDO')
             raise ValueError('ACK Subscribe inválido')
+        self.subscribed = True
 
     def _filter(self, connection, message):
+        if self.closed:
+            return
+        try:
+            self._decode_message(connection, message)
+        except Exception as exc:
+            self.mark_loss('FILTRO:' + type(exc).__name__)
+
+    def _decode_message(self, connection, message):
         from dbus.lowlevel import MESSAGE_TYPE_SIGNAL, MESSAGE_TYPE_METHOD_RETURN, MESSAGE_TYPE_ERROR
+        if self.closed:
+            return
+        if self.bus is not None and connection is not self.bus:
+            self.mark_loss('CONEXAO_DIVERGENTE')
+            return
         kind = message.get_type()
         if kind != MESSAGE_TYPE_SIGNAL:
             if kind not in (MESSAGE_TYPE_METHOD_RETURN, MESSAGE_TYPE_ERROR) or self.expected_reply_serial is None:
@@ -353,13 +412,16 @@ class NativeTransport:
             if message.get_reply_serial() != self.expected_reply_serial:
                 return
             try:
+                if self.owner is None or message.get_sender() != self.owner:
+                    raise ValueError('remetente da resposta divergente')
                 if kind == MESSAGE_TYPE_ERROR or message.get_signature() != 'o':
                     raise ValueError('resposta recusada ou inválida')
                 args = message.get_args_list()
                 if len(args) != 1:
                     raise ValueError('corpo resposta')
                 envelope = Envelope('reply', str(message.get_sender()), 'o', (str(args[0]),),
-                                    reply_serial=int(message.get_reply_serial()))
+                                    reply_serial=int(message.get_reply_serial()),
+                                    message_serial=int(message.get_serial()))
                 self._enqueue(envelope)
             except Exception as exc:
                 self.mark_loss('RESPOSTA:' + type(exc).__name__)
@@ -370,7 +432,9 @@ class NativeTransport:
             if (sender == 'org.freedesktop.DBus' and path == '/org/freedesktop/DBus'
                     and interface == 'org.freedesktop.DBus' and member == 'NameOwnerChanged'):
                 args = message.get_args_list()
-                if message.get_signature() == 'sss' and len(args) == 3 and str(args[0]) == SERVICE:
+                if message.get_signature() != 'sss' or len(args) != 3:
+                    raise ValueError('evento de proprietário inválido')
+                if str(args[0]) == SERVICE:
                     self.mark_loss('PROPRIETARIO_ALTERADO')
                 return
             if path == '/org/freedesktop/DBus/Local' and interface == 'org.freedesktop.DBus.Local' and member == 'Disconnected':
@@ -378,6 +442,8 @@ class NativeTransport:
                 return
             if path != PATH or interface != INTERFACE or member != 'JobRemoved':
                 return
+            if self.owner is None or sender != self.owner:
+                raise ValueError('remetente do sinal divergente')
             if message.get_signature() != 'uoss':
                 raise ValueError('signature')
             args = message.get_args_list()
@@ -400,37 +466,70 @@ class NativeTransport:
         self.queue_bytes += size
 
     def drain(self):
-        """Até 32 despachos/50 ms por chamada, sem espera bloqueante ou retry."""
+        """Orçamento cooperativo; não preempta callback/libdbus/GLib."""
         if self.closed or self.bus is None:
             raise OSError('conexão encerrada')
-        from gi.repository import GLib
-        context = GLib.MainContext.default()
-        deadline = time.monotonic() + 0.05
-        for _ in range(32):
-            if time.monotonic() >= deadline or not context.pending():
-                break
-            context.iteration(False)
-        if not self.bus.get_is_connected():
-            self.mark_loss('DESCONECTADO')
-        frames = list(self.queue)
-        self.queue.clear()
-        self.queue_bytes = 0
-        return frames, self.loss
+        acquired = False
+        context = None
+        started = time.monotonic()
+        dispatched = 0
+        dispatch_failed = False
+        try:
+            from gi.repository import GLib
+            # dbus-python 1.3.2 só suporta o contexto GLib padrão.
+            context = GLib.MainContext.default()
+            acquired = context.acquire()
+            if not acquired:
+                raise RuntimeError('contexto GLib ocupado')
+            for _ in range(MAX_DISPATCH):
+                if time.monotonic() - started >= DISPATCH_SECONDS or not context.pending():
+                    break
+                context.iteration(False)
+                dispatched += 1
+            if not self.bus.get_is_connected():
+                self.mark_loss('DESCONECTADO')
+            frames = list(self.queue)
+            self.queue.clear()
+            self.queue_bytes = 0
+            return frames, self.loss
+        except Exception as exc:
+            dispatch_failed = True
+            self.mark_loss('DESPACHO:' + type(exc).__name__)
+            raise
+        finally:
+            self.last_dispatch = dict(iterations=dispatched,
+                                      elapsed_seconds=time.monotonic() - started,
+                                      absolute_deadline_guaranteed=False)
+            if acquired:
+                try:
+                    context.release()
+                except Exception as exc:
+                    self.mark_loss('LIBERACAO_CONTEXTO:' + type(exc).__name__)
+                    if not dispatch_failed:
+                        raise
 
     def close(self):
-        # Conexão dedicada: fechamento libera Subscribe/matches sem afetar terceiros.
+        # Conexão dedicada: não se envia Unsubscribe em conexão compartilhada.
         if self.closed:
             return
         self.closed = True
-        if self.bus is not None:
-            try:
-                self.bus.remove_message_filter(self._filter)
-            finally:
+        first_error = None
+        try:
+            if self.bus is not None:
+                try:
+                    self.bus.remove_message_filter(self._filter)
+                except Exception as exc:
+                    first_error = exc
+                    self.mark_loss('REMOCAO_FILTRO:' + type(exc).__name__)
                 try:
                     self.bus.close()
-                finally:
-                    self.bus = None
-                    self.queue.clear()
-                    self.queue_bytes = 0
-        self.queue.clear()
-        self.queue_bytes = 0
+                except Exception as exc:
+                    if first_error is None:
+                        first_error = exc
+                    self.mark_loss('FECHAMENTO_CONEXAO:' + type(exc).__name__)
+        finally:
+            self.bus = None
+            self.queue.clear()
+            self.queue_bytes = 0
+        if first_error is not None:
+            raise first_error

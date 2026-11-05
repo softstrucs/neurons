@@ -303,7 +303,7 @@ class NativeAdapterWithoutBus(unittest.TestCase):
     def message(self, **overrides):
         from unittest.mock import Mock
         from dbus.lowlevel import MESSAGE_TYPE_SIGNAL
-        values = dict(get_type=MESSAGE_TYPE_SIGNAL, get_sender=':1.10', get_path=t.PATH,
+        values = dict(get_type=MESSAGE_TYPE_SIGNAL, get_serial=99, get_sender=':1.10', get_path=t.PATH,
                       get_interface=t.INTERFACE, get_member='JobRemoved', get_signature='uoss',
                       get_args_list=[42, '/org/freedesktop/systemd1/job/42', 'test.scope', 'done'])
         values.update(overrides)
@@ -314,6 +314,7 @@ class NativeAdapterWithoutBus(unittest.TestCase):
 
     def native(self):
         backend = t.NativeTransport(enabled=True, clock=lambda: 40)
+        backend.owner = ':1.10'
         self.addCleanup(backend.close)
         return backend
 
