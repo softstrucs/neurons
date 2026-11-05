@@ -908,3 +908,297 @@ git diff --check
 **Parecer: C2-B APROVADA PARA AUDITORIA**, exclusivamente para contratos preparatórios e avaliação sintética. Uma futura autorização exigirá auditoria independente desses contratos, implementação de produtores nativos de evidência sem aceitar alegações do chamador, preflight de runtime/socket/credenciais/gerenciador e unidade, subscrição e emissão/serial comprovadas, política de continuidade/perdas e revisão dos limites/isolamento. Não se presume que passar nos mocks satisfaça qualquer dessas condições.
 
 Não foram abertos barramentos/sockets, executados stat de runtime, Subscribe, StopUnit, systemd-run/systemctl operacionais ou experimentos. Executor, C1, B2, C2-A-R2, src/, dependências, políticas e critérios científicos preservados. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Nenhuma integração ou etapa posterior iniciada.
+
+
+## C2-C — Garantias e fronteira de integração
+
+Base inicial confirmada: `48514b174264cedf9307dd282922362155adfffc`, softstrucs/neurons, devs, árvore limpa. Inspecionados C1, transporte C2-A/R1/R2, C2-B, B2, executor e testes/documentação. Esta etapa acrescenta somente `systemd_integration_boundary.py` e testes adversariais. C1, B2, C2-A-R2, C2-B, executor, src/ e dependências permanecem inalterados. Nenhum backend ou produtor operacional foi criado/ativado.
+
+### Fronteira de confiança e modelo de garantias
+
+Trust distingue DADOS_DECLARADOS, DADOS_SIMULADOS, OBSERVACAO_NATIVA_NAO_AUTENTICADA, OBSERVACAO_NATIVA_AUTENTICADA, CORRELACAO_VERIFICADA e CONCLUSAO_EXPERIMENTAL. Não são níveis de uma escala nem uma sequência de promoção. O gateway atual aceita somente dados declarados/simulados; as demais categorias são vocabulário reservado. A origem rotulada pelo chamador é uma alegação, não prova. Categoria DECLARADA não pode ser elevada nem pela presença de campos internos SIMULADA. Nomes, seriais e timestamps válidos sintaticamente não comprovam mecanismo de produção.
+
+Nenhuma capacidade, token textual ou fixture representa produtor nativo autenticado. Todos os estados operacionais e COMPROVADA_OPERACIONALMENTE são recusados incondicionalmente pelas APIs. Assessments SIMULADA indicam apenas exercício sintético declarado; não satisfazem dependências operacionais. A matriz abaixo é ESPECIFICAÇÃO, com bloqueios atuais explícitos. Os testes verificam regras de recusa/correlação e não alteram esses estados para comprovados. Nenhuma garantia G01–G21 foi comprovada operacionalmente nesta etapa.
+
+A origem requerida nas garantias é um produtor com identidade/mecanismo demonstrados, não uma string AUTENTICADA. Para metadados OS, isso significa produtor/credenciais e mecanismo de coleta verificáveis; NÃO significa que uma inspeção de filesystem autentique D-Bus. Para mensagens, exige conexão/cabeçalhos e identidade do serviço verificados. Não há implementação desse produtor. A proteção cobre entradas pela API suportada, não execução arbitrária de Python no processo: reflexão, substituição de código ou acesso irrestrito a atributos privados não constituem sandbox. A saída operacional C2-B continua sempre inconclusiva; nem mesmo uma correlação C1 simulada done muda isso.
+
+### Matriz G01–G21
+
+Pré-requisitos e dependências são as arestas indicadas; são necessários, nunca suficientes. A evidência precisa ter origem confiável do mecanismo futuro indicado, sem aceitar atestado do próprio chamador. G21 permanece bloqueada também por falta de formalização/evidência suficiente contra escape e de alcance da conclusão; não se promete prova universal de limpeza por esta API.
+
+| ID | Descrição | Pré-requisitos/dependências | Evidências necessárias | Mecanismo futuro de verificação | Falhas possíveis | Critério de aceitação | Estado atual |
+|---|---|---|---|---|---|---|---|
+| G01 | Gerenciador correto | nenhuma aresta; contexto do produtor ainda exigido | alvo e serviço no contexto do executor | comparar USER/SYSTEM e contexto autenticado | gerenciador/namespace errado | mesmo gerenciador do executor --user | ESPECIFICADA |
+| G02 | UID correto | G01 | UID efetivo e credenciais do cliente | validar identidade local e credenciais do transporte | UID informado não corresponde ao processo | UID efetivo vinculado à conexão | ESPECIFICADA |
+| G03 | Runtime esperado | G02 | tipo, dono, permissões, caminho e device/inode | inspeção segura de ancestrais e substituições | ausência/symlink/TOCTOU | política explícita e nenhuma divergência não resolvida | ESPECIFICADA |
+| G04 | Socket esperado | G03 | socket, device/inode e peer conectado | validar objeto e peer separadamente | socket substituído ou redirecionado | endereço/objeto/peer coerentes sem alegar eliminar TOCTOU | ESPECIFICADA |
+| G05 | Conexão dedicada | G04 | handle exclusivo e epoch | produtor nativo controla criação e fechamento | reuso de handle/conexão anterior | ciclo exclusivo sem reconexão silenciosa | ESPECIFICADA |
+| G06 | Autenticação da conexão | G02, G05 | handshake e credenciais concretas | libdbus autentica transporte e expõe evidência verificável | campo textual ou handshake incompleto | produtor autenticado sem depender de alegação do chamador | BLOQUEADA |
+| G07 | Identidade do serviço | G01, G06 | GetNameOwner e credenciais do serviço | verificar resposta do daemon e serviço no gerenciador esperado | nome resolvido em broker errado | serviço/gerenciador vinculados, não apenas nome único | BLOQUEADA |
+| G08 | Proprietário único contínuo | G07 | owner, NameOwnerChanged e epoch | subscrever troca antes da descoberta e invalidar ao perder origem | owner alterado/desconexão | mesmo proprietário na janela relevante | ESPECIFICADA |
+| G09 | Subscrição confirmada | G05, G08 | ACK AddMatch e Subscribe antes do envio | validar origem/retorno na conexão dedicada | ACK ausente/tardio ou perda | subscrição válida anterior à emissão | ESPECIFICADA |
+| G10 | Instância da unidade identificada | G07, G08 | nome, object path, InvocationID, cgroup e identidade do executor | snapshots autenticados e política de referência/substituição | nome reutilizado ou geração indisponível | escopo da identidade declarado sem inventar vínculo atômico ao job | BLOQUEADA |
+| G11 | Snapshot anterior válido | G10 | snapshot prévio com origem e tempo local | validar contexto/geração/cgroup anterior ao envio | snapshot ausente/trocado/fora de ordem | identidade consistente antes do pedido | ESPECIFICADA |
+| G12 | Emissão nativa comprovada | G06, G09, G11 | registro do envio efetivo no handle dedicado | futuro produtor nativo autorizado, ainda inexistente | intenção/serial declarado apresentados como envio | emissão efetiva comprovada pelo mecanismo produtor | BLOQUEADA |
+| G13 | Serial da chamada comprovado | G12 | serial atribuído pela biblioteca no envio | capturar retorno send_message ou serial da mensagem efetivamente enviada | serial inventado ou de outra conexão | uint32 vinculado à mesma emissão/conexão | BLOQUEADA |
+| G14 | Resposta correlacionada | G08, G13 | ReplySerial, remetente e caminho do job | validar cabeçalhos e janela sem confundir serial da resposta | outro owner/serial/janela ou resposta ausente | resposta da emissão específica | ESPECIFICADA |
+| G15 | JobRemoved correlacionado | G09, G14 | uoss, job ID/path/unidade, origem e tempo | C1 com envelopes autenticados e eventos precoces preservados | job divergente/duplicatas conflitantes | mesmo job sem assumir InvocationID no sinal | ESPECIFICADA |
+| G16 | Snapshot posterior válido | G10, G15 | estado e geração posteriores autenticados | verificar mesmo contexto, geração e cgroup ou diagnosticar ausência | not-found, substituição ou lacuna | estado posterior vinculado ou inconclusivo, nunca vazio inferido | ESPECIFICADA |
+| G17 | Continuidade temporal | G08, G11 | timestamps locais e lacunas explicitamente registradas | preservar ordem original e janela, sem relógios fabricados | regressão temporal ou lacuna desconhecida | ausência de lacuna registrada no intervalo relevante | ESPECIFICADA |
+| G18 | Ausência de perda de eventos | G09, G17 | contadores, overflow e continuidade da subscrição | detectar perdas e documentar limitações de detecção | evento perdido sem diagnóstico confiável | nenhuma perda relevante conhecida; detecção incompleta bloqueia certeza | BLOQUEADA |
+| G19 | Limites de recursos atendidos | G05 | contadores Python, orçamento e isolamento nativo | validar entrada antes de cópias e auditar limites nativos separadamente | asdict, relatórios, callback ou operação bloqueante | contratos locais atendidos sem alegar RAM/prazo absoluto nativo | BLOQUEADA |
+| G20 | População do cgroup observada | G10, G17, G18, G19 | amostras reais de cgroup e metadados B2 | B2 avalia identidade, ordem, lacunas e janela | remoção sem zero ou amostra incompleta | somente B2 classifica a subárvore/janela observadas | ESPECIFICADA |
+| G21 | Limpeza integral comprovada | G15, G16, G18, G19, G20 | evidências independentes de população e sobreviventes/escape | definir alcance da conclusão e obter provas adicionais hoje ausentes | done/vazio local tratados como ausência universal | não homologar limpeza universal com dados locais insuficientes | BLOQUEADA |
+
+### Grafo de dependências
+
+GRAPH tem exatamente G01–G21 e ORDER foi validada por ordenação topológica. validate_graph recusa referências ausentes, duplicatas, ciclos, IDs inválidos e grafos excessivos. O catálogo é imutável e a ordem não atribui confiança. O grafo não inclui uma aresta artificial que transforme autenticação de conexão em prova de cgroup/ausência de escape.
+
+```mermaid
+graph TD
+  G01 --> G02
+  G02 --> G03
+  G03 --> G04
+  G04 --> G05
+  G02 --> G06
+  G05 --> G06
+  G01 --> G07
+  G06 --> G07
+  G07 --> G08
+  G05 --> G09
+  G08 --> G09
+  G07 --> G10
+  G08 --> G10
+  G10 --> G11
+  G06 --> G12
+  G09 --> G12
+  G11 --> G12
+  G12 --> G13
+  G08 --> G14
+  G13 --> G14
+  G09 --> G15
+  G14 --> G15
+  G10 --> G16
+  G15 --> G16
+  G08 --> G17
+  G11 --> G17
+  G09 --> G18
+  G17 --> G18
+  G05 --> G19
+  G10 --> G20
+  G17 --> G20
+  G18 --> G20
+  G19 --> G20
+  G15 --> G21
+  G16 --> G21
+  G18 --> G21
+  G19 --> G21
+  G20 --> G21
+```
+
+### Máquina de estados e falha fechada
+
+DESABILITADA → CONFIGURADA → PRE_VALIDADA → SIMULANDO exercita somente contrato/configuração e fixtures. PRE_VALIDADA significa entrada sintática aceita, não runtime/peer/serviço autenticados. A validação do gerenciador e orçamento ocorre na construção; os dados de cada operação são novamente verificados antes de chegar a C2-B. Não há chamada de conexão nessas transições.
+
+CONEXAO_ESTABELECIDA, IDENTIDADE_VERIFICADA, SUBSCRITA e OBSERVANDO são estados operacionais reservados, sem transição permitida. Uma tentativa produz INVALIDADA. Estado textual forjado, argumento de estado inicial operacional ou corrupção sintética de estado também não habilita operação. A propriedade state e report detectam estado reservado. INVALIDADA só pode encerrar, nunca restaurar confiança; ENCERRADA não pode reabrir. O encerramento é lógico, não prova liberação de um recurso externo.
+
+```mermaid
+stateDiagram-v2
+  [*] --> DESABILITADA
+  DESABILITADA --> CONFIGURADA: contrato sintático
+  CONFIGURADA --> PRE_VALIDADA: preparação descritiva
+  PRE_VALIDADA --> SIMULANDO: somente fixtures
+  SIMULANDO --> INVALIDADA: perda, conflito ou limite
+  PRE_VALIDADA --> INVALIDADA: entrada incompatível
+  CONFIGURADA --> INVALIDADA: promoção operacional recusada
+  DESABILITADA --> INVALIDADA: transição forjada
+  INVALIDADA --> ENCERRADA
+  SIMULANDO --> ENCERRADA
+  PRE_VALIDADA --> ENCERRADA
+  CONFIGURADA --> ENCERRADA
+  DESABILITADA --> ENCERRADA
+  ENCERRADA --> [*]
+```
+
+Fechamento após falha preserva a primeira causa e também registra a falha de fechamento. Entradas ausentes/declaradas permanecem INCONCLUSIVAS; contexto divergente, perda, overflow, falha inesperada ou tentativa de promoção invalidam a fronteira. Assessments operacionais são BLOQUEADOS. Em nenhum caso falha vira autenticação, emissão, parada, população ou limpeza comprovada.
+
+### Matriz A01–A27
+
+Os controles existentes abaixo são regras implementadas/testadas por dados sintéticos. Ameaça não é eliminada por um mock passar. O risco e o bloqueio operacional continuam explícitos.
+
+| ID | Condição de ocorrência | Impacto | Controle existente | Controle ausente | Teste sintético | Risco residual | Bloqueio operacional |
+|---|---|---|---|---|---|---|---|
+| A01 | gerenciador errado | job atribuído ao alvo errado | ManagerTarget e namespace | identificar gerenciador real | T01,T02 | seleção não autentica serviço | G01/G07 |
+| A02 | UID divergente | contexto de outro usuário | UID sintático e comparação de contrato | credenciais efetivas do processo/peer | T03 | UID declarado não é credencial | G02/G06 |
+| A03 | runtime substituído | inspeção perde validade | device/inode em fixtures | verificação real e vínculo com conexão | T04 | TOCTOU residual | G03/G04 |
+| A04 | socket substituído | peer não pretendido | comparação de identidade sintética | objeto/peer autenticados | T05 | path não identifica peer | G04/G06 |
+| A05 | symlink inesperado | redirecionamento | política sintética recusa symlink | resolução segura de ancestrais | T06 | namespace pode mudar | G03/G04 |
+| A06 | corrida inspeção/conexão | objeto verificado difere do conectado | limitação explícita | mecanismo demonstrado de vínculo ao peer | T10 | duas leituras não eliminam corrida | G04/G06 |
+| A07 | owner alterado | eventos de outra instância do serviço | comparação e invalidação sintéticas | sinais autenticados contínuos | T14 | evento de troca pode ser perdido | G08/G18 |
+| A08 | conexão reaproveitada | mistura de epochs | namespace por conexão | posse exclusiva de handle real | T15 | epoch textual é declarado | G05/G06 |
+| A09 | subscrição ausente | resultado perdido | C1/C2-B recusam confirmação | ACK real AddMatch/Subscribe | T21 | mocks não comprovam ACK | G09 |
+| A10 | subscrição tardia | evento anterior não capturado | tempo anterior ao pedido obrigatório | tempo local ligado ao ACK | T22 | timestamps podem ser declarados | G09/G17 |
+| A11 | serial falso | resposta atribuída a envio inexistente | emissão apenas declarada; operacional fechado | captura nativa na mesma conexão | T23,T24 | formato correto não prova envio | G12/G13 |
+| A12 | ReplySerial errado | resposta de outro pedido | C1 compara serial da chamada | cabeçalhos autenticados | T26 | correlação de fixture é simulada | G14 |
+| A13 | outro remetente | resposta forjada | checagem de owner/conexão | autenticação dos headers no transporte | T27 | campo sender é declarado na fixture | G07/G14 |
+| A14 | job de outra unidade | falso resultado de parada | C1 compara ID/path/unidade | origem nativa e vínculo de instância | T32 | nome pode ser reutilizado | G10/G15 |
+| A15 | job de outra conexão | mistura entre epochs | comparação de conexão/contexto | lifecycle nativo exclusivo | T33 | conexão declarada não é handle | G05/G15 |
+| A16 | nome reutilizado | unidade substituída | snapshot compara geração/cgroup | evidência da instância real | T34 | nome/object path reutilizáveis | G10 |
+| A17 | InvocationID diverge | outra ativação | C2-B invalida | snapshot autenticado | T35 | JobRemoved não possui InvocationID | G10/G16 |
+| A18 | snapshot fora de ordem | cadeia temporal inválida | ordem/janela verificadas | timestamps do produtor nativo | T37 | ordem válida não elimina lacunas | G11/G16/G17 |
+| A19 | evento perdido | janela incompleta | invalidação explícita | detecção de perda demonstrada | T48 | perda silenciosa pode ser indetectável | G18 |
+| A20 | overflow | evidência truncada | prefixo preservado e resultado inválido | dimensionamento operacional | T53 | truncamento não significa ausência | G18/G19 |
+| A21 | callback GLib externo | despacho/bloqueio inesperado | orçamento cooperativo documentado | isolamento de contexto/processo auditado | T56 | conexão dedicada não isola callbacks | G19 |
+| A22 | operação nativa bloqueia | prazo excedido | nenhuma operação nativa nesta camada | contenção de vida do cliente | T57 | timeout não preempta biblioteca/kernel | G19 |
+| A23 | memória libdbus sem limite | memória fora do orçamento Python | limites locais explícitos | isolamento/medição nativa | T58 | bytes lógicos não são heap/RSS | G19 |
+| A24 | operação e close falham | causa original ocultada | diagnósticos limitados preservam prefixo | liberação real de recursos comprovada | T59 | referência removida não prova fechamento | G05/G19 |
+| A25 | simulação alega origem operacional | promoção indevida | categorias/estados reservados recusados | produtor nativo autenticado ausente | T41,T42,T45 | Python arbitrário não é sandbox | G06/G12 |
+| A26 | entrada excessiva/malformada | cópias e consumo não limitados | gateway recursivo antes de asdict | limitar alocação no produtor nativo | T51,T52,T54,T55 | objeto já criado pelo chamador não é desfeito | G19 |
+| A27 | observação incompleta vira limpeza | homologação sem prova | saída operacional sempre inconclusiva | evidência real suficiente de população/escape | T50,T60 | vazio local não prova ausência universal | G20/G21 |
+
+### Runtime, autenticação e cadeia de identidade
+
+O alvo experimental permanece USER com UID efetivo/contexto do executor e endereço canônico `/run/user/<UID>/bus`. SYSTEM não observa automaticamente unidades --user; não há fallback entre alvos. O código operacional permanece `systemd-run --user`/`systemctl --user`.
+
+A futura implementação deve separar VALIDACAO_DE_CAMINHO, VALIDACAO_DE_OBJETO, VALIDACAO_DE_PEER, AUTENTICACAO_D_BUS e IDENTIDADE_DO_SERVICO. Para runtime/socket: UID efetivo, namespace, ambiente, diretório e ancestrais, tipo/dono/permissões aprovadas, resolução de symlinks/redirecionamentos, device/inode antes/depois e identidade do peer. Uma estratégia com descritores de diretório/openat/O_NOFOLLOW e metadados estáveis precisará de revisão específica; não foi implementada nem declarada solução completa de TOCTOU. Um socket autenticado depois da inspeção não demonstra por si só que seja o mesmo objeto observado.
+
+Para transporte/serviço, APIs futuras candidatas são get_is_authenticated/get_is_connected e credenciais do peer local; GetNameOwner e GetConnectionCredentials do bus daemon para o proprietário único; cabeçalhos get_sender/get_reply_serial; AddMatch/Subscribe e NameOwnerChanged/Disconnected na mesma conexão. Credenciais do peer do socket podem identificar o broker, não o serviço systemd. UID do cliente, peer, serviço, gerenciador e unidade são identidades diferentes. É preciso demonstrar a correspondência do proprietário ao gerenciador --user esperado, não apenas aceitar um nome único. Nada disso foi consultado nesta etapa.
+
+A ponte futura exigirá subscrição/filtros antes de emissão, conexão dedicada contínua, serial efetivamente atribuído no envio, ReplySerial correspondente, remetente verificado e caminho/ID do job coerentes. Eventos precoces ficam no buffer; jobs concorrentes são separados; duplicatas diagnosticadas e conflitos invalidam. Serial da própria resposta não é ReplySerial. A [API dbus-python](https://dbus.freedesktop.org/doc/dbus-python/dbus.connection.html) e o [código systemd v252](https://github.com/systemd/systemd/blob/v252/src/core/dbus-manager.c) são referências; não constituem teste operacional. Nenhuma API de envio StopUnit foi acrescentada.
+
+A cadeia GERENCIADOR → CONEXAO → PROPRIETARIO → UNIDADE → INVOCATIONID → CGROUP → JOB é vínculo de evidências, não identidade transitiva automática. Nome/object path podem ser reutilizados; snapshots precisam vir do mesmo contexto/epoch, com origem e timestamps locais. Mudança de InvocationID/cgroup/proprietário, ausência, janela inválida ou lacuna conhecida impede conclusão dependente. JobRemoved uoss não contém InvocationID; done e snapshot posterior não criam atomicidade. Not-found não cria populated=0. B2 permanece a autoridade sobre as amostras de população, e mesmo seu vazio local não prova ausência universal de escape.
+
+### Orçamentos Python e limites residuais
+
+Defeito/risco reproduzido em C2-B: `UnitSnapshot(cgroup_inode=[...])` é aceito como dado declarado; outros campos numéricos também não possuem validação escalar uniforme. O histórico tem limite de contagem, mas asdict copia objetos aninhados. Portanto contagem de registros NÃO é limite de entrada/cópias. C2-C recusa esse exemplo antes de chamar asdict, revalida tipos exatos, campos numéricos/booleanos e validadores de domínio somente DEPOIS da inspeção recursiva. Tipos desconhecidos/subclasses com hooks não são executados, ciclos são recusados. O teste usa uma lista pequena, sem pressão. C2-B não foi reescrito: sua API direta continua não autorizada como fronteira operacional. A mitigação implementada é o novo gateway obrigatório para os exercícios C2-C; não se declara endurecimento global de C2-B.
+
+| Recurso | Contrato C2-C | Limitação |
+|---|---|---|
+| Eventos/coleções | até 128 itens; histórico C2-B até 128 registros | orçamento acumulado pode limitar antes; não é apenas eventos |
+| Profundidade/nós por entrada | 8 / 2.048 | objeto já alocado pelo chamador permanece fora do controle |
+| Strings e payload por entrada | até 64 KiB UTF-8 cada/total | limite antes de cópias; não limita todo heap |
+| Campos escalares | inteiros de 64 bits, booleanos exatos e tipos enumerados/contratos conhecidos | formato não autentica origem |
+| Histórico acumulado | 256 KiB lógicos, somando payload + 64 por nó | contabilidade conservadora de contrato, não medição de RAM/RSS |
+| Diagnósticos | 32 armazenados, contador total | prefixo preservado; contador não prova ausência de falhas |
+| Relatório | até 16 níveis, 16.384 nós e 256 KiB serializados | limites maiores de árvore só acomodam wrappers/cópias do relatório, não aumentam entrada |
+| Repetição de relatórios | até 4 tentativas por instância | limite de exercício preparatório; consumidores operacionais exigem nova revisão |
+| Total retornado por instância | até 4 × 256 KiB | retenção pelo chamador, novas instâncias e exceções externas não têm orçamento global |
+| Janela de pedido | até 5 segundos no contrato C2-B | tempo declarado/local não garante prazo absoluto nativo |
+| Dispatch nativo já existente | 32 iterações / 50 ms cooperativos | não executado; não preempta callback |
+
+Nenhum orçamento pode ser aumentado pelo construtor Budget; só reduzido. Orçamento forjado é revalidado. Tentativas de ingestão que falhem depois de aceitas também são cobradas; entrada recusada não é guardada integralmente. Relatórios excedentes são recusados antes de nova cópia e tentativas falhas consomem quota. JSON não é produzido para publicação se exceder o contrato. A checagem de tamanho final ocorre depois de codificação de uma árvore já limitada: há alocações temporárias/cópias e overhead não medidos. Não é um alocador de heap nem prova de RAM absoluta. Chamadores podem criar/guardar objetos fora da fronteira ou várias instâncias; nenhuma garantia global foi inventada.
+
+asdict do relatório C2-B ainda cria cópias; o gateway limita recursivamente o material aceito e o histórico antes dessas cópias, e limita novamente árvore/serialização de saída. Exceções inesperadas invalidam, preservam prefixo e não habilitam retry. Uso direto de C2-B, alocações libdbus, callbacks GLib, operações bloqueantes, kernel/escalonamento e memória nativa continuam pendências G19. Não se mediu pressão nem OOM.
+
+### Isolamento GLib e critérios futuros
+
+A docstring local de dbus-python 1.3.2 foi examinada sem conexão: DBusGMainLoop representa o contexto GLib padrão; contextos não padrão não são suportados por essa integração. set_as_default=False não cria um contexto isolado. Conexão dedicada ≠ contexto dedicado ≠ thread dedicada ≠ processo isolado. Acquire/release e iteration(False) coordenam posse/despacho cooperativo, mas não controlam a duração de callbacks externos nem tornam uma chamada nativa preemptível.
+
+Uma futura seleção de biblioteca/contexto deverá demonstrar a posse do contexto e o conjunto de callbacks ou propor isolamento de processo com IPC/orçamento e controle da vida do cliente. Thread não equivale a esse isolamento, e matar/expirar cliente não comprova cancelamento/conclusão de job remoto. Falhas de callback, acquire/release, operação e close devem preservar ambas as causas. Não foram criados threads/processos, executados callbacks reais ou integrado um supervisor. G19 permanece bloqueada para operação.
+
+### Testes adversariais
+
+Todos os casos usam fixtures pequenas, mocks e tempos fornecidos; nenhum barramento, consulta real systemd ou experimento. T01–T60 correspondem aos seis grupos solicitados; T61–T68 ampliam limites, concorrência e forja. PASSOU significa regra sintética exercitada, não ameaça eliminada nem garantia operacional comprovada.
+
+| Caso | Método verificável da suíte | Resultado |
+|---|---|---|
+| T01 | `user_manager` | PASSOU |
+| T02 | `wrong_system_manager` | PASSOU |
+| T03 | `wrong_uid` | PASSOU |
+| T04 | `runtime_replaced` | PASSOU |
+| T05 | `socket_replaced` | PASSOU |
+| T06 | `symlink` | PASSOU |
+| T07 | `relative_runtime` | PASSOU |
+| T08 | `wrong_owner` | PASSOU |
+| T09 | `wrong_mode` | PASSOU |
+| T10 | `toctou_not_eliminated` | PASSOU |
+| T11 | `transport_authentication_claim` | PASSOU |
+| T12 | `path_not_peer` | PASSOU |
+| T13 | `unique_name_not_authentication` | PASSOU |
+| T14 | `owner_change` | PASSOU |
+| T15 | `reused_connection` | PASSOU |
+| T16 | `connection_lost` | PASSOU |
+| T17 | `valid_syntax_is_not_native` | PASSOU |
+| T18 | `native_producer_missing` | PASSOU |
+| T19 | `authentication_field_forged` | PASSOU |
+| T20 | `service_resolution_pending` | PASSOU |
+| T21 | `missing_subscription` | PASSOU |
+| T22 | `late_subscription` | PASSOU |
+| T23 | `declared_serial` | PASSOU |
+| T24 | `fabricated_native_serial` | PASSOU |
+| T25 | `matching_reply` | PASSOU |
+| T26 | `wrong_reply_serial` | PASSOU |
+| T27 | `wrong_response_owner` | PASSOU |
+| T28 | `response_outside_window` | PASSOU |
+| T29 | `missing_reply` | PASSOU |
+| T30 | `early_event` | PASSOU |
+| T31 | `matching_job` | PASSOU |
+| T32 | `other_unit_job` | PASSOU |
+| T33 | `other_connection_job` | PASSOU |
+| T34 | `reused_name` | PASSOU |
+| T35 | `missing_invocation` | PASSOU |
+| T36 | `cgroup_changed` | PASSOU |
+| T37 | `snapshot_order` | PASSOU |
+| T38 | `snapshot_absent` | PASSOU |
+| T39 | `unit_removed_without_zero` | PASSOU |
+| T40 | `duplicate_and_conflict` | PASSOU |
+| T41 | `reserved_trust_categories` | PASSOU |
+| T42 | `forged_provenance` | PASSOU |
+| T43 | `descriptive_fsm` | PASSOU |
+| T44 | `operational_states_unreachable` | PASSOU |
+| T45 | `forged_internal_state` | PASSOU |
+| T46 | `circular_graph` | PASSOU |
+| T47 | `missing_dependency` | PASSOU |
+| T48 | `loss_cannot_restore_trust` | PASSOU |
+| T49 | `declared_category_cannot_upgrade` | PASSOU |
+| T50 | `no_experimental_promotion` | PASSOU |
+| T51 | `excessive_input` | PASSOU |
+| T52 | `nested_numeric_field_before_asdict` | PASSOU |
+| T53 | `accumulated_budget_preserves_prefix` | PASSOU |
+| T54 | `recursive_budgets` | PASSOU |
+| T55 | `repeated_reports_limited` | PASSOU |
+| T56 | `glib_isolation_not_equivalent` | PASSOU |
+| T57 | `no_absolute_native_deadline` | PASSOU |
+| T58 | `no_total_native_memory_claim` | PASSOU |
+| T59 | `simultaneous_operation_close_failure` | PASSOU |
+| T60 | `no_backend_or_experiment` | PASSOU |
+| T61 | `history_overflow` | PASSOU |
+| T62 | `report_serialization_budget` | PASSOU |
+| T63 | `unknown_objects_no_hooks` | PASSOU |
+| T64 | `catalog_completeness` | PASSOU |
+| T65 | `concurrent_jobs` | PASSOU |
+| T66 | `no_untrusted_string_hooks` | PASSOU |
+| T67 | `unexpected_exception_fails_closed` | PASSOU |
+| T68 | `budget_forgery_rejected` | PASSOU |
+
+Passaram **68 testes C2-C** e a suíte Python segura com **386 aprovados**, incluindo C2-B/C2-A-R2/R1/C2-A/C1/B2. Dois Rust sintéticos aprovados, cinco filtrados; regressão Rust filtrada: **102 aprovados, zero falhas, 93 filtrados**. cargo fmt --check, cargo check --offline --all-targets e git diff --check passaram. Permanecem três avisos históricos dead_code EC-04 e ImportWarning PyGObject, sem falhas ou instalação.
+
+Comandos efetivos, com logs temporários somente em /tmp:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_systemd_integration_boundary_safe.py'
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tests/support/v03_f1_p01 -p 'test_*_safe.py'
+cargo fmt --check
+cargo check --offline --all-targets
+env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1 cargo test --offline --test v03_f1_p01_instruments trace::tests::safe_ -- --test-threads=1
+env -u NEURONS_V03_F1_DV_CASE -u NEURONS_V03_F1_DV_CHECKPOINT -u NEURONS_V03_TRACE_RUN PYTHONDONTWRITEBYTECODE=1 cargo test --offline -- --skip development --skip validation --skip frozen --skip final --skip panel --skip protocol
+git diff --check
+```
+
+### Pendências e aceitação de futura autorização
+
+| Pendência | Estado | Evidência faltante / ação necessária |
+|---|---|---|
+| Produtor nativo com origem demonstrada | BLOQUEADA | projetar API controlada/isolamento; não aceitar flags textuais como credencial |
+| Runtime/socket/UID/peer | ESPECIFICADA, não comprovada | inspeção e vínculo ao peer sob autorização separada; tratar TOCTOU residual |
+| Gerenciador/serviço e owner | BLOQUEADA | demonstrar credenciais/namespace e mesma instância --user do executor |
+| Subscrição, continuidade e perdas | ESPECIFICADA, não comprovada | ACK, eventos de troca/desconexão e limites de detecção de perda |
+| Emissão/serial | BLOQUEADA | implementar somente após autorização, capturando serial no mesmo handle |
+| Unidade/InvocationID/cgroup/job | BLOQUEADA | snapshots autenticados e política contra substituição; manter falta de atomicidade |
+| Orçamento nativo/GLib | BLOQUEADA | justificar biblioteca/contexto/processo e medir vida/recursos em atividade autorizada |
+| População B2 e limpeza | BLOQUEADA para comprovação | obter amostras reais qualificadas e evidências independentes; sem inferência universal |
+| Integração com executor | NÃO ATIVADA | auditoria independente e nova autorização explícita; testes simulados não bastam |
+
+**Parecer: C2-C APROVADA PARA AUDITORIA**, no escopo de especificação e testes adversariais puros. Garantias demonstradas nesta etapa são as regras locais de recusa, limites contratuais, grafo acíclico, isolamento do módulo e inacessibilidade dos estados reservados pela API. Nenhuma garantia G01–G21 é COMPROVADA_OPERACIONALMENTE. Integração e ensaio real continuam bloqueados; não avançar automaticamente.
+
+Nenhum D-Bus real, Subscribe, StopUnit, systemd-run/systemctl operacional, scope, nova thread/processo operacional ou experimento foi executado por C2-C. As regressões autorizadas mantiveram seus testes sintéticos locais existentes; não se acrescentaram auxiliares operacionais. Primeiro ensaio: PARADA CORROBORADA / LIMPEZA INTEGRAL INCONCLUSIVA. Segundo: PARADA CORROBORADA / POPULAÇÃO VAZIA NÃO OBSERVADA / LIMPEZA INTEGRAL INCONCLUSIVA. TERCEIRO ENSAIO NÃO AUTORIZADO. D/V NÃO EXECUTADO. D04-E03 NÃO HOMOLOGADA. CONGELAMENTO NÃO APROVADO. PAINEL F NÃO AUTORIZADO. Critérios científicos preservados.
