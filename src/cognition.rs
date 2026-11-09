@@ -186,34 +186,22 @@ impl TwoHopTask {
             return Ok(report);
         }
 
-        let mut nodes = BTreeSet::new();
-        for fact in &facts {
-            nodes.insert(fact.from);
-            nodes.insert(fact.to);
-        }
-        if !nodes.contains(&hypothesis.from) || !nodes.contains(&hypothesis.to) {
+        if !facts
+            .iter()
+            .any(|f| f.from == hypothesis.from || f.to == hypothesis.from)
+            || !facts
+                .iter()
+                .any(|f| f.from == hypothesis.to || f.to == hypothesis.to)
+        {
             return Ok(report);
         }
-
-        let mut circuit = Circuit::new(self.queue_capacity, self.event_budget)
-            .map_err(CognitionError::Circuit)?;
-        for node in nodes {
-            circuit
-                .add_neuron(Neuron::new(node, 1, 1).map_err(CognitionError::Neuron)?)
-                .map_err(CognitionError::Circuit)?;
-        }
-        for fact in &facts {
-            let id = crate::synapse::SynapseId::new(fact.id.get())
-                .map_err(|_: SynapseIdError| CognitionError::InvalidSynapseId)?;
-            let weight = i32::from(propagate);
-            let synapse =
-                Synapse::new(id, fact.from, fact.to, weight, 1).map_err(CognitionError::Synapse)?;
-            circuit.connect(synapse).map_err(CognitionError::Circuit)?;
-        }
-        circuit
-            .stimulate(hypothesis.from, 1, 0)
-            .map_err(CognitionError::Circuit)?;
-        let cycle = circuit.run_cycle();
+        let (circuit, cycle) = propagate_facts(
+            &facts,
+            hypothesis,
+            self.queue_capacity,
+            self.event_budget,
+            propagate,
+        )?;
         report.processed_events = cycle.cycle.processed;
         report.source_activations = circuit
             .neuron_state(hypothesis.from)
@@ -265,3 +253,41 @@ impl TwoHopTask {
 
 /// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
 pub mod concepts;
+
+/// Propagação compartilhada pelas tarefas legada e limitada; mesmo Circuit/Engine.
+fn propagate_facts(
+    facts: &[RelationFact],
+    hypothesis: Hypothesis,
+    queue_capacity: usize,
+    event_budget: usize,
+    propagate: bool,
+) -> Result<(Circuit, crate::circuit::CircuitReport), CognitionError> {
+    let mut nodes = BTreeSet::new();
+    for fact in facts {
+        nodes.insert(fact.from);
+        nodes.insert(fact.to);
+    }
+    let mut circuit =
+        Circuit::new(queue_capacity, event_budget).map_err(CognitionError::Circuit)?;
+    for node in nodes {
+        circuit
+            .add_neuron(Neuron::new(node, 1, 1).map_err(CognitionError::Neuron)?)
+            .map_err(CognitionError::Circuit)?;
+    }
+    for fact in facts {
+        let id = crate::synapse::SynapseId::new(fact.id.get())
+            .map_err(|_: SynapseIdError| CognitionError::InvalidSynapseId)?;
+        let weight = i32::from(propagate);
+        let synapse =
+            Synapse::new(id, fact.from, fact.to, weight, 1).map_err(CognitionError::Synapse)?;
+        circuit.connect(synapse).map_err(CognitionError::Circuit)?;
+    }
+    circuit
+        .stimulate(hypothesis.from, 1, 0)
+        .map_err(CognitionError::Circuit)?;
+    let cycle = circuit.run_cycle();
+    Ok((circuit, cycle))
+}
+
+/// MP06: provas limitadas de até três premissas, com propagação compartilhada.
+pub mod bounded;

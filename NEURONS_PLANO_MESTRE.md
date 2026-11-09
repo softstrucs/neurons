@@ -188,7 +188,7 @@ MP03 e MP04 admitem trabalhos independentes após MP02 quando não compartilham 
 
 ### MP06 — Raciocínio fundamentado e regras contextuais extensíveis
 
-**Estado:** proposto, não iniciado. **Autorização de execução:** ausente nesta atividade.
+**Estado:** IMPLEMENTADO E VALIDADO exclusivamente no primeiro intervalo F2/MP06: inclusão com até três premissas. MP06 além desse recorte e F2 integral não estão concluídas. **Autorização:** mandato explícito do responsável para este intervalo, sem commit/push e sem MP05/MP07–MP10.
 
 **Objetivo e pré-requisitos:** MP02; MP03 somente para raciocínio sobre conceitos adquiridos. Sem depender de vantagem neural ainda ausente.
 
@@ -438,3 +438,37 @@ Essas ressalvas não são apagadas ou convertidas em requisitos retroativamente 
 O [manifesto F1](docs/referencia/F1_REPRODUTIBILIDADE.json) e as referências existentes a comandos, testes, resultados, checkpoints, hashes e limitações são preservados como evidências históricas: seus campos anteriores de aceite pendente não são reescritos retroativamente. O presente registro documenta a decisão humana posterior. A retenção permanente dos caminhos temporários `/tmp/neurons-F1.patch`, `/tmp/neurons-F1-status.txt` e `/tmp/neurons-f1-audit-3j0d0h8f/commands.json` não está comprovada; este aceite não depende exclusivamente deles e não os copia, move, regenera ou altera.
 
 Este registro é exclusivamente documental, sem nova validação funcional, homologação científica ou autorização operacional. G2 real permanece `NotEvaluable`; G7 e D/V/F permanecem `NotAuthorized`; permissões P2 inalteradas; CIC-I6/P8 não iniciada. Nenhuma implementação, etapa seguinte, publicação, commit ou push é autorizada por este aceite.
+
+### F2 — primeiro intervalo MP06: inclusão com até três premissas
+
+**Resultado técnico: IMPLEMENTADO E VALIDADO no recorte autorizado.** Base inicial `devs`, HEAD `afe2bd58c52eeacdbcfe4f39d39ab48a1bc98d8a`, sem mudança de branch, commit ou push. A autorização posterior ao aceite F1 abrange somente composição de inclusão até três premissas; não inicia MP05, MP07, MP08, MP09, MP10 ou CIC-I6/P8. F2 integral permanece não concluída. O aceite F1 e suas seis ressalvas acima permanecem intactos.
+
+**Arquivos:** `src/cognition.rs` compartilha a propagação Circuit/Engine existente com `src/cognition/bounded.rs`; a extração legada TwoHopTask mantém sua semântica. A extensão enumera somente caminhos simples de até três premissas, ordenados por quantidade de premissas e depois pelos IDs em ordem lexicográfica. IDs servem exclusivamente ao desempate, nunca ao significado. A propagação compartilhada registra eventos/ativações, falhas e orçamento; não aprende pesos. Recuperação literal dispensa propagação como no contrato legado. Não há segundo motor, serviço ou dependência externa.
+
+`src/metacognition.rs` acrescenta julgamento de caminhos sem modificar Decision/EvidenceRefs: oposição à conclusão ou a premissa de qualquer cadeia candidata relevante impede a resposta, mesmo quando há alternativa mais curta favorável. Oposição permanece no relatório junto aos registros consultados; uma cadeia conveniente não a oculta. Orçamento/propagação incompletos produzem abstenção. Ausência de cadeia positiva não é convertida em conclusão negativa.
+
+`src/integration/query.rs` acrescenta PathAuthorization, PathProof, PathQueryReport e PathEpisodeLog; QueryCoordinator continua vinculando engramas aos metadados existentes. São tipos aditivos necessários porque EvidenceRefs/EpisodeDecision legados representam no máximo duas premissas; esses enums não foram ampliados incompativelmente. A autorização MP06 é explícita e adicional à autorização base, com escopo/regra/versão/validade coincidentes. Cada premissa é verificada por identidade, conteúdo, polaridade, admissibilidade, proveniência, evidência, contexto e tempo. verify_path rejeita referências ausentes, negativas, repetidas/cíclicas, desconectadas ou comprimentos indevidos; não substitui a prova recebida por outra. Consulta mantém fatos, estados, regras e metadados imutáveis; somente o log externo cresce. Suporte produz conhecimento provisório, nunca validação explícita ou incorporação factual.
+
+**Limites e compatibilidade:** oito fatos, três premissas e no máximo 64 eventos por consulta MP06; orçamento zero ou acima do teto gera abstenção. A enumeração é finita, com teto conservador de 8+64+512 extensões e profundidade três, separada da contagem de eventos do motor. Ciclos podem consumir o orçamento e gerar abstenção mesmo havendo um caminho simples. O limite M1 de três episódios por log é preservado, mais restritivo que o teto autorizado de 32 consultas por execução de teste; os novos testes permanecem abaixo desse teto. A regressão F1 não altera seus limites próprios já aprovados (inclusive exemplos e consultas conceituais); não foram ampliados para MP06.
+
+**Sessão:** `src/session/f1.rs` adiciona `autorizar3 CONTEXTO`, `consultar3 CONTEXTO ORIGEM DESTINO` e `historico3`. A autorização só é aceita em escopo com autorização base e permanece fixada até restauração/encerramento. O relatório mostra prova, alternativas, conflitos, exclusões, contexto, regra, instante, estados e snapshots. Autorização e log MP06 são transitórios, não entram no checkpoint F1 v1 e são limpos explicitamente ao restaurar. Isso é informado no início da sessão; não se promete persistência da extensão. O formato, estado lógico e bytes dos checkpoints F1 permanecem compatíveis. Não há aquisição externa ou alterações implícitas de memória.
+
+**Demonstração pública própria do produto:** observações 11:101→103, 12:103→107 e 13:107→109, catálogo71/contexto61/regra81 versão1. A consulta 101→109 produziu prova [11,12,13]. Após admissão explícita da observação negativa 14:103→107, a mesma consulta absteve-se com ContradictoryEvidence, preservando as alternativas e a oposição. A consulta 109→101 absteve-se com MissingEvidence. Nenhuma conclusão foi cadastrada. O cenário foi repetido em processos novos, com saídas idênticas; isso não estabelece determinismo universal ou vantagem neural.
+
+**Testes e comandos efetivamente executados:** em cópia isolada de fontes permitidas, com CARGO_TARGET_DIR/TMPDIR temporários e exclusão dos cinco módulos de testes reservados já identificados no manifesto F1:
+
+```sh
+cargo check --offline --locked --lib --bin neurons
+cargo build --offline --locked --bin neurons
+cargo test --offline --locked --test cli --test engine --test interactions --test learning --test memory --test persistence --test personality --test f1_session --test mp06_paths -- --skip bounded_update_probe --skip bounded_cost_probe_for_activation_and_communication
+```
+
+Resultado final: **76 testes aprovados — 13 novos MP06 e 63 de regressão F1; zero falhas, zero ignorados; dois probes não executados**. Não somar reexecuções intermediárias. `tests/mp06_paths.rs` é público, autossuficiente e não importa fixtures/avaliadores científicos. Cobre provas de 1/2/3 premissas, verificações individuais, adulteração, exclusões, oposição em alternativa não escolhida, desempate e permutação de inserção, ausência de mutação, contexto/regra/tempo, orçamento/ciclos, log/prefixo e compatibilidade de sessão. A referência independente usa multiplicação booleana de matrizes em quatro casos públicos; os controles literal e TwoHopTask permanecem sem suporte para o caso de três premissas. Não é avaliação científica geral.
+
+Um checkpoint F1 de 897 bytes preservado antes deste intervalo, SHA-256 `053cd611f7ed562f41ff1c3fffbad818f9861c70b9bb5d0f4de2837661ff0916`, foi restaurado e salvo pelo binário novo com igualdade byte a byte. Os testes F1 existentes não foram alterados. Formatação dos seis arquivos Rust envolvidos e git diff --check conferidos; a ressalva histórica de formatação global da F1 não foi reaberta.
+
+**Recursos realmente observados:** duas execuções do cenário CLI, medidas com perf_counter_ns no pai e os.wait4 do processo filho Linux: parede 4,914 ms / 4,084 ms; CPU usuário 0 / 3,788 ms; CPU sistema 4,035 / 0 ms; pico RSS incluindo inicialização 15.252 / 15.712 KiB. Cada execução realizou três consultas MP06 e produziu 37.724 bytes de saída. Valores zero refletem a resolução/contabilização observada, não ausência de custo. Não são orçamento universal, heap vivo, vantagem de desempenho ou isolamento comprovado.
+
+Logs brutos, comandos, entradas públicas e medições desta execução estão em `/tmp/neurons-mp06-2m7oaknw/`, especialmente `regression-final.log`, `regression-command.json`, `scenario.input.txt`, `scenario-1.output.txt`, `scenario-2.output.txt`, `old-checkpoint-compatibility.log` e `evidence.json`. Sua retenção permanente não está demonstrada. Resultados e limites essenciais estão registrados neste Plano Mestre; não foi criado novo plano ou protocolo de governança.
+
+**Pendências e encerramento:** log/autorização MP06 não persistentes; ciclos podem impedir conclusão no orçamento; cobertura pública finita, sem generalização científica. Não houve acesso D/V/F, execução G2/G7, instrumentos reservados, novos crates, serviços, instalação, commit ou push. As seis ressalvas F1 permanecem. Encerrado somente o primeiro intervalo MP06, aguardando avaliação do responsável; nenhum próximo intervalo é iniciado automaticamente.

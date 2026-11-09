@@ -349,3 +349,62 @@ fn find_negative(store: &EngramStore, context: u32, from: NodeId, to: NodeId) ->
 
 /// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
 pub mod concepts;
+
+/// MP06: julgamento aditivo; enum legado Decision/EvidenceRefs permanece inalterado.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PathReview {
+    pub inference: crate::cognition::bounded::PathInference,
+    pub assessment: Assessment,
+    pub conflicts: Vec<Conflict>,
+}
+impl Monitor {
+    pub fn review_paths(
+        self,
+        store: &EngramStore,
+        query: Hypothesis,
+        budget: usize,
+    ) -> Result<PathReview, CognitionError> {
+        let inference = crate::cognition::bounded::evaluate(store, query, budget)?;
+        let mut conflicts = vec![];
+        if !inference.alternatives.is_empty() {
+            if let Some(id) = find_negative(store, query.context, query.from, query.to) {
+                conflicts.push(Conflict::NegativeConclusion { negative: id });
+            }
+        }
+        // Examina TODAS as provas relevantes, não apenas a escolhida.
+        for path in &inference.alternatives {
+            for id in path {
+                let r = store
+                    .get(*id)
+                    .map_err(|_| CognitionError::InvalidRelationTarget(*id))?;
+                let to = NodeId::new(r.cue().pattern() as u32)
+                    .map_err(|_| CognitionError::InvalidRelationTarget(*id))?;
+                if let Some(negative) = find_negative(store, query.context, r.cue().source(), to) {
+                    let c = Conflict::NegativePremise {
+                        positive: *id,
+                        negative,
+                    };
+                    if !conflicts.contains(&c) {
+                        conflicts.push(c);
+                    }
+                }
+            }
+        }
+        let assessment = if inference.resource_limited {
+            Assessment::ResourceLimited
+        } else if inference.propagation_error.is_some() || !inference.activation_supported {
+            Assessment::PropagationFailure
+        } else if !conflicts.is_empty() {
+            Assessment::ContradictoryEvidence
+        } else if inference.alternatives.is_empty() {
+            Assessment::MissingEvidence
+        } else {
+            Assessment::Sufficient
+        };
+        Ok(PathReview {
+            inference,
+            assessment,
+            conflicts,
+        })
+    }
+}

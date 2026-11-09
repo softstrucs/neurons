@@ -650,8 +650,24 @@ impl Session {
             _ => Err("comando F1 inválido; use ajuda".into()),
         }
     }
-    /// Formato aditivo distinto dos checkpoints legados. Checksum detecta corrupção,
-    /// não autoria. Não aceita comandos de E/S ou estado fornecido sem revalidação.
+    /// Consulta MP06 imutável; somente o log externo transitório cresce.
+    pub fn query_three(
+        &self,
+        context: &str,
+        from: &str,
+        to: &str,
+        authorization: crate::integration::query::PathAuthorization,
+        log: &mut crate::integration::query::PathEpisodeLog,
+    ) -> Result<crate::integration::query::PathQueryReport, String> {
+        let q = self.statement(context, from, to, "+")?;
+        let a = self.authorized.ok_or("regra sem autorização explícita")?;
+        let id = EpisodeId::new(log.entries().len() as u32 + 1).map_err(err)?;
+        QueryCoordinator::new(self.memory(), self.metadata(), a, &self.sources)
+            .map_err(err)?
+            .query_three(id, q, self.at, authorization, 64, log)
+            .map_err(err)
+    }
+    /// Checkpoint F1 v1 inalterado; checksum não autentica origem.
     pub fn encode(&self) -> Vec<u8> {
         let body = self.journal.join("\n");
         let body = body.as_bytes();
@@ -759,6 +775,9 @@ fn checksum(bytes: &[u8]) -> u64 {
 
 pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> {
     let mut session = Session::new();
+    let mut path_log = crate::integration::query::PathEpisodeLog::default();
+    let mut path_authorization = None;
+    writeln!(output,"MP06: autorizar3 CONTEXTO / consultar3 CONTEXTO ORIGEM DESTINO / historico3. Até 3 episódios transitórios, 3 premissas, 64 eventos. Autorização/log MP06 não fazem parte do checkpoint F1 v1; restaurar os limpa.")?;
     writeln!(output, "{HELP}")?;
     output.flush()?;
     for _ in 0..256 {
@@ -784,11 +803,30 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
         let p: Vec<_> = line.split_whitespace().collect();
         let result = match p.as_slice() {
             ["sair"] => return Ok(()),
+            ["historico3"] => Ok(format!("Histórico MP06 {:?}", path_log.entries())),
+            ["autorizar3", ctx] => (|| -> Result<String, String> {
+                let scope = session.scope_in(ctx)?;
+                if session.authorized.map(|a| a.scope()) != Some(scope) {
+                    return Err("escopo sem autorização base".into());
+                }
+                if path_authorization.is_some() {
+                    return Err("autorização MP06 já fixada".into());
+                }
+                path_authorization =
+                    Some(crate::integration::query::PathAuthorization::inclusion_three(scope));
+                Ok("Composição de até três premissas autorizada explicitamente; estado MP06 transitório".into())
+            })(),
+            ["consultar3", ctx, from, to] => path_authorization
+                .ok_or_else(|| "sem autorização explícita MP06".to_string())
+                .and_then(|a| session.query_three(ctx, from, to, a, &mut path_log))
+                .map(|r| format!("MP06 {r:?}")),
             ["salvar", path] => session
                 .save(Path::new(path))
                 .map(|_| "Checkpoint F1 salvo; criação exclusiva".into()),
             ["restaurar", path] => Session::load(Path::new(path)).map(|s| {
                 session = s;
+                path_log = crate::integration::query::PathEpisodeLog::default();
+                path_authorization = None;
                 "Checkpoint F1 restaurado".into()
             }),
             _ => session.execute(line),

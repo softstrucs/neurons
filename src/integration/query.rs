@@ -385,3 +385,194 @@ impl<'a> QueryCoordinator<'a> {
 
 #[cfg(test)]
 mod tests;
+
+/// MP06 aditivo: não amplia os enums públicos M1/F1 com variantes incompatíveis.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PathAuthorization {
+    scope: Scope,
+}
+impl PathAuthorization {
+    /// Ato explícito do chamador, separado da permissão legada de dois passos.
+    pub const fn inclusion_three(scope: Scope) -> Self {
+        Self { scope }
+    }
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PathProof {
+    pub premises: Vec<BoundRecord>,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PathQueryReport {
+    pub id: EpisodeId,
+    pub query: Statement,
+    pub at: u64,
+    pub before: MemorySnapshot,
+    pub after: MemorySnapshot,
+    pub prior: EpistemicState,
+    pub posterior: EpistemicState,
+    pub rule: crate::cognitive_contracts::RuleRef,
+    pub proof: Option<PathProof>,
+    pub alternatives: Vec<PathProof>,
+    pub refusal: Option<Refusal>,
+    pub review: Option<crate::metacognition::PathReview>,
+    pub consulted: Vec<BoundRecord>,
+    pub excluded: Vec<ExcludedRecord>,
+}
+#[derive(Default)]
+pub struct PathEpisodeLog {
+    entries: Vec<PathQueryReport>,
+}
+impl PathEpisodeLog {
+    pub fn entries(&self) -> &[PathQueryReport] {
+        &self.entries
+    }
+}
+impl QueryCoordinator<'_> {
+    /// Verifica referências fornecidas contra fatos/metadados reais. Nunca procura prova substituta.
+    pub fn verify_path(
+        &self,
+        query: Statement,
+        at: u64,
+        ids: &[EngramId],
+    ) -> Result<PathProof, ProofError> {
+        if query.polarity() != Polarity::Positive {
+            return Err(ProofError::InconsistentReport);
+        }
+        if ids.is_empty() || ids.len() > 3 {
+            return Err(ProofError::DisconnectedChain);
+        }
+        let mut premises = vec![];
+        let mut node = query.subject();
+        let mut visited = vec![node];
+        for id in ids {
+            let r = *self
+                .records
+                .iter()
+                .find(|r| r.engram.id() == *id)
+                .ok_or(ProofError::MissingPremise)?;
+            self.eligibility(r, query, at)
+                .map_err(|_| ProofError::IneligiblePremise(*id))?;
+            let s = r.metadata.information.statement;
+            if s.polarity() != Polarity::Positive {
+                return Err(ProofError::NegativePremise(*id));
+            }
+            if s.subject() != node || visited.contains(&s.object()) {
+                return Err(ProofError::DisconnectedChain);
+            }
+            node = s.object();
+            visited.push(node);
+            premises.push(r);
+        }
+        if node != query.object() {
+            return Err(ProofError::DisconnectedChain);
+        }
+        Ok(PathProof { premises })
+    }
+    pub fn query_three(
+        &self,
+        id: EpisodeId,
+        query: Statement,
+        at: u64,
+        authorization: PathAuthorization,
+        budget: usize,
+        log: &mut PathEpisodeLog,
+    ) -> Result<PathQueryReport, QueryError> {
+        // Conserva limite M1 de três episódios, mais restritivo que o teto 32 do intervalo.
+        if log.entries.len() >= MAX_EPISODES {
+            return Err(ContractError::Capacity.into());
+        }
+        if log.entries.iter().any(|e| e.id == id) {
+            return Err(ContractError::Duplicate.into());
+        }
+        if !query.scope().validity.contains(at) || log.entries.last().is_some_and(|e| e.at > at) {
+            return Err(ContractError::OutsideValidity.into());
+        }
+        let snapshot = MemorySnapshot::new(
+            &self
+                .records
+                .iter()
+                .map(|r| r.engram.id())
+                .collect::<Vec<_>>(),
+        )?;
+        let mut out = PathQueryReport {
+            id,
+            query,
+            at,
+            before: snapshot.clone(),
+            after: snapshot,
+            prior: EpistemicState::Hypothesis,
+            posterior: EpistemicState::Hypothesis,
+            rule: query.scope().rule,
+            proof: None,
+            alternatives: vec![],
+            refusal: None,
+            review: None,
+            consulted: vec![],
+            excluded: vec![],
+        };
+        if authorization.scope != query.scope() || !self.authorization.allows(query, at) {
+            out.refusal = Some(Refusal::RuleOutsideContext)
+        } else if query.polarity() != Polarity::Positive {
+            out.refusal = Some(Refusal::Contract(ContractError::InvalidFormat))
+        } else {
+            let mut projection = EngramStore::new(MAX_RECORDS).map_err(QueryError::Memory)?;
+            for r in self.records.iter().copied() {
+                match self.eligibility(r, query, at) {
+                    Ok(()) => {
+                        projection.record(r.engram).map_err(QueryError::Memory)?;
+                        out.consulted.push(r)
+                    }
+                    Err(reason) => out.excluded.push(ExcludedRecord { record: r, reason }),
+                }
+            }
+            let hyp = Hypothesis::new(query.scope().context.get(), query.subject(), query.object())
+                .map_err(QueryError::Cognition)?;
+            let review = self
+                .monitor
+                .review_paths(&projection, hyp, budget)
+                .map_err(QueryError::Cognition)?;
+            for path in &review.inference.alternatives {
+                match self.verify_path(query, at, path) {
+                    Ok(p) => out.alternatives.push(p),
+                    Err(_) => {
+                        out.refusal = Some(Refusal::Monitor(AbstainReason::InvalidEvidence));
+                        break;
+                    }
+                }
+            }
+            if out.refusal.is_none() {
+                use crate::metacognition::Assessment;
+                out.refusal = match review.assessment {
+                    Assessment::Sufficient => None,
+                    Assessment::MissingEvidence => {
+                        Some(Refusal::Monitor(AbstainReason::MissingEvidence))
+                    }
+                    Assessment::ContradictoryEvidence => {
+                        Some(Refusal::Monitor(AbstainReason::ContradictoryEvidence))
+                    }
+                    Assessment::ResourceLimited => {
+                        Some(Refusal::Monitor(AbstainReason::ResourceLimited))
+                    }
+                    Assessment::PropagationFailure => {
+                        Some(Refusal::Monitor(AbstainReason::PropagationFailure))
+                    }
+                    Assessment::InvalidEvidence => {
+                        Some(Refusal::Monitor(AbstainReason::InvalidEvidence))
+                    }
+                };
+                if out.refusal.is_none() {
+                    out.proof = out.alternatives.first().cloned();
+                    if out.proof.is_some() {
+                        out.posterior = EpistemicState::ProvisionalKnowledge
+                    } else {
+                        out.refusal = Some(Refusal::Monitor(AbstainReason::InvalidEvidence))
+                    }
+                }
+            }
+            out.review = Some(review);
+        }
+        debug_assert!(self.memory.iter().eq(self.records.iter().map(|r| r.engram)));
+        log.entries.push(out.clone());
+        Ok(out)
+    }
+}
