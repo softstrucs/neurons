@@ -52,3 +52,40 @@ pub(crate) fn review(
         ConceptDecision::Supported(completion_labels[0])
     }
 }
+
+/// MP09: avalia apenas decisões reais; não recebe rótulos da avaliação externa.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PedagogicalDiagnosis {
+    ExperienceNeeded,
+    AlreadySupported,
+    Blocked,
+}
+pub fn diagnose_pedagogy(
+    reports: &[crate::integration::concepts::ConceptReport],
+) -> PedagogicalDiagnosis {
+    if reports.is_empty() {
+        return PedagogicalDiagnosis::Blocked;
+    }
+    if reports.iter().any(|r| {
+        matches!(
+            r.decision,
+            ConceptDecision::Abstain(
+                Abstention::ContradictoryEvidence
+                    | Abstention::IncompleteAttributes
+                    | Abstention::ModelClassInadequate
+                    | Abstention::NoModel
+            )
+        )
+    }) {
+        PedagogicalDiagnosis::Blocked
+    } else if reports.iter().any(|r| {
+        matches!(
+            r.decision,
+            ConceptDecision::Abstain(Abstention::NoEvidence | Abstention::InsufficientEvidence)
+        )
+    }) {
+        PedagogicalDiagnosis::ExperienceNeeded
+    } else {
+        PedagogicalDiagnosis::AlreadySupported
+    }
+}

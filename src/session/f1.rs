@@ -777,6 +777,12 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
     let mut session = Session::new();
     let mut path_log = crate::integration::query::PathEpisodeLog::default();
     let mut path_authorization = None;
+    let mut teaching_builder: Option<(NodeId, Scope, Vec<crate::curriculum::Lesson>)> = None;
+    let mut teaching_plan: Option<crate::curriculum::TeachingPlan> = None;
+    let mut teaching_assessment: Option<crate::curriculum::PedagogyAssessment> = None;
+    let mut teaching_permissions: Option<crate::curriculum::PedagogyPermissions> = None;
+    let mut teaching_report: Option<crate::curriculum::PedagogyReport> = None;
+    writeln!(output,"MP09 transitório: plano9; licao9 ID RECIBO EXEMPLAR BITS ROTULO(+|-) FONTE EVIDENCIA; avaliacoes9 PRE1 PRE2 POS1 POS2 (sem rótulos); fixar9; permissoes9 CONTEXTO AVALIAR(sim|nao) APRESENTAR(sim|nao) ADM_IDS(separados por vírgula)|-; ensinar9; historico9. Sem retomada automática, ações externas ou acurácia presumida.")?;
     let mut regulation_permissions: Option<
         crate::integration::investigation::RegulationPermissions,
     > = None;
@@ -812,6 +818,131 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
         let p: Vec<_> = line.split_whitespace().collect();
         let result = match p.as_slice() {
             ["sair"] => return Ok(()),
+            ["historico9"] => teaching_report
+                .as_ref()
+                .map(|r| format!("MP09 {r:?}"))
+                .ok_or_else(|| "sem relatório MP09".into()),
+            [op, ..]
+                if teaching_report.is_some()
+                    && !matches!(
+                        *op,
+                        "estado" | "historico" | "ajuda" | "salvar" | "restaurar"
+                    ) =>
+            {
+                Err("episódio MP09 encerrado; sem reapresentação automática".into())
+            }
+            ["plano9"] => (|| -> Result<String, String> {
+                if teaching_builder.is_some()
+                    || teaching_plan.is_some()
+                    || regulation_report.is_some()
+                    || investigation.is_some()
+                {
+                    return Err("plano fixado ou episódio paralelo".into());
+                }
+                let (id, scope) = crate::curriculum::PedagogyHost::pedagogy_identity(&session)?;
+                teaching_builder = Some((id, scope, vec![]));
+                Ok("Plano didático em preparação; nenhuma experiência apresentada".into())
+            })(),
+            ["licao9", id, receipt, exemplar, vector, label, src, ev] => {
+                (|| -> Result<String, String> {
+                    let (_, _, lessons) = teaching_builder
+                        .as_mut()
+                        .ok_or("prepare plano9 antes de fixar")?;
+                    if lessons.len() >= 3 {
+                        return Err("teto de três experiências".into());
+                    }
+                    let attributes = Observation::new(bits(vector)?)
+                        .map_err(err)?
+                        .complete()
+                        .map_err(err)?;
+                    let l = crate::curriculum::Lesson {
+                        id: record(id)?,
+                        receipt: num(receipt)?,
+                        exemplar: node(exemplar)?,
+                        attributes,
+                        label: if polarity(label)? == Polarity::Positive {
+                            Label::Positive
+                        } else {
+                            Label::Negative
+                        },
+                        source: source(src)?,
+                        evidence: evidence(ev)?.ok_or("evidência didática ausente")?,
+                    };
+                    lessons.push(l);
+                    Ok("Experiência didática preparada; não admitida".into())
+                })()
+            }
+            ["avaliacoes9", pre1, pre2, post1, post2] => (|| -> Result<String, String> {
+                if teaching_assessment.is_some()
+                    || teaching_plan.is_some()
+                    || teaching_builder.is_none()
+                {
+                    return Err("avaliações já fixadas ou plano ausente".into());
+                }
+                let obs = |s: &str| -> Result<Observation, String> {
+                    Observation::new(bits(s)?).map_err(err)
+                };
+                teaching_assessment = Some(crate::curriculum::PedagogyAssessment::new(
+                    &[obs(pre1)?, obs(pre2)?],
+                    &[obs(post1)?, obs(post2)?],
+                )?);
+                Ok("Observações de avaliação separadas; nenhum gabarito recebido".into())
+            })(),
+            ["fixar9"] => (|| -> Result<String, String> {
+                if teaching_plan.is_some() || teaching_assessment.is_none() {
+                    return Err("plano fixado ou avaliações ausentes".into());
+                }
+                let (id, scope, lessons) = teaching_builder.as_ref().ok_or("prepare plano9")?;
+                teaching_plan = Some(crate::curriculum::TeachingPlan::new(*id, *scope, lessons)?);
+                teaching_builder = None;
+                Ok("Plano e avaliações fixados antes da execução".into())
+            })(),
+            ["permissoes9", ctx, eval, present, ids] => (|| -> Result<String, String> {
+                if teaching_permissions.is_some() || teaching_plan.is_none() {
+                    return Err("permissões fixadas ou plano ausente".into());
+                }
+                let scope = session.scope_in(ctx)?;
+                let flag = |s: &str| match s {
+                    "sim" => Ok(true),
+                    "nao" => Ok(false),
+                    _ => Err("use sim ou nao".to_string()),
+                };
+                let admissions = if *ids == "-" {
+                    vec![]
+                } else {
+                    ids.split(',').map(record).collect::<Result<Vec<_>, _>>()?
+                };
+                if admissions.len() > 3
+                    || admissions
+                        .iter()
+                        .enumerate()
+                        .any(|(i, a)| admissions[..i].contains(a))
+                {
+                    return Err("autorizações duplicadas ou excessivas".into());
+                }
+                teaching_permissions = Some(crate::curriculum::PedagogyPermissions {
+                    evaluation: flag(eval)?.then_some(scope),
+                    presentation: flag(present)?.then_some(scope),
+                    admissions,
+                });
+                Ok("Avaliação, apresentação e admissões explicitamente separadas".into())
+            })(),
+            ["ensinar9"] => (|| -> Result<String, String> {
+                if regulation_report.is_some() || investigation.is_some() {
+                    return Err("episódio paralelo".into());
+                }
+                let permissions = teaching_permissions
+                    .as_ref()
+                    .ok_or("declare permissoes9")?
+                    .clone();
+                let plan = teaching_plan.take().ok_or("fixe plano9")?;
+                let assessment = teaching_assessment.take().ok_or("fixe avaliações")?;
+                let report =
+                    crate::curriculum::teach_concept(&mut session, plan, assessment, permissions)?;
+                let text = format!("MP09 {report:?}");
+                teaching_report = Some(report);
+                Ok(text)
+            })(),
             ["historico8"] => regulation_report
                 .as_ref()
                 .map(|r| format!("MP08 {r:?}"))
@@ -1035,6 +1166,11 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
                 session = s;
                 path_log = crate::integration::query::PathEpisodeLog::default();
                 path_authorization = None;
+                teaching_builder = None;
+                teaching_plan = None;
+                teaching_assessment = None;
+                teaching_permissions = None;
+                teaching_report = None;
                 regulation_permissions = None;
                 regulation_report = None;
                 investigation = None;
@@ -1309,3 +1445,168 @@ impl crate::integration::investigation::AcquisitionHost for Session {
     }
 }
 impl crate::integration::investigation::sealed::Sealed for Session {}
+
+impl crate::curriculum::pedagogy_sealed::Sealed for Session {}
+impl crate::curriculum::PedagogyHost for Session {
+    fn pedagogy_existing(&self) -> Result<Vec<crate::cognition::concepts::Attributes>, String> {
+        Ok(self
+            .concepts
+            .as_ref()
+            .ok_or("sem conceito")?
+            .examples()
+            .map_err(err)?
+            .iter()
+            .map(|e| e.example.attributes)
+            .collect())
+    }
+
+    fn pedagogy_identity(&self) -> Result<(NodeId, Scope), String> {
+        let c = self.concepts.as_ref().ok_or("sem conceito")?;
+        let scope = self.scope.ok_or("sem escopo")?;
+        if c.models().len() != 1 || c.models()[0].scope() != scope {
+            return Err("MP09 requer um contexto".into());
+        }
+        Ok((c.concept().id(), scope))
+    }
+    fn pedagogy_version(&self) -> Result<crate::learning::concepts::HypothesisVersion, String> {
+        Ok(self
+            .concepts
+            .as_ref()
+            .ok_or("sem conceito")?
+            .models()
+            .first()
+            .ok_or("sem modelo")?
+            .current()
+            .clone())
+    }
+    fn pedagogy_query(
+        &self,
+        episode: EpisodeId,
+        observation: Observation,
+    ) -> Result<crate::integration::concepts::ConceptReport, String> {
+        self.concepts
+            .as_ref()
+            .ok_or("sem conceito")?
+            .query(
+                episode,
+                self.scope.ok_or("sem escopo")?,
+                observation,
+                self.at,
+                &mut crate::integration::concepts::ConceptEpisodeLog::default(),
+            )
+            .map_err(err)
+    }
+    fn pedagogy_capacity(&self, lessons: usize) -> Result<(), String> {
+        let c = self.concepts.as_ref().ok_or("sem conceito")?;
+        let scope = self.scope.ok_or("sem escopo")?;
+        let steps = lessons.checked_mul(5).ok_or("orçamento inválido")?;
+        let end = self.at.checked_add(steps as u64).ok_or("tempo excedido")?;
+        if self.journal.len() + steps > MAX_OPERATIONS
+            || c.trace().len() + steps > 128
+            || c.memory().len() + lessons > 16
+            || c.models()[0].versions().len() + lessons > 32
+            || !scope.validity.contains(self.at)
+            || !scope.validity.contains(end)
+        {
+            return Err(
+                "reserva conservadora de operações/eventos/estado/validade MP09 indisponível"
+                    .into(),
+            );
+        }
+        Ok(())
+    }
+    fn pedagogy_present(
+        &mut self,
+        lesson: crate::curriculum::Lesson,
+    ) -> Result<crate::integration::concepts::Admission, String> {
+        let scope = self.scope.ok_or("sem escopo")?;
+        let at = self.mp07_step()?;
+        let concept = self.concepts.as_ref().ok_or("sem conceito")?.concept().id();
+        let vector: String = lesson
+            .attributes
+            .values()
+            .iter()
+            .map(|b| if *b { '1' } else { '0' })
+            .collect();
+        let raw = IncomingExample {
+            receipt: ReceiptId::new(lesson.receipt).map_err(err)?,
+            teacher_episode: EpisodeId::new(lesson.receipt).map_err(err)?,
+            concept,
+            exemplar: lesson.exemplar,
+            attributes: lesson.attributes.values().map(|b| Some(u8::from(b))),
+            label: lesson.label,
+            scope,
+            source: Some(lesson.source),
+            evidence: Some(lesson.evidence),
+            nature: DeclaredNature::Observation,
+            observed_at: at,
+            sent_at: at,
+        };
+        self.concepts
+            .as_mut()
+            .unwrap()
+            .receive(raw, at)
+            .map_err(err)?;
+        self.mp07_record(
+            format!(
+                "exemplo {} {} {} {} {} {} {} observacao",
+                lesson.receipt,
+                lesson.exemplar.get(),
+                scope.context.get(),
+                vector,
+                if lesson.label == Label::Positive {
+                    "+"
+                } else {
+                    "-"
+                },
+                lesson.source.get(),
+                lesson.evidence.get()
+            ),
+            at,
+        );
+        let at = self.mp07_step()?;
+        self.concepts.as_mut().unwrap().interpret(at).map_err(err)?;
+        self.mp07_record("interpretar-exemplo".into(), at);
+        let at = self.mp07_step()?;
+        let admission = self
+            .concepts
+            .as_mut()
+            .unwrap()
+            .assess_admissibility(at)
+            .map_err(err)?;
+        self.mp07_record("avaliar-exemplo".into(), at);
+        Ok(admission)
+    }
+    fn pedagogy_admit(
+        &mut self,
+        id: EngramId,
+    ) -> Result<crate::learning::concepts::HypothesisVersion, String> {
+        // Incorporação já reserva evento/versão de revisão no núcleo; reserva também journal/tempo.
+        if self.journal.len() + 2 > MAX_OPERATIONS
+            || !self
+                .scope
+                .ok_or("sem escopo")?
+                .validity
+                .contains(self.at.checked_add(2).ok_or("tempo excedido")?)
+        {
+            return Err("admissão/revisão sem reserva".into());
+        }
+        let at = self.mp07_step()?;
+        self.concepts
+            .as_mut()
+            .ok_or("sem conceito")?
+            .incorporate(id, at)
+            .map_err(err)?;
+        self.mp07_record(format!("admitir-exemplo {}", id.get()), at);
+        let at = self.mp07_step()?;
+        let version = self
+            .concepts
+            .as_mut()
+            .unwrap()
+            .revise(at)
+            .map_err(err)?
+            .clone();
+        self.mp07_record("revisar".into(), at);
+        Ok(version)
+    }
+}
