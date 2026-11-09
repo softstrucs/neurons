@@ -95,3 +95,6 @@ fn number(value: &str) -> Result<u32, String> {
 fn node(value: &str) -> Result<NodeId, String> {
     NodeId::new(number(value)?).map_err(|e| format!("{e:?}"))
 }
+
+/// Sessão integrada F1; preserva a gramática e a API legadas.
+pub mod f1;

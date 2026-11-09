@@ -5,7 +5,7 @@ use std::thread;
 const HELP: &str = concat!(
     "Neurons ",
     env!("CARGO_PKG_VERSION"),
-    "\n\nUso: neurons [--help | doctor | session | session-explain]\n\nComandos:\n  --help, -h  Mostra esta ajuda\n  doctor      Mostra informações básicas do ambiente\n  session     Sessão curta de gramática restrita, estilo conciso\n  session-explain  Mesma sessão, estilo explicativo\n"
+    "\n\nUso: neurons [--help | doctor | session | session-explain | session-f1]\n\nComandos:\n  --help, -h  Mostra esta ajuda\n  doctor      Mostra informações básicas do ambiente\n  session     Sessão curta de gramática restrita, estilo conciso\n  session-explain  Mesma sessão, estilo explicativo\n  session-f1  Sessão integrada limitada: evidências, aquisição, conceitos e checkpoint\n"
 );
 
 fn main() -> ExitCode {
@@ -23,8 +23,17 @@ fn main() -> ExitCode {
                 Ok(threads) => println!("Paralelismo disponível: {}", threads.get()),
                 Err(error) => println!("Paralelismo disponível: indisponível ({error})"),
             }
-            println!("Estado: inicialização mínima; núcleo ainda não implementado");
+            println!("Estado: núcleo local experimental implementado: eventos, circuitos, memória, inferência limitada e metacognição; sem compreensão geral demonstrada.");
             ExitCode::SUCCESS
+        }
+        (Some("session-f1"), None) => {
+            match neurons::session::f1::run(std::io::stdin().lock(), std::io::stdout().lock()) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(error) => {
+                    eprintln!("Erro de sessão F1: {error}");
+                    ExitCode::FAILURE
+                }
+            }
         }
         (Some(command @ ("session" | "session-explain")), None) => {
             let style = if command == "session" {

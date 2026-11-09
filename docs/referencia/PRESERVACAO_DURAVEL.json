@@ -1,0 +1,272 @@
+{
+  "schema": "neurons.master-consolidation.durable-preservation.v1",
+  "observed_utc": "2026-11-08T20:09:56.421289+00:00",
+  "repository": {
+    "repository": "softstrucs/neurons",
+    "root": "/home/aguiar/Documentos/Trabalho/Softstrucs/Softwares/Sys/neurons",
+    "branch": "devs",
+    "head": "5066a3745709d45df6bfd5129abc71acc660f955",
+    "origin": "git@github.com:softstrucs/neurons.git",
+    "recorded_utc": "2026-11-08T19:59:22.048871+00:00"
+  },
+  "historical_backup": {
+    "schema": "neurons.durable-historical-backup.v1",
+    "observed_utc": "2026-11-08T19:55:35.092101+00:00",
+    "original_backup_preserved": true,
+    "original_archive": "/tmp/neurons-recovery-backup-8dt15y2x/neurons-integral.tar",
+    "durable_archive": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/neurons-integral.tar",
+    "archive_bytes": 136069120,
+    "archive_sha256": "d7ff33e5a87d051ea942ab9028c4e4617089bd0ce550264b8aa7a479b9424eb4",
+    "copy_verification": "all ten listed files byte-identical by SHA-256",
+    "files": [
+      {
+        "name": "neurons-integral.tar",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/neurons-integral.tar",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/neurons-integral.tar",
+        "bytes": 136069120,
+        "sha256": "d7ff33e5a87d051ea942ab9028c4e4617089bd0ce550264b8aa7a479b9424eb4",
+        "source_equals_copy": true
+      },
+      {
+        "name": "input_inventory.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/input_inventory.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/input_inventory.json",
+        "bytes": 913633,
+        "sha256": "d68b6ab9daa9d840a68c72e69f13d66867ca682e9b418fdfe20ca0e5743c11de",
+        "source_equals_copy": true
+      },
+      {
+        "name": "verification.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/verification.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/verification.json",
+        "bytes": 1142,
+        "sha256": "43b358c4e898088015cb8e4df34420b1ef25d1430b81e50a14c7acdcff78fa1c",
+        "source_equals_copy": true
+      },
+      {
+        "name": "audit_before_reorganization.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/audit_before_reorganization.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/audit_before_reorganization.json",
+        "bytes": 122300,
+        "sha256": "e3b8b4ee94b52c98934ee9e8d0b4e199149b025094ea20fcb6c9353b6e7201aa",
+        "source_equals_copy": true
+      },
+      {
+        "name": "git_status_final.txt",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/git_status_final.txt",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/git_status_final.txt",
+        "bytes": 75810,
+        "sha256": "3c84c47a7e1b7b10a9dbe1b122dfd5f1dea71ea596c2ca27179bad80d9653f34",
+        "source_equals_copy": true
+      },
+      {
+        "name": "navigation_after.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/navigation_after.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/navigation_after.json",
+        "bytes": 16970,
+        "sha256": "412de76883b29650370f42caa4ba0cd18b08c3b5c18d9e691b1b2859ded6964f",
+        "source_equals_copy": true
+      },
+      {
+        "name": "navigation_final.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/navigation_final.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/navigation_final.json",
+        "bytes": 16281,
+        "sha256": "37fec8b202218296456469d7e409686e49113d7779e05735ca8ee5a64d587204",
+        "source_equals_copy": true
+      },
+      {
+        "name": "recovery_final_verification.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/recovery_final_verification.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/recovery_final_verification.json",
+        "bytes": 616269,
+        "sha256": "baed5ba61850e2ed6685887778023f3585a932a57eba19bb72c8193dec9ae2b3",
+        "source_equals_copy": true
+      },
+      {
+        "name": "relocation.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/relocation.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/relocation.json",
+        "bytes": 1551,
+        "sha256": "c8bb08a8c7189a843b310c95bc017095c7f231b96a12ff6673e5d9c6c3408525",
+        "source_equals_copy": true
+      },
+      {
+        "name": "technical_audit.json",
+        "original_absolute_path": "/tmp/neurons-recovery-backup-8dt15y2x/technical_audit.json",
+        "durable_absolute_path": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/recuperacao_historica_20261108T195533_431277Z/technical_audit.json",
+        "bytes": 907723,
+        "sha256": "e4210826f4b0e533d174e9e186b3c27d955ec4b78c7c56c98a978840fef54e81",
+        "source_equals_copy": true
+      }
+    ],
+    "destination_mode_octal": "0o700",
+    "capacity_before_free_bytes": 6137225216,
+    "copied_total_bytes": 138740799,
+    "capacity_after_free_bytes": 5997854720,
+    "storage": {
+      "original_partition": "/dev/nvme0n1p5",
+      "durable_partition": "/dev/nvme0n1p6",
+      "both_physical_parent": "nvme0n1",
+      "physical_mapping_source": "read-only findmnt and lsblk observed before copy",
+      "independent_device_copy_exists": false,
+      "limitation": "Persistent copy on same physical NVMe does not protect against that device failure",
+      "recommendation": "Make and verify an additional copy on a separate physical device or independent off-host storage under appropriate authorization"
+    },
+    "no_existing_permissions_changed": true,
+    "no_historical_archive_replaced": true
+  },
+  "verification_now": {
+    "original_archive_exists": true,
+    "original_archive_expected_sha256_matches": true,
+    "durable_archive_expected_sha256_matches": true,
+    "all_10_copied_file_hashes_match": true,
+    "original_backup_not_removed_or_replaced": true,
+    "independent_physical_device_copy_verified": false,
+    "existing_security_permissions_changed": false
+  },
+  "worktree_before": {
+    "files": 1419,
+    "categories": {
+      "tracked": 226,
+      "untracked": 484,
+      "tracked_modified": 7,
+      "ignored": 702
+    },
+    "tracked_deleted_preexisting": [
+      "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "neurons_plano_executivo_evolucao_cognitiva_v0_1.md",
+      "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "neurons_plano_executivo_v1_1.md"
+    ],
+    "full_initial_record": "/tmp/neurons-master-consolidation-ov5q9k3t/initial_inventory.json",
+    "source_file_count": 178
+  },
+  "executive_document": {
+    "path": "NEURONS_PLANO_MESTRE.md",
+    "before_sha256": "16ce1f1aad62fab583fe5a94113acedf57b0ca9f5d37b73dfce0eb3aaa42797c",
+    "after_sha256": "1b4a8f42dcae1f6f73fe607cce4dae3a11105e3b8ae87536dc44c4d234401b82",
+    "only_executive_document_updated": true,
+    "MP_stage_bodies_unchanged": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "targeted_text_clarifications": {
+      "MP04": "Encaminhar a MP11 em vez de encerrar F1 isoladamente",
+      "MP11": "F1 prioritária, F0 intermediária e F2 posterior"
+    },
+    "functional_implementation_started": false
+  },
+  "source_preservation": {
+    "source_manifest": "docs/referencia/REPRODUTIBILIDADE_FONTES.json",
+    "initial_178_source_hashes_match_historical_durable_archive": true,
+    "final_source_SHA256_rechecked_count": 173,
+    "final_gated_source_metadata_only_count": 5,
+    "gated_source_not_reopened": [
+      "src/integration/acquisition/tests.rs",
+      "src/integration/concepts/tests.rs",
+      "src/integration/query/tests.rs",
+      "src/protocol_verification/conceptual/tests.rs",
+      "src/protocol_verification/tests.rs"
+    ],
+    "five_preexisting_Rust_changes_preserved": [
+      {
+        "path": "src/cognition.rs",
+        "sha256_unchanged": "10cfab8a7c515b02d849402216708556c3d90305c593f0c9d2fd92905648675e"
+      },
+      {
+        "path": "src/integration.rs",
+        "sha256_unchanged": "a5182d0743f5268ab9b4f6bf85659c2a2960cb8b21ee9f9efad568eec73d364d"
+      },
+      {
+        "path": "src/learning.rs",
+        "sha256_unchanged": "ff31dcc8273148a605e6cad4e68e4f53cd6f02aaa988314c934ba957a7a66de1"
+      },
+      {
+        "path": "src/lib.rs",
+        "sha256_unchanged": "90a730500d9863745094009f684e91948d678201ae8a89e6d857f077bff8604d"
+      },
+      {
+        "path": "src/metacognition.rs",
+        "sha256_unchanged": "738eb8ef76a1de4c690ec19a14bbd2d9159bf73e4e9412c90aa717566dc5aa37"
+      }
+    ],
+    "code_tests_APIs_contracts_modified": false,
+    "nonexecutive_previous_worktree_size_mode_unchanged": true
+  },
+  "historical_count_correction": {
+    "previous_recovery_summary": "Untracked 446→468 was a stale summary count; original backup inventory had 468 before reorganization.",
+    "current_observation": "233 existing tracked (7 modified), 484 untracked, 702 ignored; 6 tracked originals absent correspond to preserved moves. Two new manifests add two untracked paths.",
+    "evidence": "Current initial inventory plus git status; old report preserved, not rewritten."
+  },
+  "scope_incident": {
+    "type": "unauthorized_static_fixture_D_excerpt_read",
+    "source_path": "src/protocol_verification/conceptual/tests.rs",
+    "operation": "Static sed excerpt during dependency inspection",
+    "within_authorized_scope": false,
+    "response": "Stopped further reading of this material; no vectors/labels reproduced in new artifacts",
+    "executed": false,
+    "copied_to_isolated_build": false,
+    "used_for_code_or_criteria": false,
+    "V_F_access": false,
+    "G2_G7_operation": false,
+    "record_status": "open_for_human_review_before_next_executive_interval"
+  },
+  "limitations": [
+    "Persistent copy is on same physical nvme0n1, no independent device protection",
+    "No new off-device copy created or verified",
+    "Source initial digests verified, final gated files metadata-only after incident",
+    "A forbidden static D excerpt was displayed; activity cannot be claimed fully compliant with no-D-access restriction",
+    "Initial worktree digest record remains temporary; all 178 code bytes are preserved by the durable historical archive",
+    "Hashes prove byte equality, not scientific truth, authority or functional correctness"
+  ],
+  "new_document_paths": [
+    "docs/referencia/PRESERVACAO_DURAVEL.json",
+    "docs/referencia/REPRODUTIBILIDADE_FONTES.json"
+  ],
+  "self_hash_excluded": true,
+  "no_software_tests_or_panels": true,
+  "G2_real": "NotEvaluable",
+  "G7_reserved_access": "NotAuthorized",
+  "reserved_DVF_access": "NotAuthorized",
+  "CIC_I6_P8": "not_started",
+  "final_documentary_verification": {
+    "git_diff_check": {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "whitespace_errors": false,
+      "no_index_exit_1_means_expected_content_difference": false
+    },
+    "only_existing_document_updated": "NEURONS_PLANO_MESTRE.md",
+    "new_executive_plans": 0,
+    "source_and_API_changes": false,
+    "MP01_MP11_started": false,
+    "initial_worktree_files": 1419,
+    "final_worktree_files": 1421,
+    "git_status_counts": {
+      " M": 7,
+      " D": 6,
+      "??": 486
+    },
+    "syntax_JSON_verified": true,
+    "scope_compliance": "not_fully_compliant_due_to_static_D_excerpt_read",
+    "independent_device_copy_verified": false,
+    "F1_functionally_accepted": false,
+    "CIC_I6_P8": "not_started"
+  }
+}

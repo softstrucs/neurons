@@ -6,6 +6,12 @@ use crate::engram::EngramStore;
 use crate::metacognition::{Monitor, ReviewError, ReviewReport};
 use crate::persistence::{self, PersistenceError};
 
+/// Consulta tipada M2, sem aquisição ou alteração do estado integrado legado.
+pub mod query;
+
+/// Aquisição simbólica assistida M3, com incorporação explícita e histórico finito.
+pub mod acquisition;
+
 pub struct IntegratedState {
     engine: Engine,
     memory: EngramStore,
@@ -49,3 +55,6 @@ impl IntegratedState {
         self.monitor.review(&self.memory, hypothesis, contexts)
     }
 }
+
+/// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
+pub mod concepts;

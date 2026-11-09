@@ -262,3 +262,6 @@ impl TwoHopTask {
         Ok(report)
     }
 }
+
+/// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
+pub mod concepts;

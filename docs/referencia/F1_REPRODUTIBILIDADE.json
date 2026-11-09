@@ -1,0 +1,661 @@
+{
+  "schema": "neurons/F1-source-reproduction/v1",
+  "observed_utc": "2026-11-08T22:46:15.423682+00:00",
+  "identity": {
+    "root": "/home/aguiar/Documentos/Trabalho/Softstrucs/Softwares/Sys/neurons",
+    "branch": "devs",
+    "HEAD": "5066a3745709d45df6bfd5129abc71acc660f955",
+    "origin": "git@github.com:softstrucs/neurons.git"
+  },
+  "production_and_config_files": 40,
+  "safe_test_files": 8,
+  "source_inputs": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "91de8856cddf8c036410042b3d70b2038f5c8c04c386fe1b0d77a332a0056931",
+      "size": 151,
+      "git_tracked": true
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "1d0dd589aeb345312a2e755d4dce0f9fe28c521731325757b3e9389a4259b860",
+      "size": 176,
+      "git_tracked": true
+    },
+    {
+      "path": "src/circuit.rs",
+      "sha256": "4b3aaf2b6cf5c66e51c2c00e3a8feced8a328e50c0169f09e88f46918bf313c7",
+      "size": 5847,
+      "git_tracked": true
+    },
+    {
+      "path": "src/cognition.rs",
+      "sha256": "10cfab8a7c515b02d849402216708556c3d90305c593f0c9d2fd92905648675e",
+      "size": 8630,
+      "git_tracked": true
+    },
+    {
+      "path": "src/cognition/concepts.rs",
+      "sha256": "0a6bcab7fc000f56cefb3eb96e488bb7adbd803b311e731c67b9cdcee74b6b20",
+      "size": 6915,
+      "git_tracked": false
+    },
+    {
+      "path": "src/cognitive_contracts.rs",
+      "sha256": "b0dfa68dc79c3ccb4e37c7c0d6875ea1211c0d17836d4bc634f8326e47320c91",
+      "size": 27140,
+      "git_tracked": false
+    },
+    {
+      "path": "src/curriculum.rs",
+      "sha256": "ea6c03e6e92cb27dc5e8225923b9cfff9f1f518f1f1184c94bb775a35608a877",
+      "size": 3241,
+      "git_tracked": true
+    },
+    {
+      "path": "src/engine.rs",
+      "sha256": "43405bf17c23f2982b39f822b0ac340905c7b2d0f4f60d6647fb0b8f8ba5436c",
+      "size": 5951,
+      "git_tracked": true
+    },
+    {
+      "path": "src/engram.rs",
+      "sha256": "f9bcd93b9f2894f6d3bdf68d9eaa2be9d93f6b94eb40bce3396195d26dfb9c3d",
+      "size": 6336,
+      "git_tracked": true
+    },
+    {
+      "path": "src/event.rs",
+      "sha256": "e998ad1e290f85c9e9b4266ae19d461898735c02aabf40f51d6864ffaeacf4d5",
+      "size": 1782,
+      "git_tracked": true
+    },
+    {
+      "path": "src/integration.rs",
+      "sha256": "a5182d0743f5268ab9b4f6bf85659c2a2960cb8b21ee9f9efad568eec73d364d",
+      "size": 1821,
+      "git_tracked": true
+    },
+    {
+      "path": "src/integration/acquisition.rs",
+      "sha256": "6b0497cb71053335808600f8682a501013d8dc7528b6ae2121143d1738642e87",
+      "size": 21534,
+      "git_tracked": false
+    },
+    {
+      "path": "src/integration/concepts.rs",
+      "sha256": "d7bb0b6478d93feb6f90abc558fe5c8953206a4134d6fec31a2a50650254fc22",
+      "size": 19051,
+      "git_tracked": false
+    },
+    {
+      "path": "src/integration/query.rs",
+      "sha256": "b90453cfb83604456c385eafa32b7880a3ae426159ba81a901e0baf24d227cdf",
+      "size": 15076,
+      "git_tracked": false
+    },
+    {
+      "path": "src/languages.rs",
+      "sha256": "726dff0be9ee7ffa85335c614e1370ce1a26239322581bc9dde90030324705db",
+      "size": 13734,
+      "git_tracked": true
+    },
+    {
+      "path": "src/languages/contextual.rs",
+      "sha256": "9005bda6c0b3d56c36e40639c9c61565e82b7111a75da4803106b90a2668b2a5",
+      "size": 13109,
+      "git_tracked": true
+    },
+    {
+      "path": "src/languages/sentences.rs",
+      "sha256": "554eeda26e884a0d01f440307835c978ee5ce22cd4fc020ec8640460c630bf1f",
+      "size": 10093,
+      "git_tracked": true
+    },
+    {
+      "path": "src/learning.rs",
+      "sha256": "ff31dcc8273148a605e6cad4e68e4f53cd6f02aaa988314c934ba957a7a66de1",
+      "size": 3367,
+      "git_tracked": true
+    },
+    {
+      "path": "src/learning/concepts.rs",
+      "sha256": "3f67b8e7a443e4775622df1b0ef56aa266539561a4d722b3dd09b1a1bac2e535",
+      "size": 2065,
+      "git_tracked": false
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "90a730500d9863745094009f684e91948d678201ae8a89e6d857f077bff8604d",
+      "size": 490,
+      "git_tracked": true
+    },
+    {
+      "path": "src/main.rs",
+      "sha256": "0a2e42a46a74722193feea4c10900d8bb7a3cb06e961257da74394194c89716a",
+      "size": 2466,
+      "git_tracked": true
+    },
+    {
+      "path": "src/metacognition.rs",
+      "sha256": "738eb8ef76a1de4c690ec19a14bbd2d9159bf73e4e9412c90aa717566dc5aa37",
+      "size": 12419,
+      "git_tracked": true
+    },
+    {
+      "path": "src/metacognition/concepts.rs",
+      "sha256": "f3aafc7bf2d00ee6b437fe5de89f1537f9877ef595b74503e4b07b8c71ccee46",
+      "size": 1729,
+      "git_tracked": false
+    },
+    {
+      "path": "src/neuron.rs",
+      "sha256": "0d2b50e061063f738f84e572e7fcc6ad46476b3be3c14bdf118eb020e11a463e",
+      "size": 2986,
+      "git_tracked": true
+    },
+    {
+      "path": "src/persistence.rs",
+      "sha256": "df39e087de065ed5d44b7deabe512232bb7c6660487308eb5d7a9c3145bcab18",
+      "size": 12601,
+      "git_tracked": true
+    },
+    {
+      "path": "src/personality.rs",
+      "sha256": "1b3cc6af1bce2b8f1a104292e54f145b35a8b9cb8f5cfca31ff54bef559e426b",
+      "size": 755,
+      "git_tracked": true
+    },
+    {
+      "path": "src/protocol_verification/conceptual/audit.rs",
+      "sha256": "b6eeb50b25b4e654a2283548b41eb1991c1b99a9a7cb6972eaf43d98e99d06c6",
+      "size": 19372,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/conceptual/controls.rs",
+      "sha256": "380e9b0def256ca6df51d34df5bbb2d8c8055dfad2cf582cc89329a878c8e5f2",
+      "size": 6988,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/conceptual/custody.rs",
+      "sha256": "9a18e44e820fa5109d631c0154f54b904e5ecbd9b4b8b12e4952fd67e13851ee",
+      "size": 7083,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/conceptual/mod.rs",
+      "sha256": "fee6b9d742e90c329ece80febdb689d5c642957fbd6f02ded8bc96a80700b5fb",
+      "size": 3302,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/conceptual/plan.rs",
+      "sha256": "cf611cfb0965a271a61ef053f9ff320ba38b26b59f233c6f929fae357bc0b2f3",
+      "size": 8180,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/conceptual/recording.rs",
+      "sha256": "f3d1f3cf853de7fde2db4ff16f9536c3d72ae980fe6543fd973eda313f0ca349",
+      "size": 3001,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/controls.rs",
+      "sha256": "3ee72c712b72f62d186b0d2018eb020d8276a98ca3014b9905395bea0ee7cac1",
+      "size": 11094,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/evaluator.rs",
+      "sha256": "3aa4279b2c61bbaab42c36700ab8b9f5c57addde5317f2bdc0a471216e50050a",
+      "size": 28458,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/fixtures.rs",
+      "sha256": "347259bd00c22e3690670e5ad4d0e05c2a6a28aa8da44e060195306aec70e4a9",
+      "size": 6877,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/history.rs",
+      "sha256": "1ed4a178003bca5ee6fc97bd7f42f648812cfc189c82eb8afc86c04f1c1593e0",
+      "size": 9920,
+      "git_tracked": false
+    },
+    {
+      "path": "src/protocol_verification/mod.rs",
+      "sha256": "229cda58db3b6b2628ffd89c20a31a86840e1f1700733c85cd72778d9d33560c",
+      "size": 2786,
+      "git_tracked": false
+    },
+    {
+      "path": "src/session.rs",
+      "sha256": "b948c2b5783aadb2fbb5fe474435f39f8d01579d0468b1b04164bc1d07fbabd6",
+      "size": 4638,
+      "git_tracked": true
+    },
+    {
+      "path": "src/session/f1.rs",
+      "sha256": "757109f16bacc0a87d04bca9013c3ab1152fb655d0224d22da98a8bc92541ab3",
+      "size": 32866,
+      "git_tracked": false
+    },
+    {
+      "path": "src/synapse.rs",
+      "sha256": "843f0af15035c94264f1d75ca7a86034e067bba7c5e4e64cf66f93775fc51a51",
+      "size": 2506,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/cli.rs",
+      "sha256": "5509ef5b4614e1f2187697170aaed4dda450f3d7bb44764b64256188ba26467b",
+      "size": 1456,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/engine.rs",
+      "sha256": "74bcf1393c496821456f9cb7d18917a981beaffebb4789c6dbbc90c13b615f44",
+      "size": 5996,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/interactions.rs",
+      "sha256": "90c791b463a8caf812f3322170ee4d8d37e158bf12bbeed31bb2790ba6f78322",
+      "size": 10446,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/learning.rs",
+      "sha256": "386f9313e627b12567b27296213200fc3800872a3289b656f52bce442ccff8ca",
+      "size": 7636,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/memory.rs",
+      "sha256": "864eb9603694fb557fed8e1ccaf38ae6dbff452968cc61c8b09461280dcb08a6",
+      "size": 6947,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/persistence.rs",
+      "sha256": "80c58ecfd3545d12d73c722f0e68aacd34d6d7563c556c559145c9af9b398fae",
+      "size": 12778,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/personality.rs",
+      "sha256": "a3fcb527b395a397553391104e5a6eb8853a1bbab8e4c6d5e10fa80f1c636657",
+      "size": 4322,
+      "git_tracked": true
+    },
+    {
+      "path": "tests/f1_session.rs",
+      "sha256": "5c893068b4f499349ea00b2d3e9852da65a37718d362712e37f41690eec6ec14",
+      "size": 18004,
+      "git_tracked": false
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "cargo",
+        "check",
+        "--offline",
+        "--locked",
+        "--lib",
+        "--bin",
+        "neurons"
+      ],
+      "cwd": "/tmp/neurons-f1-work-twhs6vgj/reproduction",
+      "target": "/tmp/neurons-f1-work-twhs6vgj/reproduction-target",
+      "exit": 0,
+      "elapsed_ns": 2031476770,
+      "log": "/tmp/neurons-f1-work-twhs6vgj/final-check.log",
+      "log_sha256": "5d067f190b121a4c5e79ac332cf9fa0e01bbe2bf9a5b914f8e28ab50143862d9"
+    },
+    {
+      "argv": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--test",
+        "cli",
+        "--test",
+        "engine",
+        "--test",
+        "interactions",
+        "--test",
+        "learning",
+        "--test",
+        "memory",
+        "--test",
+        "persistence",
+        "--test",
+        "personality",
+        "--test",
+        "f1_session",
+        "--",
+        "--skip",
+        "bounded_update_probe",
+        "--skip",
+        "bounded_cost_probe_for_activation_and_communication"
+      ],
+      "cwd": "/tmp/neurons-f1-work-twhs6vgj/reproduction",
+      "target": "/tmp/neurons-f1-work-twhs6vgj/reproduction-target",
+      "exit": 0,
+      "elapsed_ns": 5104312933,
+      "log": "/tmp/neurons-f1-work-twhs6vgj/final-tests.log",
+      "log_sha256": "a11d6761c9f34b62a6f40cde00fc4ac80b43e16cb90174b8859dd0311e817e96"
+    },
+    {
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "--lib",
+        "--bin",
+        "neurons"
+      ],
+      "cwd": "/tmp/neurons-f1-work-twhs6vgj/reproduction",
+      "target": "/tmp/neurons-f1-work-twhs6vgj/reproduction-target",
+      "exit": 0,
+      "elapsed_ns": 117023139,
+      "log": "/tmp/neurons-f1-work-twhs6vgj/final-build.log",
+      "log_sha256": "47d1ebe904a90b00c5b9e4f31a52db52e92ee8caeaa47e1a29a4a65b6baf0c9d"
+    }
+  ],
+  "source_archive": {
+    "path": "/tmp/neurons-f1-work-twhs6vgj/F1-source.tar",
+    "bytes": 501760,
+    "sha256": "72b1541d3748883eefd835870c172a6662fa7ce09bcc615a518e5d939979f565"
+  },
+  "public_cli_repetitions": [
+    {
+      "repetition": 1,
+      "command": [
+        "/tmp/neurons-f1-work-twhs6vgj/reproduction-target/debug/neurons",
+        "session-f1"
+      ],
+      "exit": 0,
+      "elapsed_wall_ns": 26599004,
+      "resource_observations": "NotEvaluable",
+      "checkpoint_bytes": 897,
+      "checkpoint_sha256": "053cd611f7ed562f41ff1c3fffbad818f9861c70b9bb5d0f4de2837661ff0916",
+      "stdout_sha256": "fd3f59c26f3a1adf4d6fd900d2c3219d96dccb35a1e8a23a5eebc079b30a2af2"
+    },
+    {
+      "repetition": 2,
+      "command": [
+        "/tmp/neurons-f1-work-twhs6vgj/reproduction-target/debug/neurons",
+        "session-f1"
+      ],
+      "exit": 0,
+      "elapsed_wall_ns": 18514383,
+      "resource_observations": "NotEvaluable",
+      "checkpoint_bytes": 897,
+      "checkpoint_sha256": "053cd611f7ed562f41ff1c3fffbad818f9861c70b9bb5d0f4de2837661ff0916",
+      "stdout_sha256": "fd3f59c26f3a1adf4d6fd900d2c3219d96dccb35a1e8a23a5eebc079b30a2af2"
+    }
+  ],
+  "deterministic_outputs_and_restored_state_equal": true,
+  "excluded_test_sources_not_read_or_copied": [
+    "src/integration/acquisition/tests.rs",
+    "src/integration/concepts/tests.rs",
+    "src/integration/query/tests.rs",
+    "src/protocol_verification/conceptual/tests.rs",
+    "src/protocol_verification/tests.rs"
+  ],
+  "excluded_execution": [
+    "cargo test --lib",
+    "cargo test sem seleção",
+    "painéis M0/M5/CIC",
+    "scripts G2",
+    "D/V/F",
+    "bounded_update_probe",
+    "bounded_cost_probe_for_activation_and_communication"
+  ],
+  "scientific_panels_executed": false,
+  "prior_D_exposure": "pendência independente histórica; não relida nem reutilizada",
+  "limitations": [
+    "Somente estes oito alvos públicos; não é regressão integral científica.",
+    "Rust/std e Linux são pré-requisitos externos ao pacote; nenhum crate externo.",
+    "Checksum F1 não autentica conteúdo ou fonte.",
+    "Tempo e RSS são observações deste processo CLI; não orçamento universal, memória viva ou isolamento.",
+    "Cópia isolada nesta máquina, não demonstra portabilidade para outras plataformas."
+  ],
+  "F1_human_acceptance": "pending",
+  "MP05_MP10": "not_started",
+  "CIC_I6_P8": "not_started",
+  "G2_real": "NotEvaluable",
+  "G7_reserved_access": "NotAuthorized",
+  "reserved_DVF_access": "NotAuthorized",
+  "resource_measurement": {
+    "method": "os.wait4(pid,0) rusage do processo CLI individual; Linux ru_maxrss em KiB; perf_counter_ns no pai",
+    "command": [
+      "/tmp/neurons-f1-work-twhs6vgj/reproduction-target/debug/neurons",
+      "session-f1"
+    ],
+    "exit": 0,
+    "elapsed_wall_ns": 33954994,
+    "max_rss_kib": 16964,
+    "user_cpu_seconds": 0.017689,
+    "system_cpu_seconds": 0.004422,
+    "stdin_bytes": 878,
+    "stdout_bytes": 76491,
+    "live_heap": "NotEvaluable",
+    "physical_disk_allocation": "NotEvaluable",
+    "universal_resource_conformance": "NotEvaluable",
+    "note": "Pico inclui inicialização; não medição de heap vivo. Esta sessão não grava checkpoint; tamanhos de checkpoint medidos nas duas anteriores."
+  },
+  "source_archive_restore": {
+    "files": 48,
+    "sha256_matches": 48,
+    "destination": "/tmp/neurons-f1-work-twhs6vgj/source-archive-restoration",
+    "result": "verified"
+  },
+  "test_results": {
+    "passed": 63,
+    "failed": 0,
+    "ignored": 0,
+    "filtered_out": 2,
+    "new_F1_tests": 16,
+    "test_counts": {
+      "cli": 3,
+      "engine": 7,
+      "interactions": 9,
+      "learning": 6,
+      "memory": 7,
+      "persistence": 9,
+      "personality": 6,
+      "f1_session": 16
+    }
+  },
+  "preservation": {
+    "initial_paths_metadata_count": 1421,
+    "historical_removed": [],
+    "historical_modified_in_authorized_scope": [
+      "NEURONS_PLANO_MESTRE.md",
+      "README.md",
+      "src/main.rs",
+      "src/session.rs",
+      "tests/cli.rs"
+    ],
+    "other_initial_metadata_unchanged": 1416,
+    "allowed_contents_hashed_at_start": 46,
+    "five_preexisting_Rust_changes_byte_identical": [
+      "src/cognition.rs",
+      "src/integration.rs",
+      "src/learning.rs",
+      "src/lib.rs",
+      "src/metacognition.rs"
+    ],
+    "limits": "Demais entradas históricas comparadas somente por caminho/tamanho/mtime, sem abrir conteúdo reservado. Hashes de conteúdo comparados apenas na allowlist de fontes/testes autorizados. Master e README têm cópias anteriores em before/.",
+    "before_after": [
+      {
+        "path": "NEURONS_PLANO_MESTRE.md",
+        "before_sha256": "1b4a8f42dcae1f6f73fe607cce4dae3a11105e3b8ae87536dc44c4d234401b82",
+        "after_sha256": "94eaf2993689f29a04e2dfb70a70dee85f8c58236f9e4e9165eb96b228da61e1"
+      },
+      {
+        "path": "README.md",
+        "before_sha256": "816018bf47e8c4a77d72060f6fb658c5e030cf7b6c0a400aa2cb364e731ea9a7",
+        "after_sha256": "ff56d3d1306a383a5423e78e6d4cb2943505e6d59c839c5d5b893aae48988c61"
+      },
+      {
+        "path": "src/main.rs",
+        "before_sha256": "77e4829567f4ab381ea151aa2f38ac611c9543a82630a6fdbe8daea72fb3c21c",
+        "after_sha256": "0a2e42a46a74722193feea4c10900d8bb7a3cb06e961257da74394194c89716a"
+      },
+      {
+        "path": "src/session.rs",
+        "before_sha256": "bceb8293c57fde84dad7853ddea4d0b1e63ea43bb226db2ccb4992c639c1b93a",
+        "after_sha256": "b948c2b5783aadb2fbb5fe474435f39f8d01579d0468b1b04164bc1d07fbabd6"
+      },
+      {
+        "path": "tests/cli.rs",
+        "before_sha256": "d8771e6f3acc2a2ed58d033ba9a42c0182364fe771e6c04148b55c0ab8f99f10",
+        "after_sha256": "5509ef5b4614e1f2187697170aaed4dda450f3d7bb44764b64256188ba26467b"
+      }
+    ]
+  },
+  "durable_F1_destination": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/F1_20261108_twhs6vgj",
+  "original_durable_backup_sha256_verified": "d7ff33e5a87d051ea942ab9028c4e4617089bd0ce550264b8aa7a479b9424eb4",
+  "durable_F1_copy_status": "verified",
+  "retention_limit": "Cópia persistente no mesmo disco físico; nenhuma segunda cópia independente demonstrada.",
+  "toolchain": {
+    "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+    "cargo": "cargo 1.88.0 (873a06493 2025-05-10)",
+    "platform": "Linux x86_64"
+  },
+  "reconstruction_instructions": [
+    "Verificar SHA-256 de F1-source.tar conforme este manifesto.",
+    "Reconstruir seus 48 arquivos em diretório vazio privado; não usar clone remoto como substituto do worktree.",
+    "Conferir cada SHA-256 em source_inputs.",
+    "Definir CARGO_TARGET_DIR em diretório isolado e executar os três comandos listados em commands.",
+    "Usar os arquivos public-session-*.input.txt e o binário compilado, adaptando SOMENTE os caminhos de saída para novos arquivos.",
+    "Não copiar/executar testes reservados ou executar cargo test --lib."
+  ],
+  "audit_limitations": [
+    "Uma verificação documental inicial usou incorretamente a expectativa de hash de Master na allowlist de 46 arquivos; interrompeu antes de escrever o manifesto. Corrigida por conferência da cópia before/ do Master. Nenhum teste funcional falhou."
+  ],
+  "durable_files_verified": [
+    {
+      "name": "F1-source.tar",
+      "bytes": 501760,
+      "sha256": "72b1541d3748883eefd835870c172a6662fa7ce09bcc615a518e5d939979f565"
+    },
+    {
+      "name": "final-check.log",
+      "bytes": 133,
+      "sha256": "5d067f190b121a4c5e79ac332cf9fa0e01bbe2bf9a5b914f8e28ab50143862d9"
+    },
+    {
+      "name": "final-tests.log",
+      "bytes": 6396,
+      "sha256": "a11d6761c9f34b62a6f40cde00fc4ac80b43e16cb90174b8859dd0311e817e96"
+    },
+    {
+      "name": "final-build.log",
+      "bytes": 60,
+      "sha256": "47d1ebe904a90b00c5b9e4f31a52db52e92ee8caeaa47e1a29a4a65b6baf0c9d"
+    },
+    {
+      "name": "reproduction-summary.json",
+      "bytes": 14977,
+      "sha256": "f8891865885b8b0a27cd53b0ea8f2efb2de28e21f1e868ece8677f220df07c02"
+    },
+    {
+      "name": "public-session-1.input.txt",
+      "bytes": 935,
+      "sha256": "464b246dcad7897d77a25845204ffca9542df0671e2eec031e7947680fa397f2"
+    },
+    {
+      "name": "public-session-1.output.txt",
+      "bytes": 76532,
+      "sha256": "fd3f59c26f3a1adf4d6fd900d2c3219d96dccb35a1e8a23a5eebc079b30a2af2"
+    },
+    {
+      "name": "public-session-1.restored.txt",
+      "bytes": 55101,
+      "sha256": "ecaf158f87f3ef6a80e7b948c7d8ce5a14a74ace0b03c14b871b684c05a16814"
+    },
+    {
+      "name": "public-session-1.f1",
+      "bytes": 897,
+      "sha256": "053cd611f7ed562f41ff1c3fffbad818f9861c70b9bb5d0f4de2837661ff0916"
+    },
+    {
+      "name": "public-session-2.input.txt",
+      "bytes": 935,
+      "sha256": "246aab9c866316bab64d423a3207dee5594788de59de75eb6574be11fe27a65c"
+    },
+    {
+      "name": "public-session-2.output.txt",
+      "bytes": 76532,
+      "sha256": "fd3f59c26f3a1adf4d6fd900d2c3219d96dccb35a1e8a23a5eebc079b30a2af2"
+    },
+    {
+      "name": "public-session-2.restored.txt",
+      "bytes": 55101,
+      "sha256": "ecaf158f87f3ef6a80e7b948c7d8ce5a14a74ace0b03c14b871b684c05a16814"
+    },
+    {
+      "name": "public-session-2.f1",
+      "bytes": 897,
+      "sha256": "053cd611f7ed562f41ff1c3fffbad818f9861c70b9bb5d0f4de2837661ff0916"
+    },
+    {
+      "name": "measured-session.input.txt",
+      "bytes": 878,
+      "sha256": "6e5e6a3d5d06f57154be1c3b106f2798ec4e121712a07977ba2a826130a6a7ff"
+    },
+    {
+      "name": "measured-session.output.txt",
+      "bytes": 76491,
+      "sha256": "1a382db938f1ed8f0f68cbf9f56656cbf42b967c6a82a2f48585fc31091509b3"
+    },
+    {
+      "name": "measured-session.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "delivery-README.md",
+      "bytes": 1739,
+      "sha256": "ff56d3d1306a383a5423e78e6d4cb2943505e6d59c839c5d5b893aae48988c61"
+    },
+    {
+      "name": "delivery-NEURONS_PLANO_MESTRE.md",
+      "bytes": 53915,
+      "sha256": "4689fab6f831b845d6527eaa5a738507cdefd32c88e9aa4d1c85fa2c008bcea5"
+    }
+  ],
+  "durable_source_archive": "/home/aguiar/Documentos/Trabalho/Softstrucs/Backups/neurons/F1_20261108_twhs6vgj/F1-source.tar",
+  "durable_copy_verified_utc": "2026-11-08T22:51:51.898683+00:00",
+  "F1_acceptance_criteria": {
+    "technical_1_to_11": "demonstrated_with_documented_scope_and_limits",
+    "criterion_12_project_owner_acceptance": "pending"
+  },
+  "delivery_changed_existing": [
+    "README.md",
+    "NEURONS_PLANO_MESTRE.md",
+    "src/main.rs",
+    "src/session.rs",
+    "tests/cli.rs"
+  ],
+  "delivery_new": [
+    "src/session/f1.rs",
+    "tests/f1_session.rs",
+    "docs/referencia/F1_REPRODUTIBILIDADE.json"
+  ],
+  "git_status_initial_file": "/tmp/neurons-f1-status-initial.txt",
+  "git_status_final_file": "/tmp/neurons-F1-status.txt",
+  "review_patch_file": "/tmp/neurons-F1.patch",
+  "review_patch_base": "Conteúdo preservado no início desta atividade, incluindo alterações e não rastreados preexistentes; não HEAD isolado."
+}

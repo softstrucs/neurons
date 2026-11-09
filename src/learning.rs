@@ -114,3 +114,6 @@ impl PlasticityRule {
         Ok(update)
     }
 }
+
+/// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
+pub mod concepts;

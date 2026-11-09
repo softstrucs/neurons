@@ -1,0 +1,917 @@
+{
+  "scope": "Historical relocation only, no approval/state change",
+  "moves": [
+    {
+      "old": "neurons_plano_executivo_v1_1.md",
+      "new": "docs/historico/planos_executivos/neurons_plano_executivo_v1_1.md",
+      "sha256": "5a70c20f334d1d25e3a7ca4f2784083337132f77eec59a218f44e0f48d06ddbf"
+    },
+    {
+      "old": "neurons_plano_executivo_evolucao_cognitiva_v0_1.md",
+      "new": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_1.md",
+      "sha256": "c74dfd3ba99b35710e19b615f0e6366fb02d0f91afdfe3dc09df555dc04428be"
+    },
+    {
+      "old": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "new": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "sha256": "489f1998ad729df683944c7160a9b227010e0ac3a8e2a223838500898acfb9fe"
+    },
+    {
+      "old": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "new": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "sha256": "0688c7ff22384ef19b3f4cb23da604714a6330eb8cac0f9f5edb3d52ed9705da"
+    },
+    {
+      "old": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "new": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "sha256": "0a0ba9053843976726fc82d35e6b3921999211445ed046307e23298afdb27579"
+    },
+    {
+      "old": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "new": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "sha256": "cb7d4c561ded93a5b446f5c68d4c285ef81951123e04d82c08e2bc6361b1c1a6"
+    }
+  ],
+  "historical_link_resolution": [
+    {
+      "original_source": "docs/EC-10_auditoria_cientifica_final.md",
+      "current_source": "docs/EC-10_auditoria_cientifica_final.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-11_auditoria_cientifica_final.md",
+      "current_source": "docs/EC-11_auditoria_cientifica_final.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-11_mapear_interfaces_dependencias.md",
+      "current_source": "docs/EC-11_mapear_interfaces_dependencias.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_auditoria_cientifica_final.md",
+      "current_source": "docs/EC-12_auditoria_cientifica_final.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_avaliacao_lacunas.md",
+      "current_source": "docs/EC-12_avaliacao_lacunas.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_source": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_pre_requisitos_especializacao.md",
+      "current_source": "docs/EC-12_pre_requisitos_especializacao.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/EC-12_questoes_abertas.md",
+      "current_source": "docs/EC-12_questoes_abertas.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/Plano_v0_2_consolidacao_final.md",
+      "current_source": "docs/Plano_v0_2_consolidacao_final.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/Plano_v0_2_consolidacao_final.md",
+      "current_source": "docs/Plano_v0_2_consolidacao_final.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "current_source": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "current_source": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "original_link_target": "../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/V03-F1-P01_auditoria_prontidao_pre_final.md",
+      "current_source": "docs/V03-F1-P01_auditoria_prontidao_pre_final.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/V03-F1-P01_decisoes_metodologicas_pre_finais_APROVADAS.md",
+      "current_source": "docs/V03-F1-P01_decisoes_metodologicas_pre_finais_APROVADAS.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/V03-F1-P01_fechamento_operacional_pre_congelamento.md",
+      "current_source": "docs/V03-F1-P01_fechamento_operacional_pre_congelamento.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/V03-F1-P01_investigacao_contencao_memoria.md",
+      "current_source": "docs/V03-F1-P01_investigacao_contencao_memoria.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/V03-F1-P01_validacao_infraestrutura_cgroup.md",
+      "current_source": "docs/V03-F1-P01_validacao_infraestrutura_cgroup.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/decisions.md",
+      "current_source": "docs/decisions.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/decisions.md",
+      "current_source": "docs/decisions.md",
+      "original_link_target": "planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_resolved_path": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/decisions.md",
+      "current_source": "docs/decisions.md",
+      "original_link_target": "planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/decisions.md",
+      "current_source": "docs/decisions.md",
+      "original_link_target": "planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_resolved_path": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "current_source": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "original_link_target": "../../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/fundamentos/README.md",
+      "current_source": "docs/fundamentos/README.md",
+      "original_link_target": "../../neurons_plano_executivo_v1_1.md",
+      "original_resolved_path": "neurons_plano_executivo_v1_1.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_v1_1.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/fundamentos/README.md",
+      "current_source": "docs/fundamentos/README.md",
+      "original_link_target": "../../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_resolved_path": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../Plano_v0_2_consolidacao_final.md",
+      "original_resolved_path": "docs/Plano_v0_2_consolidacao_final.md",
+      "current_resolved_target": "docs/Plano_v0_2_consolidacao_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "original_resolved_path": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "current_resolved_target": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-12_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-12_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-12_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-12_inventario_competencias_demonstradas.md",
+      "original_resolved_path": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_resolved_target": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-12_avaliacao_lacunas.md",
+      "original_resolved_path": "docs/EC-12_avaliacao_lacunas.md",
+      "current_resolved_target": "docs/EC-12_avaliacao_lacunas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-12_pre_requisitos_especializacao.md",
+      "original_resolved_path": "docs/EC-12_pre_requisitos_especializacao.md",
+      "current_resolved_target": "docs/EC-12_pre_requisitos_especializacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-12_questoes_abertas.md",
+      "original_resolved_path": "docs/EC-12_questoes_abertas.md",
+      "current_resolved_target": "docs/EC-12_questoes_abertas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-03.5_auditoria_experimental.md",
+      "original_resolved_path": "docs/EC-03.5_auditoria_experimental.md",
+      "current_resolved_target": "docs/EC-03.5_auditoria_experimental.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-04_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-04_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-04_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-05_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-05_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-05_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-06_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-06_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-06_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-07_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-07_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-07_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-08_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-08_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-08_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-09_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-09_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-09_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-10_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-10_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-10_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../EC-11_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-11_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-11_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "original_resolved_path": "docs/fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "current_resolved_target": "docs/fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "original_resolved_path": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "current_resolved_target": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_link_target": "../decisions.md",
+      "original_resolved_path": "docs/decisions.md",
+      "current_resolved_target": "docs/decisions.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../Plano_v0_2_consolidacao_final.md",
+      "original_resolved_path": "docs/Plano_v0_2_consolidacao_final.md",
+      "current_resolved_target": "docs/Plano_v0_2_consolidacao_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "original_resolved_path": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "current_resolved_target": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-12_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-12_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-12_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-12_inventario_competencias_demonstradas.md",
+      "original_resolved_path": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_resolved_target": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-12_avaliacao_lacunas.md",
+      "original_resolved_path": "docs/EC-12_avaliacao_lacunas.md",
+      "current_resolved_target": "docs/EC-12_avaliacao_lacunas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-12_pre_requisitos_especializacao.md",
+      "original_resolved_path": "docs/EC-12_pre_requisitos_especializacao.md",
+      "current_resolved_target": "docs/EC-12_pre_requisitos_especializacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-12_questoes_abertas.md",
+      "original_resolved_path": "docs/EC-12_questoes_abertas.md",
+      "current_resolved_target": "docs/EC-12_questoes_abertas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-03.5_auditoria_experimental.md",
+      "original_resolved_path": "docs/EC-03.5_auditoria_experimental.md",
+      "current_resolved_target": "docs/EC-03.5_auditoria_experimental.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-04_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-04_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-04_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-05_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-05_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-05_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-06_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-06_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-06_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-07_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-07_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-07_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-08_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-08_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-08_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-09_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-09_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-09_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-10_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-10_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-10_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../EC-11_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-11_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-11_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "original_resolved_path": "docs/fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "current_resolved_target": "docs/fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "original_resolved_path": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "current_resolved_target": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_link_target": "../decisions.md",
+      "original_resolved_path": "docs/decisions.md",
+      "current_resolved_target": "docs/decisions.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../Plano_v0_2_consolidacao_final.md",
+      "original_resolved_path": "docs/Plano_v0_2_consolidacao_final.md",
+      "current_resolved_target": "docs/Plano_v0_2_consolidacao_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "original_resolved_path": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "current_resolved_target": "docs/Plano_v0_2_reconciliacao_historica_EC00_EC02.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../EC-12_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-12_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-12_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../EC-12_inventario_competencias_demonstradas.md",
+      "original_resolved_path": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "current_resolved_target": "docs/EC-12_inventario_competencias_demonstradas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../EC-12_avaliacao_lacunas.md",
+      "original_resolved_path": "docs/EC-12_avaliacao_lacunas.md",
+      "current_resolved_target": "docs/EC-12_avaliacao_lacunas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../EC-12_pre_requisitos_especializacao.md",
+      "original_resolved_path": "docs/EC-12_pre_requisitos_especializacao.md",
+      "current_resolved_target": "docs/EC-12_pre_requisitos_especializacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../EC-12_questoes_abertas.md",
+      "original_resolved_path": "docs/EC-12_questoes_abertas.md",
+      "current_resolved_target": "docs/EC-12_questoes_abertas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "original_resolved_path": "docs/fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "current_resolved_target": "docs/fundamentos/Neurons_Fundamento_Cognitivo_Metacognitivo_Pedagogico_Aprovado.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "original_resolved_path": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "current_resolved_target": "docs/fundamentos/Neurons_Diretrizes_Complementares_Memoria_Pedagogia_Idiomas.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../decisions.md",
+      "original_resolved_path": "docs/decisions.md",
+      "current_resolved_target": "docs/decisions.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../src/circuit.rs",
+      "original_resolved_path": "src/circuit.rs",
+      "current_resolved_target": "src/circuit.rs",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../src/learning.rs",
+      "original_resolved_path": "src/learning.rs",
+      "current_resolved_target": "src/learning.rs",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../src/engram.rs",
+      "original_resolved_path": "src/engram.rs",
+      "current_resolved_target": "src/engram.rs",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../src/cognition.rs",
+      "original_resolved_path": "src/cognition.rs",
+      "current_resolved_target": "src/cognition.rs",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../src/metacognition.rs",
+      "original_resolved_path": "src/metacognition.rs",
+      "current_resolved_target": "src/metacognition.rs",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../EC-06_auditoria_cientifica_final.md",
+      "original_resolved_path": "docs/EC-06_auditoria_cientifica_final.md",
+      "current_resolved_target": "docs/EC-06_auditoria_cientifica_final.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_source": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_link_target": "../../src/integration.rs",
+      "original_resolved_path": "src/integration.rs",
+      "current_resolved_target": "src/integration.rs",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/CIC-01_formacao_revisao_conceitos_PROPOSTA.md",
+      "current_source": "docs/protocolos/CIC-01_formacao_revisao_conceitos_PROPOSTA.md",
+      "original_link_target": "../../neurons_plano_executivo_v1_1.md",
+      "original_resolved_path": "neurons_plano_executivo_v1_1.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_v1_1.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/CIC-01_formacao_revisao_conceitos_PROPOSTA.md",
+      "current_source": "docs/protocolos/CIC-01_formacao_revisao_conceitos_PROPOSTA.md",
+      "original_link_target": "../planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/EC-05_preparacao_retencao_contextual.md",
+      "current_source": "docs/protocolos/EC-05_preparacao_retencao_contextual.md",
+      "original_link_target": "../../neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "original_resolved_path": "neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_evolucao_cognitiva_v0_2.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/M0_primeiro_ciclo_cognitivo_integrado_PROPOSTA.md",
+      "current_source": "docs/protocolos/M0_primeiro_ciclo_cognitivo_integrado_PROPOSTA.md",
+      "original_link_target": "../../neurons_plano_executivo_v1_1.md",
+      "original_resolved_path": "neurons_plano_executivo_v1_1.md",
+      "current_resolved_target": "docs/historico/planos_executivos/neurons_plano_executivo_v1_1.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/M0_primeiro_ciclo_cognitivo_integrado_PROPOSTA.md",
+      "current_source": "docs/protocolos/M0_primeiro_ciclo_cognitivo_integrado_PROPOSTA.md",
+      "original_link_target": "../planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/M2_integracao_nucleo_cognitivo.md",
+      "current_source": "docs/protocolos/M2_integracao_nucleo_cognitivo.md",
+      "original_link_target": "../planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md",
+      "current_source": "docs/protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md",
+      "original_link_target": "../planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_APROVADO.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md",
+      "current_source": "docs/protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md",
+      "original_link_target": "../planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "original_resolved_path": "docs/planos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_Plano_Executivo_Evolucao_Cognitiva_v0_3_PROPOSTA.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    },
+    {
+      "original_source": "docs/protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md",
+      "current_source": "docs/protocolos/V03-F1-P01_confiabilidade_experimental_inicial_PROPOSTA.md",
+      "original_link_target": "../planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "original_resolved_path": "docs/planos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "current_resolved_target": "docs/historico/planos_executivos/Neurons_v0_3_revisao_cientifica_pre_aprovacao.md",
+      "target_exists_now": true,
+      "context_note": "Resolve original relative target against original source location, not archived directory. Original source bytes are preserved."
+    }
+  ],
+  "backup_archive": "/tmp/neurons-recovery-backup-8dt15y2x/neurons-integral.tar",
+  "backup_sha256": "d7ff33e5a87d051ea942ab9028c4e4617089bd0ce550264b8aa7a479b9424eb4",
+  "notes": [
+    "Archived plans preserve exact original bytes and historical wording",
+    "Historical relative paths retain original context; table resolves them without rewriting scientific protocols",
+    "No code/test/script references to moved plan filenames found in static source scan; string construction/dynamic external clients not globally excluded"
+  ]
+}

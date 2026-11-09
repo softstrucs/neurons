@@ -346,3 +346,6 @@ fn find_negative(store: &EngramStore, context: u32, from: NodeId, to: NodeId) ->
         .map(|record| record.id())
         .min()
 }
+
+/// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
+pub mod concepts;

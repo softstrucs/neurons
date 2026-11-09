@@ -14,7 +14,7 @@ fn help_lists_available_commands() {
 }
 
 #[test]
-fn doctor_reports_bootstrap_state() {
+fn doctor_reports_existing_core_and_its_limits() {
     let output = Command::new(env!("CARGO_BIN_EXE_neurons"))
         .arg("doctor")
         .output()
@@ -24,7 +24,9 @@ fn doctor_reports_bootstrap_state() {
     let stdout = String::from_utf8(output.stdout).expect("a saída deve ser UTF-8");
     assert!(stdout.contains("Neurons 0.1.0"));
     assert!(stdout.contains("Sistema:"));
-    assert!(stdout.contains("núcleo ainda não implementado"));
+    assert!(stdout.contains("núcleo local experimental implementado"));
+    assert!(stdout.contains("sem compreensão geral demonstrada"));
+    assert!(!stdout.contains("núcleo ainda não implementado"));
 }
 
 #[test]
