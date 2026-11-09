@@ -777,6 +777,10 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
     let mut session = Session::new();
     let mut path_log = crate::integration::query::PathEpisodeLog::default();
     let mut path_authorization = None;
+    let mut source_builder: Option<(SourceId, Vec<Information>)> = None;
+    let mut fixed_source: Option<crate::integration::investigation::LocalSource> = None;
+    let mut investigation: Option<crate::integration::investigation::Investigation> = None;
+    writeln!(output,"MP07 transitório: fonte7 ID / evidencia7 CONTEXTO ORIGEM DESTINO +|- EVIDENCIA|- observacao|hipotese / fixar-fonte7 (antes da pergunta); investigar7 ORIGEM DESTINO; permitir-investigacao7 / pedido7 / permitir-fonte7 / consultar-fonte7 / interpretar7 / avaliar7 / permitir-admissao7 / admitir7 ID / recusar7 / concluir7 / historico7. Fonte e permissões não persistem; restaurar limpa MP07. Ações externas proibidas.")?;
     writeln!(output,"MP06: autorizar3 CONTEXTO / consultar3 CONTEXTO ORIGEM DESTINO / historico3. Até 3 episódios transitórios, 3 premissas, 64 eventos. Autorização/log MP06 não fazem parte do checkpoint F1 v1; restaurar os limpa.")?;
     writeln!(output, "{HELP}")?;
     output.flush()?;
@@ -803,6 +807,123 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
         let p: Vec<_> = line.split_whitespace().collect();
         let result = match p.as_slice() {
             ["sair"] => return Ok(()),
+            ["fonte7", id] => (|| -> Result<String, String> {
+                if investigation.is_some() || fixed_source.is_some() || source_builder.is_some() {
+                    return Err("fonte já definida ou investigação iniciada".into());
+                }
+                source_builder = Some((source(id)?, vec![]));
+                Ok("Fonte em preparação; nenhuma consulta executada".into())
+            })(),
+            ["evidencia7", ctx, from, to, pol, ev, nat] => (|| -> Result<String, String> {
+                if investigation.is_some() || fixed_source.is_some() {
+                    return Err("fonte imutável".into());
+                }
+                let (id, rows) = source_builder.as_mut().ok_or("defina fonte7")?;
+                if rows.len() >= 8 {
+                    return Err("limite da fonte".into());
+                }
+                let info = session.info(&[ctx, from, to, pol, &id.get().to_string(), ev, nat])?;
+                rows.push(info);
+                Ok("Registro explícito preparado antes da pergunta".into())
+            })(),
+            ["fixar-fonte7"] => (|| -> Result<String, String> {
+                if investigation.is_some() || fixed_source.is_some() {
+                    return Err("fonte já fixada".into());
+                }
+                let (id, rows) = source_builder.as_ref().ok_or("defina fonte7")?;
+                fixed_source = Some(crate::integration::investigation::LocalSource::new(
+                    *id, rows,
+                )?);
+                source_builder = None;
+                Ok("Fonte local fixada e imutável".into())
+            })(),
+            ["investigar7", from, to] => (|| -> Result<String, String> {
+                if investigation.is_some() {
+                    return Err("um episódio MP07 por sessão".into());
+                }
+                let ctx = session.scope.ok_or("sem escopo")?.context.get().to_string();
+                let q = session.statement(&ctx, from, to, "+")?;
+                let source = fixed_source
+                    .take()
+                    .ok_or("fixe a fonte antes da pergunta")?;
+                let mut r = crate::integration::investigation::Investigation::new(source);
+                let result = r.begin(&mut session, q);
+                investigation = Some(r);
+                result.map(|r| format!("MP07 inicial {r:?}"))
+            })(),
+            ["permitir-investigacao7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.allow_investigation())
+                .map(|_| {
+                    "Investigação autorizada; fonte/admissão não autorizadas por implicação".into()
+                }),
+            ["pedido7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.derive(&mut session))
+                .map(|r| format!("Pedido MP07 {r:?}")),
+            ["permitir-fonte7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.allow_source(&session))
+                .map(|_| "Acesso à fonte autorizado; sem admissão implícita".into()),
+            ["consultar-fonte7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| {
+                    r.fetch(&mut session)?;
+                    Ok(r.history())
+                }),
+            ["interpretar7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.interpret(&mut session))
+                .map(|_| "Retorno interpretado".into()),
+            ["avaliar7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| {
+                    r.assess(&mut session)?;
+                    Ok(r.history())
+                }),
+            ["permitir-admissao7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.allow_admission())
+                .map(|_| "Admissão explicitamente autorizada".into()),
+            ["admitir7", id] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.admit(&mut session, record(id)?))
+                .map(|_| "Uma observação incorporada explicitamente".into()),
+            ["recusar7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.deny_admission())
+                .map(|_| "Admissão recusada; memória preservada".into()),
+            ["concluir7"] => investigation
+                .as_mut()
+                .ok_or_else(|| "sem investigação".into())
+                .and_then(|r| r.finish(&mut session))
+                .map(|r| format!("MP07 final {r:?}")),
+            ["historico7"] => investigation
+                .as_ref()
+                .map(|r| r.history())
+                .ok_or_else(|| "sem investigação".into()),
+            ["externa7"] => Err("ações externas proibidas em MP07".into()),
+            [op, ..]
+                if investigation.is_some()
+                    && !matches!(
+                        *op,
+                        "estado" | "historico" | "ajuda" | "salvar" | "restaurar"
+                    ) =>
+            {
+                Err(
+                    "durante MP07 use os atos supervisionados; comandos paralelos bloqueados"
+                        .into(),
+                )
+            }
             ["historico3"] => Ok(format!("Histórico MP06 {:?}", path_log.entries())),
             ["autorizar3", ctx] => (|| -> Result<String, String> {
                 let scope = session.scope_in(ctx)?;
@@ -827,6 +948,9 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
                 session = s;
                 path_log = crate::integration::query::PathEpisodeLog::default();
                 path_authorization = None;
+                investigation = None;
+                fixed_source = None;
+                source_builder = None;
                 "Checkpoint F1 restaurado".into()
             }),
             _ => session.execute(line),
@@ -839,3 +963,236 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
     }
     writeln!(output, "Limite de entradas atingido; sessão encerrada")
 }
+
+/// Porta MP07: atos M3 diretos, sem reexecutar consultas históricas da sessão.
+/// O journal recebe os mesmos comandos F1 v1 somente após sucesso do ato.
+impl Session {
+    fn mp07_step(&self) -> Result<u64, String> {
+        if self.journal.len() >= MAX_OPERATIONS {
+            return Err("capacidade de operações excedida".into());
+        }
+        self.at.checked_add(1).ok_or("tempo excedido".into())
+    }
+    fn mp07_record(&mut self, command: String, at: u64) {
+        debug_assert!(command.len() <= MAX_LINE_BYTES);
+        self.at = at;
+        self.journal.push(command);
+    }
+}
+impl crate::integration::investigation::AcquisitionHost for Session {
+    fn start(&mut self, q: Statement) -> Result<crate::integration::query::QueryReport, String> {
+        if Some(q.scope()) != self.scope || q.polarity() != Polarity::Positive {
+            return Err("consulta MP07 fora do escopo".into());
+        }
+        if self.acquisition.is_some()
+            || self.pending.is_some_and(|p| {
+                !matches!(
+                    p.stage,
+                    AdmissionStage::Incorporated | AdmissionStage::Quarantined
+                )
+            })
+        {
+            return Err("episódio ou admissão pendente".into());
+        }
+        let at = self.mp07_step()?;
+        let mut memory = EngramStore::new(8).map_err(err)?;
+        for r in self.memory.iter() {
+            memory.record(r).map_err(err)?;
+        }
+        let mut core = CognitiveEpisode::new(
+            memory,
+            &self.metadata,
+            &self.symbols,
+            self.authorized.ok_or("regra sem autorização explícita")?,
+            &self.sources,
+        )
+        .map_err(err)?;
+        let report = core
+            .evaluate_initial(q, EpisodeId::new(1).map_err(err)?, at)
+            .map_err(err)?
+            .clone();
+        self.acquisition = Some(core);
+        self.mp07_record(
+            format!("iniciar {} {}", q.subject().get(), q.object().get()),
+            at,
+        );
+        Ok(report)
+    }
+    fn request(&mut self) -> Result<InformationRequest, String> {
+        let at = self.mp07_step()?;
+        let r = self
+            .acquisition
+            .as_mut()
+            .ok_or("sem episódio")?
+            .derive_request(RequestId::new(1).map_err(err)?, at)
+            .map_err(err)?;
+        self.mp07_record("pedido".into(), at);
+        Ok(r)
+    }
+    fn receive(&mut self, p: FeedbackPackage) -> Result<(), String> {
+        let request = self
+            .acquisition
+            .as_ref()
+            .ok_or("sem episódio")?
+            .request()
+            .ok_or("sem pedido")?;
+        p.check_link(request).map_err(err)?;
+        let FeedbackContent::One(i) = p.content else {
+            return Err("MP07 aceita uma candidata".into());
+        };
+        let polarity = if i.statement.polarity() == Polarity::Positive {
+            "+"
+        } else {
+            "-"
+        };
+        let s = self.statement(
+            &i.statement.scope().context.get().to_string(),
+            &i.statement.subject().get().to_string(),
+            &i.statement.object().get().to_string(),
+            polarity,
+        )?;
+        if s != i.statement {
+            return Err("IncompatibleScope: retorno não representável em F1 v1".into());
+        }
+        if p.envelope_source != i.declared_source {
+            return Err("fonte do envelope divergente".into());
+        }
+        let at = self.mp07_step()?;
+        if i.received_at != at || p.returned_at != at {
+            return Err("instante de retorno incompatível".into());
+        }
+        let source = i.declared_source.ok_or("fonte ausente")?;
+        let evidence = i
+            .evidence
+            .map_or_else(|| "-".into(), |e| e.get().to_string());
+        let command = format!(
+            "retorno {} {} {} {} {} {} {} {} {}",
+            p.id.get(),
+            p.request.get(),
+            i.statement.scope().context.get(),
+            i.statement.subject().get(),
+            i.statement.object().get(),
+            polarity,
+            source.get(),
+            evidence,
+            if i.nature == DeclaredNature::Observation {
+                "observacao"
+            } else {
+                "hipotese"
+            }
+        );
+        self.acquisition
+            .as_mut()
+            .unwrap()
+            .receive(p, at)
+            .map_err(err)?;
+        self.mp07_record(command, at);
+        Ok(())
+    }
+    fn interpret(&mut self) -> Result<(), String> {
+        let at = self.mp07_step()?;
+        self.acquisition
+            .as_mut()
+            .ok_or("sem episódio")?
+            .interpret(at)
+            .map_err(err)?;
+        self.mp07_record("interpretar-retorno".into(), at);
+        Ok(())
+    }
+    fn assess(&mut self) -> Result<Vec<crate::integration::acquisition::AssessedItem>, String> {
+        let at = self.mp07_step()?;
+        let result = self
+            .acquisition
+            .as_mut()
+            .ok_or("sem episódio")?
+            .assess_admissibility(at)
+            .map_err(err)?
+            .to_vec();
+        self.mp07_record("avaliar-retorno".into(), at);
+        Ok(result)
+    }
+    fn incorporate(&mut self, id: EngramId) -> Result<(), String> {
+        let at = self.mp07_step()?;
+        self.acquisition
+            .as_mut()
+            .ok_or("sem episódio")?
+            .incorporate(&[id], at)
+            .map_err(err)?;
+        self.mp07_record(format!("admitir-retorno {}", id.get()), at);
+        Ok(())
+    }
+    fn reassess(&mut self) -> Result<crate::integration::query::QueryReport, String> {
+        let at = self.mp07_step()?;
+        let r = self
+            .acquisition
+            .as_mut()
+            .ok_or("sem episódio")?
+            .reassess(EpisodeId::new(2).map_err(err)?, at)
+            .map_err(err)?
+            .clone();
+        self.mp07_record("reavaliar".into(), at);
+        Ok(r)
+    }
+    fn query_readonly(
+        &self,
+        q: Statement,
+    ) -> Result<crate::integration::query::QueryReport, String> {
+        QueryCoordinator::new(
+            self.memory(),
+            self.metadata(),
+            self.authorized.ok_or("regra não autorizada")?,
+            &self.sources,
+        )
+        .map_err(err)?
+        .query(
+            EpisodeId::new(2).map_err(err)?,
+            q,
+            self.at.checked_add(1).ok_or("tempo excedido")?,
+            &mut EpisodeLog::default(),
+        )
+        .map_err(err)
+    }
+    fn next_at(&self) -> Result<u64, String> {
+        self.at.checked_add(1).ok_or("tempo excedido".into())
+    }
+    fn knows_source(&self, id: SourceId) -> bool {
+        self.sources.contains(&id)
+    }
+    fn opposition(
+        &self,
+        q: Statement,
+        i: Information,
+    ) -> Vec<crate::integration::query::BoundRecord> {
+        self.metadata()
+            .iter()
+            .filter_map(|m| {
+                let r = self.memory().get(m.id).ok()?;
+                let s = m.information.statement;
+                let c = i.statement;
+                if m.state != EpistemicState::AdmittedObservation
+                    || m.disposition.is_some()
+                    || r.status() != RecordStatus::Observed
+                    || r.observed_at() > self.at
+                    || check_observation(m.information, q.scope(), &self.sources, self.at).is_err()
+                {
+                    return None;
+                }
+                if (s.subject() == c.subject()
+                    && s.object() == c.object()
+                    && s.polarity() != c.polarity())
+                    || (s.subject() == q.subject()
+                        && s.object() == q.object()
+                        && s.polarity() == Polarity::Negative)
+                {
+                    Some(crate::integration::query::BoundRecord {
+                        engram: r,
+                        metadata: *m,
+                    })
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+}
+impl crate::integration::investigation::sealed::Sealed for Session {}

@@ -61,3 +61,6 @@ pub mod concepts;
 
 /// MP05: episódio sináptico assistido, limitado e persistente; sem memória epistêmica implícita.
 pub mod synaptic;
+
+/// MP07: supervisão de uma consulta real a fonte local, sem outro motor cognitivo.
+pub mod investigation;
