@@ -115,6 +115,7 @@ pub(crate) mod pedagogy_sealed {
     pub trait Sealed {}
 }
 pub trait PedagogyHost: pedagogy_sealed::Sealed {
+    fn pedagogy_events(&self) -> usize;
     fn pedagogy_existing(&self) -> Result<Vec<Attributes>, String>;
     fn pedagogy_identity(&self) -> Result<(NodeId, Scope), String>;
     fn pedagogy_version(&self) -> Result<HypothesisVersion, String>;
@@ -304,34 +305,16 @@ pub fn teach_concept(
     if out.diagnosis == PedagogicalDiagnosis::ExperienceNeeded
         && permissions.presentation == Some(plan.scope)
     {
-        let mut used = vec![];
-        for _ in 0..3 {
-            let version = host.pedagogy_version()?;
-            let Some((lesson, rejected)) = choose_lesson(&version, &plan.lessons, &used) else {
-                break;
-            };
-            used.push(lesson.id);
-            let admission = host.pedagogy_present(lesson)?;
-            let mut record = LessonRecord {
-                lesson,
-                rejected_hypotheses: rejected,
-                admissibility: admission,
-                admitted: false,
-                revision: None,
-            };
-            if admission == Admission::Admissible && permissions.admissions.contains(&lesson.id) {
-                record.revision = Some(host.pedagogy_admit(lesson.id)?);
-                record.admitted = true;
-            }
+        let run = run_teaching(host, &plan, &permissions, 3);
+        if let Some(error) = run.failure {
+            return Err(error);
+        }
+        out.lessons = run.records;
+        for record in &out.lessons {
             out.history.push(format!(
                 "Experiência {:?}: redução prevista {}; admitida={}",
-                lesson.id, rejected, record.admitted
+                record.lesson.id, record.rejected_hypotheses, record.admitted
             ));
-            let continue_teaching = record.admitted;
-            out.lessons.push(record);
-            if !continue_teaching {
-                break;
-            } // Preserva a pendência F1 e não tenta outra apresentação após recusa.
         }
     } else {
         out.history
@@ -353,6 +336,373 @@ pub fn teach_concept(
     ));
     if out.history.len() > 8 || out.lessons.len() > 3 {
         return Err("limite supervisor pedagógico".into());
+    }
+    Ok(out)
+}
+
+/// Núcleo de coordenação MP09 compartilhado pelos dois adaptadores; não aprende por si.
+struct TeachingRun {
+    records: Vec<LessonRecord>,
+    failure: Option<String>,
+}
+fn run_teaching(
+    host: &mut impl PedagogyHost,
+    plan: &TeachingPlan,
+    permissions: &PedagogyPermissions,
+    limit: usize,
+) -> TeachingRun {
+    let mut out = TeachingRun {
+        records: vec![],
+        failure: None,
+    };
+    let mut used = vec![];
+    for _ in 0..limit {
+        let version = match host.pedagogy_version() {
+            Ok(v) => v,
+            Err(e) => {
+                out.failure = Some(e);
+                break;
+            }
+        };
+        let Some((lesson, rejected)) = choose_lesson(&version, &plan.lessons, &used) else {
+            break;
+        };
+        used.push(lesson.id);
+        let admission = match host.pedagogy_present(lesson) {
+            Ok(a) => a,
+            Err(e) => {
+                out.failure = Some(e);
+                break;
+            }
+        };
+        let mut record = LessonRecord {
+            lesson,
+            rejected_hypotheses: rejected,
+            admissibility: admission,
+            admitted: false,
+            revision: None,
+        };
+        if admission == Admission::Admissible && permissions.admissions.contains(&lesson.id) {
+            match host.pedagogy_admit(lesson.id) {
+                Ok(v) => {
+                    record.revision = Some(v);
+                    record.admitted = true;
+                }
+                Err(e) => out.failure = Some(e),
+            }
+        }
+        let proceed = record.admitted;
+        out.records.push(record);
+        if !proceed {
+            break;
+        }
+    }
+    out
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum GoalCriterion {
+    SupportedByCurrentEvidence,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ConceptGoal {
+    pub id: EpisodeId,
+    pub concept: NodeId,
+    pub scope: Scope,
+    pub observation: Observation,
+    pub criterion: GoalCriterion,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConceptGoalResult {
+    Resolved,
+    Partial,
+    Abstention,
+    Interrupted,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConceptExecution {
+    NotStarted,
+    Completed,
+    Interrupted,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ConceptGoalBudget {
+    pub queries: usize,
+    pub experiences: usize,
+}
+impl Default for ConceptGoalBudget {
+    fn default() -> Self {
+        Self {
+            queries: 5,
+            experiences: 2,
+        }
+    }
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct GoalQuery {
+    pub goal: ConceptGoal,
+    pub report: ConceptReport,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct GoalLesson {
+    pub goal: ConceptGoal,
+    pub record: LessonRecord,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ConceptGoalReport {
+    pub goal: ConceptGoal,
+    pub permissions: PedagogyPermissions,
+    pub budget: ConceptGoalBudget,
+    pub initial: Option<GoalQuery>,
+    pub final_query: Option<GoalQuery>,
+    pub independent_before: Vec<GoalQuery>,
+    pub independent_after: Vec<GoalQuery>,
+    pub strategy: crate::metacognition::concepts::ConceptStrategy,
+    pub outcome: ConceptGoalResult,
+    pub execution: ConceptExecution,
+    pub lessons: Vec<GoalLesson>,
+    pub queries: usize,
+    pub concept_events: usize,
+    pub history: Vec<String>,
+    pub reason: String,
+}
+fn goal_supported(r: &ConceptReport) -> bool {
+    matches!(
+        r.decision,
+        crate::metacognition::concepts::ConceptDecision::Supported(_)
+    ) && !r.consulted.is_empty()
+        && r.version
+            .as_ref()
+            .is_some_and(|v| !v.support.is_empty() && !v.criteria.is_empty())
+}
+/// Um objetivo, uma escolha e uma tentativa MP09. Chave de correção não existe na API.
+pub fn supervise_concept_goal(
+    host: &mut impl PedagogyHost,
+    goal: ConceptGoal,
+    plan: TeachingPlan,
+    assessment: PedagogyAssessment,
+    permissions: PedagogyPermissions,
+    budget: ConceptGoalBudget,
+) -> Result<ConceptGoalReport, String> {
+    use crate::metacognition::concepts::{select_concept_strategy, ConceptStrategy};
+    if budget.queries > 5
+        || budget.experiences > 2
+        || plan.lessons.len() > 2
+        || permissions.admissions.len() > 2
+        || permissions
+            .admissions
+            .iter()
+            .enumerate()
+            .any(|(i, a)| permissions.admissions[..i].contains(a))
+    {
+        return Err("teto/autorizações do objetivo inválidos".into());
+    }
+    if (goal.concept, goal.scope) != (plan.concept, plan.scope)
+        || host.pedagogy_identity()? != (goal.concept, goal.scope)
+    {
+        return Err("objetivo/plano/estado incompatíveis".into());
+    }
+    let mut out = ConceptGoalReport {
+        goal,
+        permissions: permissions.clone(),
+        budget,
+        initial: None,
+        final_query: None,
+        independent_before: vec![],
+        independent_after: vec![],
+        strategy: ConceptStrategy::Abstain,
+        outcome: ConceptGoalResult::Interrupted,
+        execution: ConceptExecution::NotStarted,
+        lessons: vec![],
+        queries: 0,
+        concept_events: 0,
+        history: vec![format!(
+            "Objetivo {:?} fixado; critério {:?}; sem rótulo esperado",
+            goal.id, goal.criterion
+        )],
+        reason: String::new(),
+    };
+    let known = host.pedagogy_existing()?;
+    let probes: Vec<_> = assessment
+        .before
+        .iter()
+        .chain(&assessment.after)
+        .copied()
+        .collect();
+    if probes.contains(&goal.observation)
+        || plan
+            .lessons
+            .iter()
+            .map(|l| l.attributes)
+            .chain(known)
+            .any(|a| probes.iter().any(|o| o.completions().contains(&a)))
+        || plan
+            .lessons
+            .iter()
+            .any(|l| goal.observation.completions().contains(&l.attributes))
+    {
+        out.reason =
+            "Sobreposição ensino/objetivo/avaliações; vazamento potencial bloqueado".into();
+        out.history.push(out.reason.clone());
+        return Ok(out);
+    }
+    if permissions.evaluation != Some(goal.scope) {
+        out.reason = "Avaliação do objetivo não autorizada".into();
+        return Ok(out);
+    }
+    if budget.queries == 0 {
+        out.strategy = ConceptStrategy::Stop;
+        out.reason = "Sem orçamento para consulta inicial".into();
+        return Ok(out);
+    }
+    let events_before = host.pedagogy_events();
+    let initial = host.pedagogy_query(
+        EpisodeId::new(1).map_err(|e| format!("{e:?}"))?,
+        goal.observation,
+    )?;
+    out.queries = 1;
+    out.history.push(format!(
+        "Objetivo {:?}: diagnóstico {:?}, versão {:?}, antes do ensino",
+        goal.id,
+        diagnose_pedagogy(std::slice::from_ref(&initial)),
+        initial.version.as_ref().map(|v| v.number)
+    ));
+    let next = choose_lesson(&host.pedagogy_version()?, &plan.lessons, &[]);
+    let can_teach = permissions.presentation == Some(goal.scope)
+        && next.is_some_and(|(l, _)| permissions.admissions.contains(&l.id));
+    let needed = 2 + assessment.before.len() + assessment.after.len();
+    let capacity = budget.experiences >= plan.lessons.len()
+        && budget.experiences > 0
+        && needed <= budget.queries
+        && host.pedagogy_capacity(plan.lessons.len()).is_ok();
+    out.strategy = select_concept_strategy(&initial, can_teach, capacity);
+    out.initial = Some(GoalQuery {
+        goal,
+        report: initial.clone(),
+    });
+    out.history.push(format!(
+        "Objetivo {:?}: seleção única {:?}",
+        goal.id, out.strategy
+    ));
+    match out.strategy {
+        ConceptStrategy::Respond => {
+            out.execution = ConceptExecution::Completed;
+            out.outcome = if goal_supported(&initial) {
+                ConceptGoalResult::Resolved
+            } else {
+                ConceptGoalResult::Abstention
+            };
+            out.reason =
+                "Resposta inicial já sustentada; nenhuma experiência ou consulta duplicada".into();
+        }
+        ConceptStrategy::Abstain => {
+            out.execution = ConceptExecution::Completed;
+            let denied = diagnose_pedagogy(std::slice::from_ref(&initial))
+                == PedagogicalDiagnosis::ExperienceNeeded
+                && next.is_some()
+                && !can_teach;
+            if denied {
+                out.execution = ConceptExecution::Interrupted;
+            }
+            out.outcome = if denied {
+                ConceptGoalResult::Interrupted
+            } else {
+                ConceptGoalResult::Abstention
+            };
+            out.reason = if denied {
+                "Apresentação/admissão não autorizada"
+            } else {
+                "Diagnóstico bloqueante ou nenhuma experiência informativa"
+            }
+            .into();
+        }
+        ConceptStrategy::Stop => {
+            out.execution = ConceptExecution::Interrupted;
+            out.reason="Reserva agregada de consultas/experiências/operações/eventos/validade indisponível".into();
+        }
+        ConceptStrategy::TeachOnce => {
+            // Mesmos conjuntos separados MP09; consulta do objetivo NÃO é um item deles.
+            for observation in &assessment.before {
+                let r = host.pedagogy_query(
+                    EpisodeId::new(out.queries as u32 + 1).map_err(|e| format!("{e:?}"))?,
+                    *observation,
+                )?;
+                out.queries += 1;
+                out.independent_before.push(GoalQuery { goal, report: r });
+            }
+            let run = run_teaching(host, &plan, &permissions, budget.experiences);
+            for record in run.records {
+                out.history.push(format!(
+                    "Objetivo {:?}: experiência {:?}, admitida={}, revisão {:?}",
+                    goal.id,
+                    record.lesson.id,
+                    record.admitted,
+                    record.revision.as_ref().map(|v| v.number)
+                ));
+                out.lessons.push(GoalLesson { goal, record });
+            }
+            out.concept_events = host.pedagogy_events() - events_before;
+            if let Some(e) = run.failure {
+                out.reason = format!("Ensino interrompido: {e}");
+                out.execution = ConceptExecution::Interrupted;
+            } else {
+                out.execution = ConceptExecution::Completed;
+            }
+            for observation in &assessment.after {
+                let r = host.pedagogy_query(
+                    EpisodeId::new(out.queries as u32 + 1).map_err(|e| format!("{e:?}"))?,
+                    *observation,
+                )?;
+                out.queries += 1;
+                out.independent_after.push(GoalQuery { goal, report: r });
+            }
+            let final_report = host.pedagogy_query(
+                EpisodeId::new(out.queries as u32 + 1).map_err(|e| format!("{e:?}"))?,
+                goal.observation,
+            )?;
+            out.queries += 1;
+            let progress = final_report.version.as_ref().map(|v| v.number)
+                > initial.version.as_ref().map(|v| v.number);
+            let refusal = out
+                .lessons
+                .iter()
+                .any(|l| !l.record.admitted && l.record.admissibility == Admission::Admissible);
+            if refusal {
+                out.execution = ConceptExecution::Interrupted;
+            }
+            out.outcome = if out.execution == ConceptExecution::Interrupted || refusal {
+                ConceptGoalResult::Interrupted
+            } else if goal_supported(&final_report) {
+                ConceptGoalResult::Resolved
+            } else if progress {
+                ConceptGoalResult::Partial
+            } else {
+                ConceptGoalResult::Abstention
+            };
+            if out.reason.is_empty() {
+                out.reason = format!(
+                    "Resultado {:?}; versão {:?}→{:?}; ensino executado não implica resolução",
+                    out.outcome,
+                    initial.version.as_ref().map(|v| v.number),
+                    final_report.version.as_ref().map(|v| v.number)
+                );
+            }
+            out.final_query = Some(GoalQuery {
+                goal,
+                report: final_report,
+            });
+        }
+    }
+    out.history.push(format!(
+        "Objetivo {:?}: {:?}, consultas={}, eventos conceituais={}",
+        goal.id, out.outcome, out.queries, out.concept_events
+    ));
+    if out.queries > budget.queries
+        || out.lessons.len() > 2
+        || out.history.len() > 8
+        || out.concept_events > 10
+    {
+        return Err("limite agregado do objetivo violado".into());
     }
     Ok(out)
 }

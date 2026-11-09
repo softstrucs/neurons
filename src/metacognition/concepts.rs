@@ -89,3 +89,41 @@ pub fn diagnose_pedagogy(
         PedagogicalDiagnosis::AlreadySupported
     }
 }
+
+/// Supervisão de objetivo conceitual: a escolha precede o ensino e não recebe gabarito.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConceptStrategy {
+    Respond,
+    TeachOnce,
+    Abstain,
+    Stop,
+}
+pub fn select_concept_strategy(
+    initial: &crate::integration::concepts::ConceptReport,
+    can_teach: bool,
+    capacity_available: bool,
+) -> ConceptStrategy {
+    use crate::metacognition::{select_strategy, RegulationDiagnostic as D, Strategy};
+    let diagnosis = diagnose_pedagogy(std::slice::from_ref(initial));
+    let supported = diagnosis == PedagogicalDiagnosis::AlreadySupported;
+    let mut diagnostics = vec![match diagnosis {
+        PedagogicalDiagnosis::AlreadySupported => D::Supported,
+        PedagogicalDiagnosis::ExperienceNeeded => D::MissingEvidence,
+        PedagogicalDiagnosis::Blocked => match initial.decision {
+            ConceptDecision::Abstain(Abstention::ContradictoryEvidence) => D::Opposition,
+            ConceptDecision::Abstain(Abstention::ModelClassInadequate) => D::InvalidEvidence,
+            _ => D::GapUnavailable,
+        },
+    }];
+    if diagnosis == PedagogicalDiagnosis::ExperienceNeeded && !capacity_available {
+        diagnostics.push(D::ResourceLimited);
+    }
+    // Reutiliza a precedência pura MP08. A ação exploratória é adaptada ao ensino
+    // MP09, sem executar MP07 ou transferir suas permissões relacionais.
+    match select_strategy(&diagnostics, supported, can_teach, can_teach) {
+        Strategy::Respond => ConceptStrategy::Respond,
+        Strategy::Investigate => ConceptStrategy::TeachOnce,
+        Strategy::Abstain => ConceptStrategy::Abstain,
+        Strategy::StopAtLimit => ConceptStrategy::Stop,
+    }
+}

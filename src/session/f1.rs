@@ -777,6 +777,9 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
     let mut session = Session::new();
     let mut path_log = crate::integration::query::PathEpisodeLog::default();
     let mut path_authorization = None;
+    let mut concept_goal: Option<crate::curriculum::ConceptGoal> = None;
+    let mut concept_goal_report: Option<crate::curriculum::ConceptGoalReport> = None;
+    writeln!(output,"Objetivo conceitual transitório: objetivo9 ID BITS; avaliacoes-objetivo9 PRE POS (independentes e sem rótulos); preparar/fixar plano9 e permissoes9; acompanhar9 CONSULTAS EXPERIENCIAS (máximos5/2); historico-objetivo9. Objetivo original é reconsultado separadamente; restauração não retoma supervisão.")?;
     let mut teaching_builder: Option<(NodeId, Scope, Vec<crate::curriculum::Lesson>)> = None;
     let mut teaching_plan: Option<crate::curriculum::TeachingPlan> = None;
     let mut teaching_assessment: Option<crate::curriculum::PedagogyAssessment> = None;
@@ -818,6 +821,84 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
         let p: Vec<_> = line.split_whitespace().collect();
         let result = match p.as_slice() {
             ["sair"] => return Ok(()),
+            ["historico-objetivo9"] => concept_goal_report
+                .as_ref()
+                .map(|r| format!("ObjetivoConceitual {r:?}"))
+                .ok_or_else(|| "sem supervisão de objetivo conceitual".into()),
+            [op, ..]
+                if concept_goal_report.is_some()
+                    && !matches!(
+                        *op,
+                        "estado" | "historico" | "ajuda" | "salvar" | "restaurar"
+                    ) =>
+            {
+                Err("objetivo conceitual encerrado; sem retomada ou ensino automático".into())
+            }
+            ["objetivo9", id, vector] => (|| -> Result<String, String> {
+                if concept_goal.is_some()
+                    || teaching_report.is_some()
+                    || regulation_report.is_some()
+                    || investigation.is_some()
+                {
+                    return Err("objetivo fixado ou episódio paralelo".into());
+                }
+                let (concept, scope) =
+                    crate::curriculum::PedagogyHost::pedagogy_identity(&session)?;
+                concept_goal = Some(crate::curriculum::ConceptGoal {
+                    id: EpisodeId::new(num(id)?).map_err(err)?,
+                    concept,
+                    scope,
+                    observation: Observation::new(bits(vector)?).map_err(err)?,
+                    criterion: crate::curriculum::GoalCriterion::SupportedByCurrentEvidence,
+                });
+                Ok("Objetivo identificado e sem rótulo esperado".into())
+            })(),
+            ["avaliacoes-objetivo9", pre, post] => (|| -> Result<String, String> {
+                if teaching_assessment.is_some()
+                    || teaching_plan.is_some()
+                    || teaching_builder.is_none()
+                {
+                    return Err("avaliações fixadas ou plano ausente".into());
+                }
+                teaching_assessment = Some(crate::curriculum::PedagogyAssessment::new(
+                    &[Observation::new(bits(pre)?).map_err(err)?],
+                    &[Observation::new(bits(post)?).map_err(err)?],
+                )?);
+                Ok("Avaliações independentes fixadas, sem rótulos; objetivo não incluído".into())
+            })(),
+            ["acompanhar9", queries, experiences] => (|| -> Result<String, String> {
+                if teaching_report.is_some()
+                    || regulation_report.is_some()
+                    || investigation.is_some()
+                {
+                    return Err("episódio paralelo".into());
+                }
+                let goal = concept_goal.ok_or("defina objetivo9")?;
+                let permissions = teaching_permissions
+                    .as_ref()
+                    .ok_or("declare permissoes9")?
+                    .clone();
+                let budget = crate::curriculum::ConceptGoalBudget {
+                    queries: num(queries)? as usize,
+                    experiences: num(experiences)? as usize,
+                };
+                if budget.queries > 5 || budget.experiences > 2 {
+                    return Err("teto de objetivo conceitual excedido".into());
+                }
+                let plan = teaching_plan.take().ok_or("fixe plano9")?;
+                let assessment = teaching_assessment.take().ok_or("fixe avaliações")?;
+                let r = crate::curriculum::supervise_concept_goal(
+                    &mut session,
+                    goal,
+                    plan,
+                    assessment,
+                    permissions,
+                    budget,
+                )?;
+                let text = format!("ObjetivoConceitual {r:?}");
+                concept_goal_report = Some(r);
+                Ok(text)
+            })(),
             ["historico9"] => teaching_report
                 .as_ref()
                 .map(|r| format!("MP09 {r:?}"))
@@ -928,6 +1009,9 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
                 Ok("Avaliação, apresentação e admissões explicitamente separadas".into())
             })(),
             ["ensinar9"] => (|| -> Result<String, String> {
+                if concept_goal.is_some() {
+                    return Err("use acompanhar9 para preservar a supervisão do objetivo".into());
+                }
                 if regulation_report.is_some() || investigation.is_some() {
                     return Err("episódio paralelo".into());
                 }
@@ -1166,6 +1250,8 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
                 session = s;
                 path_log = crate::integration::query::PathEpisodeLog::default();
                 path_authorization = None;
+                concept_goal = None;
+                concept_goal_report = None;
                 teaching_builder = None;
                 teaching_plan = None;
                 teaching_assessment = None;
@@ -1448,6 +1534,10 @@ impl crate::integration::investigation::sealed::Sealed for Session {}
 
 impl crate::curriculum::pedagogy_sealed::Sealed for Session {}
 impl crate::curriculum::PedagogyHost for Session {
+    fn pedagogy_events(&self) -> usize {
+        self.concepts.as_ref().map_or(0, |c| c.trace().len())
+    }
+
     fn pedagogy_existing(&self) -> Result<Vec<crate::cognition::concepts::Attributes>, String> {
         Ok(self
             .concepts
