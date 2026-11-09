@@ -105,3 +105,22 @@ impl Neuron {
         Ok(None)
     }
 }
+
+/// Snapshot somente leitura; não permite injetar estado não validado no neurônio.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct NeuronSnapshot {
+    pub id: NodeId,
+    pub threshold: i32,
+    pub state_limit: i32,
+    pub state: NeuronState,
+}
+impl Neuron {
+    pub fn snapshot(&self) -> NeuronSnapshot {
+        NeuronSnapshot {
+            id: self.id,
+            threshold: self.threshold,
+            state_limit: self.state_limit,
+            state: self.state,
+        }
+    }
+}

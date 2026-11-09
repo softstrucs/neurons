@@ -5,7 +5,7 @@ use std::thread;
 const HELP: &str = concat!(
     "Neurons ",
     env!("CARGO_PKG_VERSION"),
-    "\n\nUso: neurons [--help | doctor | session | session-explain | session-f1]\n\nComandos:\n  --help, -h  Mostra esta ajuda\n  doctor      Mostra informações básicas do ambiente\n  session     Sessão curta de gramática restrita, estilo conciso\n  session-explain  Mesma sessão, estilo explicativo\n  session-f1  Sessão integrada limitada: evidências, aquisição, conceitos e checkpoint\n"
+    "\n\nUso: neurons [--help | doctor | session | session-explain | session-f1 | session-mp05]\n\nComandos:\n  --help, -h  Mostra esta ajuda\n  doctor      Mostra informações básicas do ambiente\n  session     Sessão curta de gramática restrita, estilo conciso\n  session-explain  Mesma sessão, estilo explicativo\n  session-f1  Sessão integrada limitada: evidências, aquisição, conceitos e checkpoint\n  session-mp05 Episódio sináptico assistido e persistente\n"
 );
 
 fn main() -> ExitCode {
@@ -25,6 +25,16 @@ fn main() -> ExitCode {
             }
             println!("Estado: núcleo local experimental implementado: eventos, circuitos, memória, inferência limitada e metacognição; sem compreensão geral demonstrada.");
             ExitCode::SUCCESS
+        }
+        (Some("session-mp05"), None) => {
+            match neurons::session::synaptic::run(std::io::stdin().lock(), std::io::stdout().lock())
+            {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(error) => {
+                    eprintln!("Erro de sessão MP05: {error}");
+                    ExitCode::FAILURE
+                }
+            }
         }
         (Some("session-f1"), None) => {
             match neurons::session::f1::run(std::io::stdin().lock(), std::io::stdout().lock()) {

@@ -172,3 +172,31 @@ impl Circuit {
         self.engine.metrics()
     }
 }
+
+/// Snapshot observável completo do circuito e do Engine. Não é formato de arquivo.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CircuitSnapshot {
+    pub neurons: Vec<crate::neuron::NeuronSnapshot>,
+    pub synapses: Vec<(SynapseId, NodeId, NodeId, i32, u64)>,
+    pub engine: Vec<u8>,
+}
+impl Circuit {
+    pub fn snapshot(&self) -> Result<CircuitSnapshot, crate::persistence::PersistenceError> {
+        let empty = crate::engram::EngramStore::new(1).expect("capacidade positiva");
+        Ok(CircuitSnapshot {
+            neurons: self.neurons.values().map(Neuron::snapshot).collect(),
+            synapses: self
+                .synapses
+                .iter()
+                .map(|s| (s.id(), s.source(), s.destination(), s.weight(), s.delay()))
+                .collect(),
+            engine: crate::persistence::encode(&self.engine, &empty)?,
+        })
+    }
+}
+
+impl Circuit {
+    pub fn logical_time(&self) -> Option<u64> {
+        self.engine.logical_time()
+    }
+}

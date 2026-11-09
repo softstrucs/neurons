@@ -182,3 +182,10 @@ impl Engine {
 /// Checkpoints locais opcionais do motor e da memória associativa.
 #[path = "persistence.rs"]
 pub mod persistence;
+
+impl Engine {
+    /// Instante do último evento despachado; leitura sem avançar o motor.
+    pub const fn logical_time(&self) -> Option<u64> {
+        self.current_time
+    }
+}

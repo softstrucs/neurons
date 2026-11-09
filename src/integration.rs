@@ -58,3 +58,6 @@ impl IntegratedState {
 
 /// CIC-I1: contratos e mecanismo conceitual simbólico delimitado.
 pub mod concepts;
+
+/// MP05: episódio sináptico assistido, limitado e persistente; sem memória epistêmica implícita.
+pub mod synaptic;

@@ -98,3 +98,6 @@ fn node(value: &str) -> Result<NodeId, String> {
 
 /// Sessão integrada F1; preserva a gramática e a API legadas.
 pub mod f1;
+
+/// MP05: sessão sináptica assistida sobre o mesmo núcleo, sem alterar a sessão F1.
+pub mod synaptic;

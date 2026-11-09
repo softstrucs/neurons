@@ -102,3 +102,10 @@ impl Synapse {
         )))
     }
 }
+
+impl Synapse {
+    /// Configuração necessária ao snapshot fiel, sem alterar a conexão.
+    pub const fn delay(&self) -> u64 {
+        self.delay
+    }
+}
