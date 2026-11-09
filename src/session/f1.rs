@@ -777,6 +777,11 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
     let mut session = Session::new();
     let mut path_log = crate::integration::query::PathEpisodeLog::default();
     let mut path_authorization = None;
+    let mut regulation_permissions: Option<
+        crate::integration::investigation::RegulationPermissions,
+    > = None;
+    let mut regulation_report: Option<crate::integration::investigation::RegulationReport> = None;
+    writeln!(output,"MP08 transitório: permissoes8 CONTEXTO AVALIAR(sim|nao) MP06(sim|nao) INVESTIGAR(sim|nao) FONTE_ID|- ADMISSAO_ID|-; regular8 ORIGEM DESTINO CONSULTAS EVENTOS; historico8. Prepare/fixe a fonte7 antes da pergunta. Sem ações externas ou retomada automática.")?;
     let mut source_builder: Option<(SourceId, Vec<Information>)> = None;
     let mut fixed_source: Option<crate::integration::investigation::LocalSource> = None;
     let mut investigation: Option<crate::integration::investigation::Investigation> = None;
@@ -807,6 +812,88 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
         let p: Vec<_> = line.split_whitespace().collect();
         let result = match p.as_slice() {
             ["sair"] => return Ok(()),
+            ["historico8"] => regulation_report
+                .as_ref()
+                .map(|r| format!("MP08 {r:?}"))
+                .ok_or_else(|| "sem relatório MP08".into()),
+            ["permissoes8", ctx, eval, path, inv, source_id, admission_id] => {
+                (|| -> Result<String, String> {
+                    if regulation_permissions.is_some()
+                        || regulation_report.is_some()
+                        || investigation.is_some()
+                    {
+                        return Err("permissões MP08 já fixadas ou episódio iniciado".into());
+                    }
+                    let scope = session.scope_in(ctx)?;
+                    let flag = |s: &str| match s {
+                        "sim" => Ok(true),
+                        "nao" => Ok(false),
+                        _ => Err("use sim ou nao".to_string()),
+                    };
+                    let evaluation = flag(eval)?.then_some(scope);
+                    let mp06 = flag(path)?.then_some(
+                        crate::integration::query::PathAuthorization::inclusion_three(scope),
+                    );
+                    let investigation_grant = flag(inv)?.then_some(scope);
+                    let source_grant = if *source_id == "-" {
+                        None
+                    } else {
+                        Some((scope, source(source_id)?))
+                    };
+                    let admission = if *admission_id == "-" {
+                        None
+                    } else {
+                        Some((scope, record(admission_id)?))
+                    };
+                    regulation_permissions =
+                        Some(crate::integration::investigation::RegulationPermissions {
+                            evaluation,
+                            mp06,
+                            investigation: investigation_grant,
+                            source: source_grant,
+                            admission,
+                        });
+                    Ok(
+                        "Concessões explícitas fixadas separadamente; ações externas proibidas"
+                            .into(),
+                    )
+                })()
+            }
+            ["regular8", from, to, queries, events] => (|| -> Result<String, String> {
+                if regulation_report.is_some() || investigation.is_some() {
+                    return Err("um episódio supervisor por sessão".into());
+                }
+                let permissions = regulation_permissions.ok_or("declare permissoes8")?;
+                let scope = session.scope.ok_or("sem escopo")?;
+                let q = session.statement(&scope.context.get().to_string(), from, to, "+")?;
+                let budget = crate::integration::investigation::RegulationBudget {
+                    queries: num(queries)? as usize,
+                    events: num(events)? as usize,
+                };
+                if budget.queries > 3 || budget.events > 96 {
+                    return Err("orçamento MP08 excede teto".into());
+                }
+                let source = fixed_source.take().ok_or("fixe fonte7 antes da pergunta")?;
+                let result = crate::integration::investigation::regulate(
+                    &mut session,
+                    source,
+                    q,
+                    permissions,
+                    budget,
+                )?;
+                let text = format!("MP08 {result:?}");
+                regulation_report = Some(result);
+                Ok(text)
+            })(),
+            [op, ..]
+                if regulation_report.is_some()
+                    && !matches!(
+                        *op,
+                        "estado" | "historico" | "ajuda" | "salvar" | "restaurar"
+                    ) =>
+            {
+                Err("supervisão MP08 encerrada; sem repetição ou troca automática".into())
+            }
             ["fonte7", id] => (|| -> Result<String, String> {
                 if investigation.is_some() || fixed_source.is_some() || source_builder.is_some() {
                     return Err("fonte já definida ou investigação iniciada".into());
@@ -948,6 +1035,8 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
                 session = s;
                 path_log = crate::integration::query::PathEpisodeLog::default();
                 path_authorization = None;
+                regulation_permissions = None;
+                regulation_report = None;
                 investigation = None;
                 fixed_source = None;
                 source_builder = None;
@@ -980,6 +1069,30 @@ impl Session {
     }
 }
 impl crate::integration::investigation::AcquisitionHost for Session {
+    fn regulation_paths(
+        &self,
+        query: Statement,
+        authorization: crate::integration::query::PathAuthorization,
+        budget: usize,
+    ) -> Result<crate::integration::query::PathQueryReport, String> {
+        QueryCoordinator::new(
+            self.memory(),
+            self.metadata(),
+            self.authorized.ok_or("regra não autorizada")?,
+            &self.sources,
+        )
+        .map_err(err)?
+        .query_three(
+            EpisodeId::new(3).map_err(err)?,
+            query,
+            self.at.checked_add(1).ok_or("tempo excedido")?,
+            authorization,
+            budget,
+            &mut crate::integration::query::PathEpisodeLog::default(),
+        )
+        .map_err(err)
+    }
+
     fn start(&mut self, q: Statement) -> Result<crate::integration::query::QueryReport, String> {
         if Some(q.scope()) != self.scope || q.polarity() != Polarity::Positive {
             return Err("consulta MP07 fora do escopo".into());

@@ -10,6 +10,12 @@ pub(crate) mod sealed {
 }
 /// Porta selada: somente adaptadores internos que preservam M1/M2 podem implementá-la.
 pub trait AcquisitionHost: sealed::Sealed {
+    fn regulation_paths(
+        &self,
+        query: Statement,
+        authorization: super::query::PathAuthorization,
+        budget: usize,
+    ) -> Result<super::query::PathQueryReport, String>;
     fn start(&mut self, query: Statement) -> Result<QueryReport, String>;
     fn request(&mut self) -> Result<InformationRequest, String>;
     fn receive(&mut self, package: FeedbackPackage) -> Result<(), String>;
@@ -399,4 +405,345 @@ impl Investigation {
         self.stage = Stage::Finished;
         Ok(r)
     }
+}
+
+/// MP08: permissões recebidas do chamador; nenhuma delas é inferida de outra.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct RegulationPermissions {
+    pub evaluation: Option<Scope>,
+    pub mp06: Option<super::query::PathAuthorization>,
+    pub investigation: Option<Scope>,
+    pub source: Option<(Scope, SourceId)>,
+    pub admission: Option<(Scope, EngramId)>,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RegulationBudget {
+    pub queries: usize,
+    pub events: usize,
+}
+impl Default for RegulationBudget {
+    fn default() -> Self {
+        Self {
+            queries: 3,
+            events: 96,
+        }
+    }
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum RegulationEvidence {
+    Query(QueryReport),
+    Path(super::query::PathQueryReport),
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RegulationReport {
+    pub query: Statement,
+    pub permissions: RegulationPermissions,
+    pub budget: RegulationBudget,
+    pub investigation_history: Option<String>,
+    pub diagnostics: Vec<crate::metacognition::RegulationDiagnostic>,
+    pub strategy: crate::metacognition::Strategy,
+    pub goal: crate::metacognition::GoalResult,
+    pub queries: usize,
+    pub events: usize,
+    pub evaluations: usize,
+    pub source_calls: usize,
+    pub admitted: bool,
+    /// Reserva conservadora indisponível; distinto de limite atingido pelo motor.
+    pub reservation_blocked: bool,
+    pub evidence: Vec<RegulationEvidence>,
+    pub history: Vec<String>,
+}
+impl RegulationReport {
+    fn diagnostic(&mut self, d: crate::metacognition::RegulationDiagnostic) {
+        if !self.diagnostics.contains(&d) {
+            self.diagnostics.push(d);
+        }
+    }
+    fn observe(&mut self, proof: bool, refusal: Option<Refusal>) {
+        use crate::metacognition::{AbstainReason as A, RegulationDiagnostic as D};
+        if proof {
+            self.diagnostic(D::Supported);
+        }
+        match refusal {
+            None => {
+                if !proof {
+                    self.diagnostic(D::InvalidEvidence);
+                }
+            }
+            Some(Refusal::Monitor(A::MissingEvidence)) => self.diagnostic(D::MissingEvidence),
+            Some(Refusal::Monitor(A::ContradictoryEvidence)) => self.diagnostic(D::Opposition),
+            Some(Refusal::Monitor(A::ResourceLimited | A::ReviewBudget)) => {
+                self.diagnostic(D::ResourceLimited)
+            }
+            Some(Refusal::Monitor(A::InvalidEvidence)) => self.diagnostic(D::InvalidEvidence),
+            Some(Refusal::Monitor(A::PropagationFailure)) => self.diagnostic(D::PropagationFailure),
+            Some(_) => self.diagnostic(D::ContractBlocked),
+        }
+    }
+    fn query(&mut self, r: QueryReport) -> bool {
+        let proof = r.proof.is_some() && r.proof_error.is_none();
+        let refusal = match r.episode.decision {
+            EpisodeDecision::Abstain(r) => Some(r),
+            _ => None,
+        };
+        self.observe(proof, refusal);
+        if r.proof_error.is_some() {
+            self.diagnostic(crate::metacognition::RegulationDiagnostic::InvalidEvidence);
+        }
+        if let Some(review) = &r.review {
+            for a in &review.attempts {
+                use crate::metacognition::{Assessment as A, RegulationDiagnostic as D};
+                if a.conflict.is_some() {
+                    self.diagnostic(D::Opposition);
+                }
+                match a.assessment {
+                    A::InvalidEvidence => self.diagnostic(D::InvalidEvidence),
+                    A::ResourceLimited => self.diagnostic(D::ResourceLimited),
+                    A::PropagationFailure => self.diagnostic(D::PropagationFailure),
+                    A::ContradictoryEvidence => self.diagnostic(D::Opposition),
+                    _ => {}
+                }
+            }
+        }
+        self.events += r.review.as_ref().map_or(0, |v| {
+            v.attempts
+                .iter()
+                .filter_map(|a| a.inference)
+                .map(|i| i.processed_events)
+                .sum()
+        });
+        self.queries += 1;
+        self.evidence.push(RegulationEvidence::Query(r));
+        proof
+    }
+    fn room(&self, b: RegulationBudget) -> bool {
+        // Reserva conservadora antes de executar a consulta M3 de teto fixo32.
+        self.queries < b.queries && self.events + 32 <= b.events
+    }
+}
+/// Episódio único, sem retomada, repetição automática ou concessão de permissões.
+/// A fonte é recebida já fixada antes da pergunta. Só relatórios reais são julgados.
+pub fn regulate(
+    host: &mut impl AcquisitionHost,
+    source: LocalSource,
+    query: Statement,
+    permissions: RegulationPermissions,
+    budget: RegulationBudget,
+) -> Result<RegulationReport, String> {
+    use crate::metacognition::{select_strategy, GoalResult, RegulationDiagnostic as D, Strategy};
+    if budget.queries > 3 || budget.events > 96 {
+        return Err("orçamento MP08 excede o teto".into());
+    }
+    let mut out = RegulationReport {
+        query,
+        permissions,
+        budget,
+        investigation_history: None,
+        diagnostics: vec![],
+        strategy: Strategy::Abstain,
+        goal: GoalResult::NotMet,
+        queries: 0,
+        events: 0,
+        evaluations: 0,
+        source_calls: 0,
+        admitted: false,
+        reservation_blocked: false,
+        evidence: vec![],
+        history: vec!["Permissões recebidas; ações externas proibidas".into()],
+    };
+    if permissions.evaluation != Some(query.scope()) {
+        out.diagnostic(D::PermissionMissing);
+        out.diagnostic(D::ContractBlocked);
+        out.history
+            .push("Avaliação negada; nenhum método cognitivo executado".into());
+        return Ok(out);
+    }
+    if !out.room(budget) {
+        out.reservation_blocked = true;
+        out.diagnostic(D::ResourceLimited);
+        out.strategy = Strategy::StopAtLimit;
+        out.history
+            .push("Reserva mínima de32 eventos/consulta indisponível".into());
+        return Ok(out);
+    }
+    let mut investigation = Investigation::new(source);
+    let first = match investigation.begin(host, query) {
+        Ok(r) => r,
+        Err(e) => {
+            out.diagnostic(D::ContractBlocked);
+            out.history.push(format!("Avaliação recusada: {e}"));
+            return Ok(out);
+        }
+    };
+    let mut supported = out.query(first);
+    // MP06 é uma capacidade separadamente autorizada; não pode ser inferida da avaliação.
+    if !supported
+        && !out.diagnostics.iter().any(|d| {
+            matches!(
+                d,
+                D::ContractBlocked
+                    | D::InvalidEvidence
+                    | D::Opposition
+                    | D::PropagationFailure
+                    | D::ResourceLimited
+            )
+        })
+    {
+        if let Some(auth) = permissions.mp06 {
+            if out.room(budget) {
+                let cap = (budget.events - out.events).min(64);
+                match host.regulation_paths(query, auth, cap) {
+                    Ok(r) => {
+                        supported = r.proof.is_some() && r.refusal.is_none();
+                        out.observe(supported, r.refusal);
+                        if r.review.as_ref().is_some_and(|v| !v.conflicts.is_empty()) {
+                            out.diagnostic(D::Opposition);
+                        }
+                        out.events += r
+                            .review
+                            .as_ref()
+                            .map_or(0, |r| r.inference.processed_events);
+                        out.queries += 1;
+                        out.evidence.push(RegulationEvidence::Path(r));
+                    }
+                    Err(e) => {
+                        out.diagnostic(D::ContractBlocked);
+                        out.history.push(format!("MP06 recusado: {e}"));
+                    }
+                }
+            } else {
+                out.reservation_blocked = true;
+                out.diagnostic(D::ResourceLimited);
+            }
+        }
+    }
+    out.evaluations = 1;
+    out.history
+        .push(format!("Diagnóstico inicial {:?}", out.diagnostics));
+    let permits = permissions.investigation == Some(query.scope())
+        && permissions.source == Some((query.scope(), investigation.source.id))
+        && host.knows_source(investigation.source.id);
+    let mut unique = false;
+    if !supported && select_strategy(&out.diagnostics, false, true, true) == Strategy::Investigate {
+        if permits {
+            // Copia apenas a concessão explícita já recebida; não cria autoridade.
+            investigation.allow_investigation()?;
+            match investigation.derive(host) {
+                Ok(_) => unique = true,
+                Err(e) => {
+                    out.diagnostic(D::GapUnavailable);
+                    out.history.push(format!("Lacuna não derivável: {e}"));
+                }
+            }
+        } else {
+            out.diagnostic(D::PermissionMissing);
+        }
+    }
+    if unique && !out.room(budget) {
+        out.reservation_blocked = true;
+        out.diagnostic(D::ResourceLimited);
+    }
+    out.strategy = select_strategy(&out.diagnostics, supported, unique, permits);
+    out.history.push(format!(
+        "Seleção única {:?}; sem troca automática",
+        out.strategy
+    ));
+    if out.strategy == Strategy::Respond {
+        out.goal = GoalResult::Met;
+    }
+    if out.strategy == Strategy::Investigate {
+        let execution = (|| -> Result<(), String> {
+            investigation.allow_source(host)?;
+            investigation.fetch(host)?;
+            if investigation.stage() == Stage::Received {
+                investigation.interpret(host)?;
+                investigation.assess(host)?;
+                if investigation
+                    .assessments()
+                    .iter()
+                    .any(|a| a.verdict != AdmissionVerdict::Admissible)
+                {
+                    out.diagnostic(D::InvalidEvidence);
+                }
+                if !investigation.opposition_records().is_empty() {
+                    out.diagnostic(D::Opposition);
+                }
+                if let Some((scope, id)) = permissions.admission {
+                    if scope == query.scope()
+                        && investigation
+                            .assessments()
+                            .first()
+                            .is_some_and(|a| a.verdict == AdmissionVerdict::Admissible)
+                    {
+                        investigation.allow_admission()?;
+                        investigation.admit(host, id)?;
+                        out.admitted = true;
+                    }
+                }
+            }
+            Ok(())
+        })();
+        out.source_calls = investigation.source_calls();
+        if matches!(
+            investigation.receipt().map(|r| &r.result),
+            Some(SourceResult::Rejected(_, _))
+        ) {
+            out.diagnostic(D::InvalidEvidence);
+        }
+        if matches!(
+            investigation.receipt().map(|r| &r.result),
+            Some(SourceResult::HostRefused(_, _))
+        ) {
+            out.diagnostic(D::ContractBlocked);
+        }
+        out.history.push(format!(
+            "Execução MP07: {:?}; chamadas={}; admissão={}",
+            execution, out.source_calls, out.admitted
+        ));
+        // Consulta final somente nas fases seguras, nunca admissão vazia.
+        if execution.is_ok() || investigation.stage() == Stage::NoResult {
+            match investigation.finish(host) {
+                Ok(r) => {
+                    let final_supported = out.query(r);
+                    out.evaluations += 1;
+                    out.goal = if final_supported
+                        && !out.diagnostics.iter().any(|d| {
+                            matches!(
+                                d,
+                                D::Opposition
+                                    | D::InvalidEvidence
+                                    | D::ContractBlocked
+                                    | D::PropagationFailure
+                                    | D::ResourceLimited
+                            )
+                        }) {
+                        GoalResult::Met
+                    } else if out.source_calls == 1 && execution.is_ok() {
+                        GoalResult::Partial
+                    } else {
+                        GoalResult::NotMet
+                    };
+                }
+                Err(e) => {
+                    out.diagnostic(D::ContractBlocked);
+                    out.history.push(format!("Reavaliação recusada: {e}"));
+                }
+            }
+        } else {
+            out.diagnostic(D::ContractBlocked);
+        }
+    }
+    out.investigation_history = Some(investigation.history());
+    out.history.push(format!(
+        "Objetivo {:?}; eventos={}; consultas={}",
+        out.goal, out.events, out.queries
+    ));
+    if out.events > budget.events
+        || out.queries > budget.queries
+        || out.evaluations > 2
+        || out.history.len() > 8
+    {
+        return Err("violação de orçamento supervisor; episódio interrompido".into());
+    }
+    Ok(out)
 }

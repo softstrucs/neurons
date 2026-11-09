@@ -408,3 +408,57 @@ impl Monitor {
         })
     }
 }
+
+/// MP08: diagnóstico delimitado do resultado observado, sem probabilidades inventadas.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RegulationDiagnostic {
+    Supported,
+    MissingEvidence,
+    Opposition,
+    InvalidEvidence,
+    ContractBlocked,
+    ResourceLimited,
+    PropagationFailure,
+    GapUnavailable,
+    PermissionMissing,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Strategy {
+    Respond,
+    Investigate,
+    Abstain,
+    StopAtLimit,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum GoalResult {
+    Met,
+    Partial,
+    NotMet,
+}
+/// Precedência: impedimento contratual/invalidez/oposição/falha, limite,
+/// prova verificada, investigação permitida com lacuna única, abstenção.
+/// A política não autentica relatórios: o coordenador deve fornecê-los do núcleo.
+pub fn select_strategy(
+    diagnostics: &[RegulationDiagnostic],
+    verified_support: bool,
+    unique_gap: bool,
+    investigation_permitted: bool,
+) -> Strategy {
+    use RegulationDiagnostic::*;
+    if diagnostics.iter().any(|d| {
+        matches!(
+            d,
+            ContractBlocked | InvalidEvidence | Opposition | PropagationFailure
+        )
+    }) {
+        Strategy::Abstain
+    } else if diagnostics.contains(&ResourceLimited) {
+        Strategy::StopAtLimit
+    } else if verified_support {
+        Strategy::Respond
+    } else if diagnostics.contains(&MissingEvidence) && unique_gap && investigation_permitted {
+        Strategy::Investigate
+    } else {
+        Strategy::Abstain
+    }
+}
