@@ -667,6 +667,32 @@ impl Session {
             .query_three(id, q, self.at, authorization, 64, log)
             .map_err(err)
     }
+    /// Portas internas de leitura para o episódio composto; preservam fontes e regra reais.
+    pub(crate) fn composed_coordinator(&self) -> Result<QueryCoordinator<'_>, String> {
+        QueryCoordinator::new(
+            self.memory(),
+            self.metadata(),
+            self.authorized.ok_or("regra base não autorizada")?,
+            &self.sources,
+        )
+        .map_err(err)
+    }
+    pub(crate) fn composed_statement(
+        &self,
+        scope: Scope,
+        from: NodeId,
+        to: NodeId,
+    ) -> Result<Statement, String> {
+        if self.scope != Some(scope) {
+            return Err("escopo composto incompatível".into());
+        }
+        self.statement(
+            &scope.context.get().to_string(),
+            &from.get().to_string(),
+            &to.get().to_string(),
+            "+",
+        )
+    }
     /// Checkpoint F1 v1 inalterado; checksum não autentica origem.
     pub fn encode(&self) -> Vec<u8> {
         let body = self.journal.join("\n");

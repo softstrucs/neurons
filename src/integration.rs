@@ -64,3 +64,6 @@ pub mod synaptic;
 
 /// MP07: supervisão de uma consulta real a fonte local, sem outro motor cognitivo.
 pub mod investigation;
+
+/// Consulta composta transitória, implementação incremental em andamento.
+pub mod composed;
