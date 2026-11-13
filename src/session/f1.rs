@@ -12,6 +12,13 @@ use crate::integration::acquisition::CognitiveEpisode;
 use crate::integration::concepts::{ConceptCoordinator, ConceptEpisodeLog, Limits};
 use crate::integration::query::{QueryCoordinator, RecordMetadata, RuleAuthorization};
 
+mod composed;
+
+/// Saída estruturada do relatório publicado, sem reinterpretar decisões cognitivas.
+pub fn format_composed_report(report: &crate::integration::composed::GoalReport) -> String {
+    composed::render(report)
+}
+
 pub const MAX_OPERATIONS: usize = 128;
 pub const MAX_LINE_BYTES: usize = 256;
 pub const MAX_CHECKPOINT_BYTES: usize = 40_000;
@@ -801,6 +808,8 @@ fn checksum(bytes: &[u8]) -> u64 {
 
 pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> {
     let mut session = Session::new();
+    let mut composed_cli = composed::Adapter::default();
+    writeln!(output, "{}", composed::HELP)?;
     let mut path_log = crate::integration::query::PathEpisodeLog::default();
     let mut path_authorization = None;
     let mut concept_goal: Option<crate::curriculum::ConceptGoal> = None;
@@ -847,6 +856,37 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
         let p: Vec<_> = line.split_whitespace().collect();
         let result = match p.as_slice() {
             ["sair"] => return Ok(()),
+            [op, ..] if composed::handles(op) => {
+                if concept_goal.is_some()
+                    || concept_goal_report.is_some()
+                    || teaching_builder.is_some()
+                    || teaching_plan.is_some()
+                    || teaching_assessment.is_some()
+                    || teaching_permissions.is_some()
+                    || teaching_report.is_some()
+                    || regulation_permissions.is_some()
+                    || regulation_report.is_some()
+                    || investigation.is_some()
+                    || source_builder.is_some()
+                    || fixed_source.is_some()
+                {
+                    Err("episódio paralelo; restaure antes da composição".into())
+                } else if line.chars().any(char::is_control) {
+                    Err("linha inválida".into())
+                } else {
+                    composed_cli.execute(&mut session, &p)
+                }
+            }
+            ["ajuda"] => Ok(format!("{}{}", HELP, composed::HELP)),
+            [op, ..]
+                if composed_cli.active()
+                    && !matches!(
+                        *op,
+                        "estado" | "historico" | "ajuda" | "salvar" | "restaurar"
+                    ) =>
+            {
+                Err("composição fixada/encerrada; comandos cognitivos paralelos bloqueados".into())
+            }
             ["historico-objetivo9"] => concept_goal_report
                 .as_ref()
                 .map(|r| format!("ObjetivoConceitual {r:?}"))
@@ -1274,6 +1314,7 @@ pub fn run<R: BufRead, W: Write>(mut input: R, mut output: W) -> io::Result<()> 
                 .map(|_| "Checkpoint F1 salvo; criação exclusiva".into()),
             ["restaurar", path] => Session::load(Path::new(path)).map(|s| {
                 session = s;
+                composed_cli = composed::Adapter::default();
                 path_log = crate::integration::query::PathEpisodeLog::default();
                 path_authorization = None;
                 concept_goal = None;
