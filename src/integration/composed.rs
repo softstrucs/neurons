@@ -486,3 +486,393 @@ impl Episode {
         result
     }
 }
+
+/// Dados previamente fixados; nenhuma chave da avaliação independente é recebida.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TeachingRequest {
+    pub lesson: Lesson,
+    pub before: Observation,
+    pub after: Observation,
+    pub permissions: PedagogyPermissions,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum GoalDiagnosis {
+    Supported,
+    ConceptualInsufficiency,
+    RelationalInsufficiency,
+    Opposition,
+    NegativeClassification,
+    ContractBlocked,
+    PermissionMissing,
+    ResourceLimited,
+    StaleReport,
+    VerificationFailed,
+    NoApplicableLesson,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum GoalOutcome {
+    Supported,
+    Partial,
+    Abstention,
+    Interrupted,
+}
+/// Relatório transitório de uma única execução; não é autoridade persistível.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct GoalReport {
+    pub objective: EpisodeId,
+    pub binding: Binding,
+    pub permissions: Permissions,
+    pub teaching: Option<TeachingRequest>,
+    pub limits: Limits,
+    pub initial: Option<Report>,
+    pub diagnosis: GoalDiagnosis,
+    pub strategy: crate::metacognition::concepts::ConceptStrategy,
+    pub action: Option<PedagogyReport>,
+    pub action_started: bool,
+    pub action_failure: Option<String>,
+    /// Prefixo aceito pela Session durante a tentativa, inclusive em falha.
+    pub accepted_operations: Vec<String>,
+    pub final_query: Option<Report>,
+    pub verification: Option<Verification>,
+    pub usage: Usage,
+    pub outcome: GoalOutcome,
+    pub history: Vec<String>,
+    pub reason: String,
+}
+impl Episode {
+    /// Diagnóstico sem nova consulta ou alteração do conhecimento. Recibos e
+    /// dependências são conferidos antes de interpretar a insuficiência.
+    pub fn diagnose(
+        &mut self,
+        session: &Session,
+        registry: &SyntheticRegistry,
+        report: &Report,
+        permissions: &Permissions,
+    ) -> GoalDiagnosis {
+        use crate::metacognition::concepts::{diagnose_pedagogy, PedagogicalDiagnosis};
+        use GoalDiagnosis::*;
+        if !self.allowed(registry, permissions) {
+            return if registry.record != self.binding {
+                ContractBlocked
+            } else {
+                PermissionMissing
+            };
+        }
+        // Recusas anteriores à emissão não possuem recibo/dependências.
+        if report.status == Status::Denied && report.dependencies.state.is_empty() {
+            return ContractBlocked;
+        }
+        if report.status == Status::Interrupted && report.dependencies.state.is_empty() {
+            return ResourceLimited;
+        }
+        match self.check_current(session, registry, report, permissions) {
+            Verification::Current => {}
+            Verification::ReevaluationRequired => return StaleReport,
+            Verification::Denied => return PermissionMissing,
+            Verification::Interrupted => return ResourceLimited,
+            _ => return VerificationFailed,
+        }
+        match report.status {
+            Status::Denied => return ContractBlocked,
+            Status::Interrupted => {
+                return if report
+                    .relational
+                    .as_ref()
+                    .and_then(|r| r.proof.as_ref())
+                    .is_some_and(|p| p.premises.len() != 1)
+                {
+                    ContractBlocked
+                } else {
+                    ResourceLimited
+                };
+            }
+            Status::Contradictory => return Opposition,
+            _ => {}
+        }
+        let (Some(concept), Some(relation)) = (&report.conceptual, &report.relational) else {
+            return ContractBlocked;
+        };
+        if relation.refusal.is_some_and(|refusal| {
+            !matches!(refusal, Refusal::Monitor(AbstainReason::MissingEvidence))
+        }) {
+            return ContractBlocked;
+        }
+        // Reutiliza o verificador MP06, sem procurar outra prova e sem consulta.
+        let valid_relation = relation.refusal.is_none()
+            && relation
+                .review
+                .as_ref()
+                .is_none_or(|r| r.conflicts.is_empty())
+            && relation.proof.as_ref().is_some_and(|proof| {
+                proof.premises.len() == 1
+                    && session.composed_coordinator().is_ok_and(|coordinator| {
+                        let ids = proof
+                            .premises
+                            .iter()
+                            .map(|r| r.engram.id())
+                            .collect::<Vec<_>>();
+                        coordinator
+                            .verify_path(relation.query, relation.at, &ids)
+                            .is_ok_and(|p| p == *proof)
+                    })
+            });
+        if !valid_relation {
+            return RelationalInsufficiency;
+        }
+        if concept.decision == ConceptDecision::Supported(Label::Negative) {
+            return NegativeClassification;
+        }
+        match diagnose_pedagogy(std::slice::from_ref(concept)) {
+            PedagogicalDiagnosis::ExperienceNeeded => ConceptualInsufficiency,
+            PedagogicalDiagnosis::AlreadySupported if report.status == Status::Supported => {
+                Supported
+            }
+            _ => ContractBlocked,
+        }
+    }
+
+    /// Consome um Episode ainda não usado. Não há reset, segunda experiência ou
+    /// acesso mutável paralelo à Session durante o ciclo. APIs manuais F1 continuam
+    /// externas: isto não é isolamento contra um chamador hostil.
+    pub fn supervise(
+        mut self,
+        session: &mut Session,
+        registry: &SyntheticRegistry,
+        permissions: Permissions,
+        teaching: Option<TeachingRequest>,
+    ) -> GoalReport {
+        use crate::metacognition::concepts::{select_concept_strategy, ConceptStrategy};
+        use GoalDiagnosis::*;
+        let mut out = GoalReport {
+            objective: self.objective,
+            binding: self.binding.clone(),
+            permissions,
+            teaching,
+            limits: self.limits,
+            initial: None,
+            diagnosis: ContractBlocked,
+            strategy: ConceptStrategy::Abstain,
+            action: None,
+            action_started: false,
+            action_failure: None,
+            accepted_operations: vec![],
+            final_query: None,
+            verification: None,
+            usage: self.usage,
+            outcome: GoalOutcome::Interrupted,
+            history: vec![
+                "Objetivo/vínculo fixos; evidência sintética não autentica identidade real".into(),
+            ],
+            reason: String::new(),
+        };
+        let journal_start = session.history().len();
+        let result = (|| -> Result<(), String> {
+            if self.usage != Usage::default() || !self.issued.is_empty() {
+                return Err("supervisão requer episódio novo; orçamento nunca é reiniciado".into());
+            }
+            let initial = self.query(session, registry, &out.permissions)?;
+            out.diagnosis = self.diagnose(session, registry, &initial, &out.permissions);
+            out.initial = Some(initial.clone());
+            out.history.push(format!(
+                "Consulta inicial e diagnóstico {:?}, sem mutação cognitiva",
+                out.diagnosis
+            ));
+            match out.diagnosis {
+                Supported => {
+                    out.strategy =
+                        select_concept_strategy(initial.conceptual.as_ref().unwrap(), false, true);
+                }
+                ConceptualInsufficiency => {
+                    let Some(request) = &out.teaching else {
+                        out.diagnosis = NoApplicableLesson;
+                        out.outcome = GoalOutcome::Abstention;
+                        return Ok(());
+                    };
+                    let p = &request.permissions;
+                    if p.evaluation != Some(self.binding.scope)
+                        || p.presentation != Some(self.binding.scope)
+                        || !p.admissions.contains(&request.lesson.id)
+                        || p.admissions.len() > 3
+                        || p.admissions
+                            .iter()
+                            .enumerate()
+                            .any(|(i, id)| p.admissions[..i].contains(id))
+                    {
+                        out.diagnosis = PermissionMissing;
+                        return Err(
+                            "avaliação/apresentação/admissão pedagógicas não autorizadas".into(),
+                        );
+                    }
+                    let known = session.pedagogy_existing()?;
+                    let probes = [request.before, request.after];
+                    let overlaps = probes.contains(&self.binding.observation)
+                        || self
+                            .binding
+                            .observation
+                            .completions()
+                            .contains(&request.lesson.attributes)
+                        || known
+                            .iter()
+                            .chain(std::iter::once(&request.lesson.attributes))
+                            .any(|a| probes.iter().any(|o| o.completions().contains(a)));
+                    TeachingPlan::new(self.binding.concept, self.binding.scope, &[request.lesson])?;
+                    PedagogyAssessment::new(&[request.before], &[request.after])?;
+                    let informative = curriculum::choose_lesson(
+                        &session.pedagogy_version()?,
+                        &[request.lesson],
+                        &[],
+                    )
+                    .is_some();
+                    // A mesma política de fontes da sessão; não concede autoridade nova.
+                    let known_source = super::investigation::AcquisitionHost::knows_source(
+                        session,
+                        request.lesson.source,
+                    );
+                    if overlaps
+                        || !informative
+                        || !known_source
+                        || request.lesson.evidence == self.binding.evidence
+                        || initial
+                            .relational
+                            .as_ref()
+                            .unwrap()
+                            .consulted
+                            .iter()
+                            .any(|r| {
+                                r.metadata.information.evidence == Some(request.lesson.evidence)
+                            })
+                    {
+                        out.diagnosis = NoApplicableLesson;
+                        out.outcome = GoalOutcome::Abstention;
+                        return Ok(());
+                    }
+                    let capacity = self.usage.conceptual_queries + 4
+                        <= self.limits.conceptual_queries
+                        && self.usage.relational_queries + 2 <= self.limits.relational_queries
+                        && self.usage.neural_events + 64 <= self.limits.neural_events
+                        && self.usage.conceptual_events + 5 <= 5
+                        && session.pedagogy_capacity(1).is_ok();
+                    out.strategy = select_concept_strategy(
+                        initial.conceptual.as_ref().unwrap(),
+                        true,
+                        capacity,
+                    );
+                    if out.strategy != ConceptStrategy::TeachOnce {
+                        out.diagnosis = ResourceLimited;
+                        return Err(
+                            "sem reserva agregada para ensino, reconsulta e verificação".into()
+                        );
+                    }
+                    out.history.push(format!(
+                        "Seleção única {:?} anterior à experiência",
+                        out.strategy
+                    ));
+                    out.action_started = true;
+                    let attempted = self.teach_once(
+                        session,
+                        request.lesson,
+                        request.before,
+                        request.after,
+                        p.clone(),
+                    );
+                    let mut admitted = false;
+                    let mut refused = false;
+                    match attempted {
+                        Ok(action) => {
+                            admitted = action.lessons.iter().any(|r| r.admitted);
+                            refused =
+                                action.leak_detected || action.lessons.iter().any(|r| !r.admitted);
+                            out.history.push(format!(
+                                "Experiência: {} apresentações; versão {}→{}",
+                                action.lessons.len(),
+                                action.initial_version.number,
+                                action.final_version.number
+                            ));
+                            out.action = Some(action);
+                        }
+                        Err(error) => {
+                            out.reason = format!("Tentativa pedagógica interrompida: {error}");
+                            out.action_failure = Some(error);
+                            out.history.push(
+                                "Tentativa falhou; prefixo autorizado e reservas preservados"
+                                    .into(),
+                            );
+                        }
+                    }
+                    // Mesmo objetivo, inclusive quando MP09 não apresenta experiência.
+                    out.final_query = Some(self.query(session, registry, &out.permissions)?);
+                    out.history
+                        .push("Reconsulta do objetivo original após a tentativa pedagógica".into());
+                    if refused {
+                        out.reason =
+                            "Experiência recusada; reconsulta não autoriza declarar sucesso".into();
+                    }
+                    // Partial exige admissão/revisão real, não apenas tentativa de ensino.
+                    if admitted {
+                        out.outcome = GoalOutcome::Partial;
+                    }
+                }
+                Opposition | NegativeClassification | RelationalInsufficiency => {
+                    out.outcome = GoalOutcome::Abstention;
+                    return Ok(());
+                }
+                ContractBlocked => {
+                    return Err("contrato/identidade/elegibilidade incompatíveis".into())
+                }
+                PermissionMissing => return Err("consulta composta não autorizada".into()),
+                ResourceLimited => {
+                    out.strategy = ConceptStrategy::Stop;
+                    return Err("consulta sem orçamento/reserva".into());
+                }
+                _ => return Err("integridade/atualidade da consulta não demonstrada".into()),
+            }
+            let final_report = out.final_query.as_ref().unwrap_or(&initial);
+            let verification = self.verify(session, registry, final_report, &out.permissions)?;
+            out.verification = Some(verification);
+            out.history
+                .push(format!("Conferência final {:?}", verification));
+            out.outcome = match verification {
+                Verification::Verified(Status::Supported) if out.reason.is_empty() => {
+                    GoalOutcome::Supported
+                }
+                Verification::Verified(Status::Insufficient)
+                    if out.outcome == GoalOutcome::Partial =>
+                {
+                    GoalOutcome::Partial
+                }
+                Verification::Verified(Status::Insufficient | Status::Contradictory)
+                    if out.reason.is_empty() =>
+                {
+                    GoalOutcome::Abstention
+                }
+                _ => GoalOutcome::Interrupted,
+            };
+            if !matches!(verification, Verification::Verified(_)) {
+                out.diagnosis = match verification {
+                    Verification::ReevaluationRequired => StaleReport,
+                    Verification::Denied => PermissionMissing,
+                    Verification::Interrupted => ResourceLimited,
+                    _ => VerificationFailed,
+                };
+            }
+            Ok(())
+        })();
+        if let Err(error) = result {
+            out.outcome = GoalOutcome::Interrupted;
+            out.reason = error;
+        }
+        out.usage = self.usage;
+        out.accepted_operations = session.history()[journal_start..].to_vec();
+        if out.reason.is_empty() {
+            out.reason = format!(
+                "{:?}; sustentação provisória no recorte sintético, sem promoção factual",
+                out.outcome
+            );
+        }
+        out.history.push(format!(
+            "Encerrado {:?}; consumo {:?}",
+            out.outcome, out.usage
+        ));
+        out
+    }
+}

@@ -218,7 +218,7 @@ pub struct PedagogyReport {
 }
 /// Seleção determinística por redução informativa entre hipóteses atuais.
 /// Recebe SOMENTE hipóteses e experiências didáticas: nenhuma observação/rótulo de prova.
-fn choose_lesson(
+pub(crate) fn choose_lesson(
     version: &HypothesisVersion,
     lessons: &[Lesson],
     used: &[EngramId],
