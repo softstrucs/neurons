@@ -67,3 +67,6 @@ pub mod investigation;
 
 /// Consulta composta transitória, implementação incremental em andamento.
 pub mod composed;
+
+/// F3-01 experimental: composição somente leitura com exatamente duas premissas.
+pub mod composed_two;

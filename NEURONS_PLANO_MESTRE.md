@@ -1138,3 +1138,128 @@ Hipótese de planejamento, não compromisso de implementação nem contrato inte
 - **F3-03:** integração mínima à Sessão/CLI e avaliação de retenção, condicionadas às evidências anteriores e a autorização própria; não implica persistência de supervisor ou novo formato.
 
 Preservados integralmente o aceite F2/R1–R9, consulta composta original, MP06/MP07/MP08/MP09, MP05 isolado, MP10 opcional, F1 v1/MP05 v1, H23/verify_path e resultados históricos. Nenhuma implementação, teste, benchmark, preparação de fixture ou experimento executado nesta atividade; nenhuma declaração de validação funcional F3. Somente NEURONS_PLANO_MESTRE.md atualizado localmente; sem documento paralelo, git add, commit ou push. Próxima ação: avaliação do responsável e autorização específica para publicar exclusivamente esta atualização documental; implementar ou executar F3-01 continua dependendo de autorização posterior explícita.
+
+
+## 11. F3-01 — Evidências locais posteriores ao pré-registro (2026-11-13)
+
+**Situação: F3-01 tecnicamente apto para auditoria independente; sem aceite formal.** Implementação e avaliação local autorizadas sobre `devs`, HEAD normativo `f5bcbeb1ec40520018a515a3503e738b9ef72560`, inicialmente coincidente com origin/devs e referência remota consultada diretamente. Índice vazio, árvore rastreada inicialmente limpa, 450 caminhos não rastreados e 702 ignorados inventariados. A seção10 permanece integral e prospectiva, como registro histórico anterior à execução; esta seção distingue os resultados agora observados. Não constitui encerramento F3 nem autorização F3-02/F3-03.
+
+### 11.1. Implementação e reprodução local
+
+Superfície aditiva: `src/integration/composed_two.rs`, exportado por três linhas em `src/integration.rs`, e teste público `tests/f3_01_composed_two.rs`. O módulo separado é necessário para preservar a API F2: reutiliza Binding/SyntheticRegistry/Permissions/Report, PedagogyHost::pedagogy_query, QueryCoordinator::query_three e verify_path existentes. Não altera H23, regras MP06, supervisor F2, Session/CLI, codecs ou checkpoints. Episode recebe objetivo/vínculo/permissões/limites fixos; query única emite relatório provisório; verify única compara integridade/dependências e recalcula ambas as consultas. As duas etapas compartilham contadores, sem reset, Clone ou restauração de autoridade. Não recebe Session mutável nem dispõe de operação de ensino/admissão.
+
+Reprodução em `/tmp/neurons-f3-01-961cnp48/isolated`, cópia seletiva de fontes/configurações/testes públicos, sem transportar target anterior, estado transitório ou módulos de probes reservados. CARGO_HOME e target separados; dependências bloqueadas, modo offline, sem dependências externas necessárias. Linux x86_64, rustc/cargo1.88.0; não demonstra portabilidade a outro sistema/toolchain ou auditoria por outra equipe.
+
+Comandos executados nessa cópia: `cargo check --offline --locked --lib --bin neurons`; `cargo build --offline --locked --bin neurons`; `cargo test --offline --locked --no-run --message-format=json` com seleção explícita dos19 alvos públicos: cli, engine, interactions, learning, memory, persistence, personality, f1_session, mp05_synaptic, mp06_paths, mp07_investigation, mp08_regulation, mp09_pedagogy, concept_goal_supervision, composed_query, tcr01_transfer, composed_goal_supervision, composed_cli e f3_01_composed_two. Executáveis compilados foram executados com exclusão explícita dos dois probes reservados de learning/interactions; o alvo F3 usou `--nocapture --test-threads=1`. Comandos completos, seleção e resultados encontram-se temporariamente em commands.json, selection.json, validation-results.json e logs nesse diretório, sem garantia de durabilidade.
+
+Resultado observado: **239 testes aprovados, zero falhas, zero ignorados e dois filtrados/excluídos**: 224 regressões públicas anteriores (incluindo25 da CLI composta) e15 novos testes agrupando toda a matriz10.5 e suas variantes. Compilação aprovada. Depois de reforçar as asserções explícitas de versão2/prova[3111,3112], o alvo F3 foi recompilado e executado novamente:15 aprovados, zero falhas/ignorados/filtrados; isso não aumenta o denominador239. Formatação dos três arquivos Rust aplicáveis e git diff --check aprovados.
+
+### 11.2. Esperado pré-fixado versus observado
+
+| Casos da seção10.5 | Esperado preservado | Observado nesta execução |
+|---|---|---|
+| P01/P02 | Sustentação positiva, versão2, prova[3111,3112], conferência | Supported e Verified(Supported), ambas as unidades; identidades preservadas. |
+| C-F2-01/C-F2-02 | API F2 recusa duas premissas | Query Interrupted; supervisor ContractBlocked/Interrupted, sem ensino ou alteração do estado. |
+| N01/N02 | Insuficiência sem preencher elo | Insufficient verificado em ambas as omissões. |
+| N03a/N03b e N04 | Não sustentar diante de oposição | Contradictory verificado nas duas oposições relacionais e na conceitual. |
+| N05; N06a/b/c | Negar vínculo incompatível ou cada permissão ausente antes do núcleo | Denied; zero consultas conceituais/relacionais. |
+| N07a/b/c | Interromper reserva insuficiente, sem execução parcial | Interrupted; zero consultas nos três limites fixados. |
+| N08a/N08b | Negar evidência compartilhada | Denied verificado para compartilhamento conceitual e com a origem do vínculo. |
+| N09 | Recusa de preparação duplicada | Admissão de R2 recusada; não houve consulta composta nesse controle. |
+| N10 | Recusa de origem circular pelo construtor | SyntheticRegistry recusou; não houve consulta composta nesse controle. |
+| N11 | Ciclo não prova destino | Insufficient verificado, sem prova circular; zero eventos neurais observados. |
+| N12a/b/c | Recusar decisão/prova/versão adulteradas | Referência recusou cada cópia; verify retornou Rejected, sem nova consulta. |
+| N13a/b/c | Não aceitar relatório contra outro tempo/registro/versão | Referência recusou; ReevaluationRequired em cada variante pré-preparada. |
+| N14 | Recusar repetição e concessão de outro vínculo | Erros nas repetições sem consumo extra; novo objetivo sem concessão exata Denied antes do núcleo. |
+| N15 e variante de contexto | Recusar prova ausente ou adulterada | Referência recusou ambas; produção ReevaluationRequired contra base sem R2, Rejected no contexto adulterado. |
+| N16/N17 | Classificação negativa/insuficiente não sustenta composição | Insufficient verificado; decisões conceituais distintas conferidas; zero ensino. |
+| I01 | Estado lógico/conhecimento imutáveis | encode/snapshot iguais nas unidades completas e conferência de portas somente leitura; nenhuma nova relação/item admitido. |
+
+A referência de teste enumera independentemente as23 hipóteses H23 por tabelas booleanas, filtra exemplos admitidos e calcula votos; não chama family/revise/evaluate do candidato. Lê memória/metadados públicos e enumera caminhos simples de duas arestas, conferindo contexto, elegibilidade, oposição, evidências independentes, versões, identidade e dependências. Não chama a função candidata ou verify_path para gerar o resultado esperado. Relatórios são comparados com essa referência depois da execução; nenhum gabarito é fornecido ao candidato. Houve concordância nos casos válidos e recusa independente das adulterações/obsolescências previstas. Independência de algoritmo avaliador não significa independência de autoria, plataforma ou equipe; o domínio permanece a família finita pré-registrada.
+
+### 11.3. Orçamento, custos e intercorrências preservadas
+
+Reserva normal integral2/2/64, teto32 por chamada MP06; limites maiores são recusados pelo construtor. P01/P02 consumiram2 consultas conceituais,2 relacionais e6 eventos neurais agregados (3 por chamada), incluindo recálculo de produção; zero eventos conceituais, ensino ou revisão. Omissões N01/N02 e ciclo N11 consumiram zero eventos neurais, mantendo as consultas contabilizadas. Oposição, compartilhamento e classificações N16/N17 consumiram6 eventos agregados. N05/N06/N07 não executaram consultas; adulteração/obsolescência foi recusada antes do recálculo. Nenhum teto foi ampliado.
+
+Os19 executáveis foram monitorados externamente com timeout10s e RSS256MiB: maior tempo observado556,129ms, RSS máximo relatado11724KiB. O alvo F3 nessa rodada levou140,388ms (CPU usuário127,765ms/sistema8,034ms); a reexecução final levou aproximadamente165ms de tempo externo. Trabalho/target temporário observado abaixo de64MiB e espaço livre em /home acima de13GiB, dentro dos tetos prospectivos. Instrumentação separa preparação, consulta candidata, referência e conferência: na reexecução, P01/P02 tiveram preparação3,080/2,894ms, consulta0,391/0,385ms, referência0,269/0,236ms e conferência0,551/0,556ms. RSS nas fronteiras dessas fases2216KiB; CPU em ticks de10ms, incluindo muitos zeros. São medições do processo, sem atribuição exclusiva de memória, pico por fase ou interpretação de zero ticks/eventos como custo nulo; não são benchmark ou demonstração de vantagem neural.
+
+Intercorrências: primeira compilação do novo teste falhou por comparação entre referência e valor de metadado (E0308), corrigida internamente; o candidato não teve hipótese/dados/tetos ajustados. Uma execução preliminar aprovou15 testes, mas a inspeção posterior identificou a montagem de fixtures alternativas N13 após a consulta inicial: a ordem do harness foi corrigida para preparar todas antes da unidade, sem alterar dados/expectativas, e os testes foram novamente executados. Essa rodada preliminar não é tomada como confirmação do protocolo; logs preliminares e finais permanecem separados no diretório temporário. Não houve falha científica observada na rodada final; isso não extrapola a matriz finita.
+
+### 11.4. Dez critérios cumulativos: avaliação técnica local
+
+| Critério normativo10.8 | Evidência/método observado | Resultado e limite |
+|---|---|---|
+| 1. Positivos completos | P01/P02, asserções de versão/prova, H23 e grafo independentes, verify com recálculo | Atendido na família fixada, não generalização. |
+| 2. Controles negativos | Matriz acima, variantes e referência; N09/N10 separados como preparação | Atendido nos casos pré-registrados. |
+| 3. Oposição | N03a/b e N04 Contradictory, nunca Supported | Atendido, sem alegação adversarial ampla. |
+| 4. Circularidade/compartilhamento | N08–N11, conferência de evidências e caminhos simples | Atendido no domínio fixado. |
+| 5. Integridade/atualidade | N12/N13/N15 e recálculo de produção; versão confrontada com modelo da fixture | Atendido; referência separada no mesmo harness/equipe. |
+| 6. Imutabilidade | encode/snapshot antes/depois, estado admitido consultado e APIs &Session | Atendido; contadores/relatórios transitórios são externos. |
+| 7. Sem promoção factual | Identidade do estado e ausência de portas de admissão no candidato | Atendido; relatório não equivale a fato armazenado. |
+| 8. Permissões/orçamento | N05–N07/N14, consumo ligado ao relatório MP06, recálculo cobrado | Atendido nos limites2/2/64 e32 por chamada. |
+| 9. Regressões F1/F2 | 224 testes públicos anteriores, zero falhas, dois probes excluídos | Atendido para a seleção pública; MP05 permanece isolado. |
+| 10. Recusa F2 original | Dois controles query e supervise; código original inalterado | Atendido: Interrupted e ContractBlocked/Interrupted. |
+
+Nenhum critério foi reescrito e nenhuma aprovação deriva apenas da contagem de testes. Checkpoints/codecs F1 v1 e MP05 v1 não foram alterados; regressões públicas de persistência passaram. O exemplar histórico F1 de897 bytes não foi novamente verificado nesta atividade. Permanecem o aceite F2 e ressalvas R1–R9; não se demonstra autenticação, resistência adversarial, generalização ampla, consciência, integração neural causal ou superioridade do algoritmo. O coordenador usa a prova canônica MP06 disponível, sem planejamento geral ou procura irrestrita de alternativas.
+
+**Encerramento local:** resultados disponíveis para auditoria independente posterior, sem aceite formal F3-01; F3-02/F3-03 não iniciados. Sem acesso D/V/F, execução de probes reservados/CIC-I6/P8/G2/G7, alterações H23/verify_path/contratos congelados, integração cognitiva MP05/MP10 ou ação externa. Nenhum git add, commit ou push. Somente dois arquivos novos de código/teste, a exportação aditiva e este registro posterior no Plano Mestre; caminhos não rastreados/ignorados preexistentes preservados. Próxima decisão cabe ao responsável, sem execução automática de outra etapa.
+
+## 12. Aceite Científico Formal — F3-01 (Aprovado com Ressalvas)
+
+### 12.1. Identificação e decisão — 2026-11-14
+
+**F3-01 — APROVADO COM RESSALVAS**, por decisão expressamente autorizada pelo responsável no mandato posterior à auditoria. Experimento: composição conceitual positiva com exatamente duas premissas relacionais independentes. Base normativa: contrato científico pré-registrado da seção 10; implementação e evidências locais posteriores: seção 11. Escopo exclusivo: família sintética finita e condições pré-registradas. Natureza: aceite científico delimitado, não aceite de produção nem encerramento integral da F3.
+
+O parecer técnico da auditoria foi **APTO COM RESSALVAS**. A decisão humana ora registrada concede o aceite científico específico; não é resultado de teste automatizado. As seções 10 e 11 permanecem integralmente preservadas como registros dos respectivos momentos, inclusive seus estados históricos de execução/aceite pendentes.
+
+### 12.2. Fundamentação técnica anterior e critérios cumulativos
+
+Conteúdo submetido ao aceite: implementação local sobre `devs`, HEAD de referência publicado `f5bcbeb1ec40520018a515a3503e738b9ef72560`, com exportação aditiva em `src/integration.rs`, novo módulo `src/integration/composed_two.rs` e novo teste `tests/f3_01_composed_two.rs`. Antes deste acréscimo documental, os hashes dos arquivos rastreados e dos dois arquivos experimentais coincidiram com o inventário da auditoria; a seleção de fontes/testes também coincidiu byte a byte com sua cópia isolada. Índice vazio e inalterado; 450 caminhos não rastreados anteriores mais os dois experimentais, e 702 ignorados, conferidos e preservados.
+
+**Resultados da auditoria anterior, conferidos nos registros disponíveis, sem nova execução de testes nesta operação documental:** 239 testes públicos aprovados, zero falhas, zero ignorados e dois probes excluídos; 224 regressões anteriores F1/F2 e 15 testes específicos F3-01. A reprodução ocorreu em nova cópia seletiva de 66 arquivos, com CARGO_HOME/target/temporários separados, compilação offline e dependências bloqueadas, no mesmo Linux x86_64 e Rust/Cargo 1.88.0. Formatação aplicável e git diff --check foram aprovados naquela auditoria.
+
+P01/P02 produziram classificação positiva na versão 2, com critérios A e A∧F, suporte conceitual [3401/4401, 3402/4402], prova relacional ordenada [3111, 3112] e evidências [4811, 4812]; ambos Supported e Verified(Supported). O ciclo de cada positivo consumiu duas consultas conceituais, duas relacionais e seis eventos neurais agregados, três por chamada, incluindo a conferência de produção. Não houve ensino, revisão, admissão factual ou mutação do estado no fluxo examinado.
+
+A referência dos testes recalculou H23 e caminhos sem usar o candidato como gabarito. A auditoria acrescentou harness Rust próprio e oráculo Python separado: 19 casos comparados sem divergências, oito adulterações adicionais rejeitadas sem nova consulta e três orçamentos acima dos limites recusados. Essas verificações adicionais não aumentam a contagem dos 239 testes nem o número de unidades positivas independentes. As recusas de duplicidade e origem circular ocorreram na preparação/construção, sem consulta composta. Não foi identificada não conformidade impeditiva no recorte auditado.
+
+| Critério cumulativo da seção 10.8, com redação normativa preservada naquela seção | Conclusão técnica da auditoria e fundamento utilizado no aceite |
+|---|---|
+| 1 — Casos positivos completos | ATENDIDO: P01/P02, classificação, versão, suportes, cadeia e conferência verificados. |
+| 2 — Controles negativos | ATENDIDO: matriz pré-registrada reproduzida, distinguindo recusa de preparação e execução. |
+| 3 — Oposição e ausência de sustentação indevida | ATENDIDO: oposição conceitual e relacional impediram sustentação. |
+| 4 — Circularidade e compartilhamento | ATENDIDO: controles N08–N11 recusados conforme suas condições. |
+| 5 — Integridade, atualidade e referência independente | ATENDIDO: recálculo de produção, referência metodologicamente separada e recusas de adulteração/obsolescência; ressalva de independência institucional abaixo. |
+| 6 — Imutabilidade | ATENDIDO: comparações encode/snapshot/projeção factual e inspeção de portas somente leitura sustentaram preservação no fluxo auditado. |
+| 7 — Ausência de promoção factual | ATENDIDO: nenhuma classificação ou composição admitida automaticamente. |
+| 8 — Permissões e orçamento | ATENDIDO: concessões independentes, recusas antecipadas e contabilização da conferência nos limites 2/2/64, com 32 eventos por chamada. |
+| 9 — Regressões F1/F2 | ATENDIDO: 224 testes anteriores aprovados; contratos e formatos congelados preservados. |
+| 10 — Recusa original F2 | ATENDIDO: nos dois controles, query Interrupted e supervisor ContractBlocked/Interrupted. |
+
+As classificações decorrem das evidências de execução e inspeção, não apenas de compilação ou contagem de testes. O aceite reconhece exclusivamente o funcionamento demonstrado nos critérios e condições pré-registrados; não estabelece cobertura universal ou validação fora dessa família.
+
+### 12.3. Ressalvas obrigatórias e permanentes deste aceite
+
+1. **Independência institucional:** não houve auditoria institucionalmente independente ou por equipe distinta. O mesmo assistente participou da implementação e da auditoria; a separação demonstrada é metodológica, com dependências compartilhadas de tipos, representação do estado e ambiente.
+2. **Portabilidade:** reprodução entre sistemas, equipamentos e toolchains distintos não demonstrada; avaliação no mesmo ambiente Linux/toolchain instalado.
+3. **Domínio:** família experimental finita e sintética, com fontes, identificadores, vínculos e condições delimitados pelo pré-registro.
+4. **Autenticação operacional:** identidade e fontes sintéticas não demonstram autenticação operacional de produção ou resistência adversarial geral.
+5. **Retenção das evidências:** artefatos temporários ainda sem retenção permanente garantida; disponibilidade pontual não equivale a preservação durável.
+6. **Checkpoint histórico:** exemplar F1 v1 de 897 bytes não revalidado nem reconstruído para este aceite; não se presume compatibilidade nova desse exemplar.
+7. **Generalização:** generalização ampla não demonstrada; os positivos e controles não autorizam extrapolação para outros domínios.
+8. **Vantagem neural:** vantagem neural, superioridade do algoritmo ou integração neural causal não demonstradas.
+9. **Consciência/AGI:** consciência, AGI ou inteligência geral não demonstradas.
+10. **Recursos:** limites e contadores de eventos neurais não equivalem a limites completos de CPU ou memória; enumeração e verificações simbólicas também têm custo. Medições de processo e amostragem não estabelecem orçamento universal ou atribuição exclusiva por operação.
+
+Permanecem os contratos, resultados e ressalvas anteriores F1/F2, inclusive R1–R9 do aceite F2; nenhuma limitação histórica é apagada ou convertida em capacidade comprovada.
+
+### 12.4. Rastreabilidade e preservação pendente
+
+Em 2026-11-14, os registros em `/tmp/neurons-f3-audit-enegdvca/` estavam disponíveis. Foram conferidos o inventário baseline.json, selection.json, commands.json, test-commands.json, test-results.json, independent-results.json, auditor-expected.json, auditor-observed.jsonl e preservation.json, além da presença do harness auditor.rs, oracle.py, audit-state.rs, executáveis e audit-state.log. Contagens e resultados estruturados são coerentes com o relatório da auditoria; fontes da cópia isolada coincidem com o conteúdo auditado. Essa conferência documental não reexecutou os 239 testes nem os cenários adicionais e não constitui autenticação criptográfica ou prova de retenção permanente dos relatórios.
+
+Ainda precisam de preservação permanente o conjunto fonte auditado, manifestos/inventários, comandos, logs de compilação e testes, relatórios de resultados, harnesses e oráculo, entradas/expectativas/observações e medições. **Procedimento separado proposto, não executado:** mediante autorização específica, copiar as evidências para destino durável fora do repositório, gerar manifesto de hashes, conferir a cópia contra os originais e verificar uma segunda cópia em dispositivo independente, preservando os originais temporários. Nenhum artefato foi copiado para o repositório nesta operação.
+
+### 12.5. Delimitação e publicação
+
+Este aceite não autoriza F3-02/F3-03, integração CLI, ensino ou aprendizagem generalizada, admissão factual automática, autonomia operacional adicional, alteração de contratos congelados, desenvolvimento de NEURONS Academy, NEURONS Agents ou NIS, nem implantação em produção. Não autoriza integração cognitiva MP05/MP10, novos experimentos ou acesso a materiais reservados.
+
+**Aceite científico formal autorizado e documentado localmente. Publicação Git pendente de autorização específica.** Somente este acréscimo ao Plano Mestre é autorizado; nenhum código, teste, codec, checkpoint, contrato H23/verify_path ou mecanismo de identidade/permissão/supervisão foi alterado. Sem git add, commit ou push; nenhuma fase seguinte iniciada.
