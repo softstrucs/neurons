@@ -73,3 +73,6 @@ pub mod composed_two;
 
 /// Ciclo funcional local aditivo; não altera os experimentos científicos anteriores.
 pub mod experiential;
+
+/// PIFI: descoberta operacional e percepção local, com permissões explícitas.
+pub mod development;
