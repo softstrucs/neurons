@@ -70,3 +70,6 @@ pub mod composed;
 
 /// F3-01 experimental: composição somente leitura com exatamente duas premissas.
 pub mod composed_two;
+
+/// Ciclo funcional local aditivo; não altera os experimentos científicos anteriores.
+pub mod experiential;
