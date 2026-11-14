@@ -13,6 +13,8 @@ mod sealed {
 }
 /// Uma porta para a memória existente, não um segundo raciocinador.
 pub trait EpisodeMemory: sealed::Sealed {
+    /// Projeção para o planejador. Em RetrievedMemory, id é referência
+    /// transitória resolvível; não substitui o ID original da evidência.
     fn memory_trials(&self) -> Result<Vec<ActionTrial>, String>;
     fn memory_contract(&self) -> Option<ConsequenceContract>;
     fn memory_used(&self, request: &Intervention) -> bool;
@@ -226,6 +228,8 @@ pub struct RecoveredVersion {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RecoveredTransition {
+    /// Referência transitória da consulta; não é identidade de fato ou concessão.
+    pub reference: u32,
     pub origins: Vec<EpisodeId>,
     pub trial: ActionTrial,
     pub before: Reading,
@@ -246,6 +250,11 @@ pub struct RetrievedMemory {
     rejected: Option<RecoveredTransition>,
 }
 impl RetrievedMemory {
+    pub fn resolve_reference(&self, reference: u32) -> Option<&RecoveredTransition> {
+        self.entries
+            .iter()
+            .find(|entry| entry.reference == reference)
+    }
     pub fn rejected_evidence(&self) -> Option<&RecoveredTransition> {
         self.rejected.as_ref()
     }
@@ -271,13 +280,25 @@ impl EpisodeMemory for RetrievedMemory {
         if self.status != RetrievalStatus::Complete {
             return Err(format!("recuperação não utilizável: {:?}", self.status));
         }
-        Ok(self.entries.iter().map(|e| e.trial.clone()).collect())
+        // A projeção para o planejador conserva o original em entries. Nenhum
+        // ID de origem é reescrito/persistido; referências só valem nesta vista.
+        Ok(self
+            .entries
+            .iter()
+            .map(|e| {
+                let mut projected = e.trial.clone();
+                projected.id = e.reference;
+                projected
+            })
+            .collect())
     }
     fn memory_contract(&self) -> Option<ConsequenceContract> {
         self.contract
     }
     fn memory_used(&self, r: &Intervention) -> bool {
-        self.used_permits.contains(&r.permit.id) || self.used_trials.contains(&r.id)
+        self.used_permits.contains(&r.permit.id)
+            || self.used_trials.contains(&r.id)
+            || self.resolve_reference(r.id).is_some()
     }
     fn validate_memory(&self, s: &Session, g: PlanningGoal) -> Result<(), String> {
         self.memory_trials()?;
@@ -376,8 +397,7 @@ impl Runtime {
                 }
                 relevant = true;
                 if let Some(old) = out.entries.iter_mut().find(|p| {
-                    p.trial.id == trial.id
-                        || p.trial.permit == trial.permit
+                    p.trial.permit == trial.permit
                         || p.before.evidence == before.evidence
                         || p.after.evidence == after.evidence
                         || p.before.evidence == after.evidence
@@ -389,6 +409,7 @@ impl Runtime {
                     }
                     out.status = RetrievalStatus::AmbiguousIdentity;
                     out.rejected = Some(RecoveredTransition {
+                        reference: u32::MAX - out.entries.len() as u32,
                         origins: vec![e.id],
                         trial: trial.clone(),
                         before,
@@ -401,6 +422,7 @@ impl Runtime {
                     return Ok(out);
                 }
                 out.entries.push(RecoveredTransition {
+                    reference: u32::MAX - out.entries.len() as u32,
                     origins: vec![e.id],
                     trial: trial.clone(),
                     before,
@@ -468,6 +490,7 @@ impl Runtime {
         self.attention_scans += 1;
         true
     }
+    /// IDs de suporte são referências desta vista: use resolve_reference.
     pub fn predict_retrieved(
         &mut self,
         session: &Session,
@@ -487,6 +510,7 @@ impl Runtime {
         )?;
         self.predict_using(query, &memory.memory_trials()?)
     }
+    /// As provas usam referências desta vista e preservam as origens em entries.
     pub fn plan_retrieved(
         &mut self,
         session: &Session,

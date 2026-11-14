@@ -432,7 +432,7 @@ fn incompatible_concept_versions_block_automatic_use() {
         .is_err());
 }
 #[test]
-fn local_identity_collisions_are_reported_instead_of_renumbering_evidence() {
+fn reused_authority_or_evidence_is_reported_instead_of_silent_merging() {
     let (h, s) = history();
     let mut a = EpisodeArchive::new();
     a.insert(eid(1), &h, &s).unwrap();
@@ -722,4 +722,144 @@ fn retrieved_memory_drives_a_question_from_an_actual_remaining_gap() {
     assert_eq!(question.goal, goal);
     assert_eq!(question.observed_trials, 3);
     assert!(out.plan.is_none());
+}
+
+#[test]
+fn separate_episode_local_ids_are_qualified_without_changing_facts() {
+    let (h, s) = history();
+    let mut a = EpisodeArchive::new();
+    a.insert(eid(1), &h, &s).unwrap();
+    let mut second = runtime();
+    let mut w = world(30, &[(30, 11, 40)]);
+    let mut fresh = request(2, 11, 20);
+    fresh.permit.id = 2002;
+    fresh.before_evidence = EvidenceId::new(5004).unwrap();
+    fresh.after_evidence = EvidenceId::new(5005).unwrap();
+    second.intervene(&mut w, &fresh).unwrap();
+    a.insert(eid(2), &second, &s).unwrap();
+    let original = a.encode();
+    let mut r = runtime();
+    let g = task(20, 40);
+    let memory = retrieve(&mut r, &a, &s, g);
+    assert_eq!(memory.status(), RetrievalStatus::Complete);
+    let repeated: Vec<_> = memory
+        .entries()
+        .iter()
+        .filter(|e| e.trial.id == 2)
+        .collect();
+    assert_eq!(repeated.len(), 2);
+    assert_ne!(repeated[0].origins, repeated[1].origins);
+    assert_ne!(repeated[0].reference, repeated[1].reference);
+    let plan = r
+        .plan_retrieved(&s, g, PlanningBudget::default(), &memory)
+        .unwrap()
+        .plan
+        .unwrap();
+    let origins: Vec<_> = plan
+        .steps()
+        .iter()
+        .map(|step| {
+            let source = memory.resolve_reference(step.id).unwrap();
+            assert_eq!(source.trial.id, 2);
+            assert_eq!(source.trial.from, step.from);
+            assert_eq!(source.trial.to, step.to);
+            source.origins.clone()
+        })
+        .collect();
+    assert_eq!(origins, vec![vec![eid(1)], vec![eid(2)]]);
+    assert_eq!(a.encode(), original);
+}
+#[test]
+fn qualified_local_ids_support_execution_of_a_novel_goal() {
+    let (h, s) = history();
+    let mut a = EpisodeArchive::new();
+    a.insert(eid(1), &h, &s).unwrap();
+    let mut second = runtime();
+    let mut w = world(30, &[(30, 11, 40)]);
+    let mut fresh = request(2, 11, 20);
+    fresh.permit.id = 2002;
+    fresh.before_evidence = EvidenceId::new(5004).unwrap();
+    fresh.after_evidence = EvidenceId::new(5005).unwrap();
+    second.intervene(&mut w, &fresh).unwrap();
+    a.insert(eid(2), &second, &s).unwrap();
+    let bytes = a.encode();
+    let a = EpisodeArchive::decode(&bytes, &[(eid(1), sensors()), (eid(2), sensors())]).unwrap();
+    let mut r = runtime();
+    let g = task(999, 40);
+    let memory = retrieve(&mut r, &a, &s, g);
+    let mut w = world(999, &[(999, 7, 20), (20, 9, 30), (30, 11, 40)]);
+    let out = r
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                task: g,
+                max_actions: 3,
+                ..goal(999)
+            },
+            contract(&s),
+            reading(9, [1, 1, 1, 0, 0, 0], 30),
+            &new_tickets(),
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(
+        out.prefix_alternative
+            .unwrap()
+            .plan
+            .unwrap()
+            .steps()
+            .iter()
+            .map(|s| memory.resolve_reference(s.id).unwrap().origins.clone())
+            .collect::<Vec<_>>(),
+        vec![vec![eid(1)], vec![eid(2)]]
+    );
+    assert_eq!(a.encode(), bytes);
+}
+#[test]
+fn local_id_qualification_does_not_launder_shared_evidence() {
+    let (h, s) = history();
+    let mut a = EpisodeArchive::new();
+    a.insert(eid(1), &h, &s).unwrap();
+    let mut second = runtime();
+    let mut w = world(30, &[(30, 11, 40)]);
+    let mut fresh = request(2, 11, 20);
+    fresh.permit.id = 2002;
+    second.intervene(&mut w, &fresh).unwrap();
+    a.insert(eid(2), &second, &s).unwrap();
+    let mut r = runtime();
+    let g = task(20, 40);
+    let memory = retrieve(&mut r, &a, &s, g);
+    assert_eq!(memory.status(), RetrievalStatus::AmbiguousIdentity);
+    assert_eq!(memory.rejected_evidence().unwrap().origins, vec![eid(2)]);
+    assert!(r
+        .plan_retrieved(&s, g, PlanningBudget::default(), &memory)
+        .is_err());
+}
+#[test]
+fn reference_ids_never_become_execution_authority() {
+    let (a, s) = archive_pair();
+    let mut r = runtime();
+    let g = task(999, 40);
+    let memory = retrieve(&mut r, &a, &s, g);
+    let mut req = new_tickets();
+    req[0].id = memory.entries()[0].reference;
+    let mut w = world(999, &[(999, 7, 20), (20, 9, 30), (30, 11, 40)]);
+    assert!(r
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                task: g,
+                max_actions: 3,
+                ..goal(999)
+            },
+            contract(&s),
+            reading(9, [1, 1, 1, 0, 0, 0], 30),
+            &req
+        )
+        .is_err());
+    assert_eq!(w.action_count(), 0);
 }

@@ -117,5 +117,13 @@ MP05 ou NRNPIFI1/2/3. `save` cria arquivo novo com sincronização; `load` exige
 reinstalação das interfaces e nunca restaura Access. Consumos históricos, inclusive
 de episódios não selecionados, impedem reciclar concessões. O checksum detecta
 corrupção, não autentica fontes. Ainda há limites de quatro episódios/oito entradas
-recuperadas; conflitos de identidade exigem decisão em vez de renumerar fatos.
+recuperadas; compartilhamento indevido de evidência ou concessão exige decisão.
 Teste público: `python3 scripts/test_public.py --target development_archive`.
+
+IDs locais de ações podem coincidir entre episódios independentes. A recuperação
+mantém `RecoveredTransition.trial` e `origins` originais e atribui uma referência
+transitória à vista. Suportes de `predict_retrieved` e provas de `plan_retrieved`
+são resolvidos por `RetrievedMemory::resolve_reference`; não são novos fatos ou
+concessões. Essas referências não são persistidas como planos/autoridade. Episódios
+com evidência compartilhada indevidamente continuam bloqueados. Uma nova consulta
+ou reinicialização exige resolver suas próprias referências.
