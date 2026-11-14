@@ -102,3 +102,20 @@ a memória de origem não muda e seus recursos/concessões não são reabertos. 
 os checkpoints de origem necessários; não há consolidação automática de arquivos
 de múltiplos episódios ou retenção permanente dos relatórios transitórios.
 Testes: `python3 scripts/test_public.py --target development_predictive`.
+
+`EpisodeArchive` guarda até quatro snapshots operacionais imutáveis. A recuperação
+`Runtime::retrieve_context` seleciona transições por mundo, revisão, contexto,
+fonte e tempo; mantém origens e versões e compartilha a atenção de 32 inspeções
+com as ações. Não funde modelos H23 nem escolhe a versão numericamente mais nova.
+Uma consulta incompleta, identidade ambígua ou linhagem conceitual incompatível
+não pode sustentar uma decisão. Evidência oposta permanece no modelo existente.
+`RetrievedMemory` alimenta as mesmas portas de previsão, planejamento, perguntas
+e aprendizagem. Mudanças na sessão exigem nova recuperação.
+
+O contêiner operacional `NRNARC01` encapsula imagens existentes, sem alterar F1,
+MP05 ou NRNPIFI1/2/3. `save` cria arquivo novo com sincronização; `load` exige
+reinstalação das interfaces e nunca restaura Access. Consumos históricos, inclusive
+de episódios não selecionados, impedem reciclar concessões. O checksum detecta
+corrupção, não autentica fontes. Ainda há limites de quatro episódios/oito entradas
+recuperadas; conflitos de identidade exigem decisão em vez de renumerar fatos.
+Teste público: `python3 scripts/test_public.py --target development_archive`.

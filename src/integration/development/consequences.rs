@@ -75,7 +75,10 @@ pub struct ConsequenceReview {
 impl Runtime {
     /// Somente configuração sem autoridade. Uma nova instância pode continuar
     /// a mesma hipótese; não transfere recursos, fontes, concessões ou episódios.
-    pub fn inherit_consequence_contract(&mut self, previous: &Runtime) -> Result<(), String> {
+    pub fn inherit_consequence_contract(
+        &mut self,
+        previous: &impl EpisodeMemory,
+    ) -> Result<(), String> {
         if self.consequence_contract.is_some()
             || self.conceptual_attempted
             || self.verification_attempted
@@ -84,7 +87,7 @@ impl Runtime {
         }
         self.consequence_contract = Some(
             previous
-                .consequence_contract
+                .memory_contract()
                 .ok_or("contrato anterior ausente")?,
         );
         Ok(())

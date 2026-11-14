@@ -75,7 +75,7 @@ pub(super) fn decode(
     }
     Ok((runtime, session))
 }
-fn checksum(bytes: &[u8]) -> u64 {
+pub(super) fn checksum(bytes: &[u8]) -> u64 {
     bytes.iter().fold(0xcbf29ce484222325, |h, b| {
         (h ^ u64::from(*b)).wrapping_mul(0x100000001b3)
     })

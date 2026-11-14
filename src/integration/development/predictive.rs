@@ -55,7 +55,7 @@ impl Runtime {
     /// explícita e revisão pelo currículo existente, sem presumir êxito do ensino.
     pub fn pursue_learning_goal(
         &mut self,
-        memory: &Runtime,
+        memory: &impl EpisodeMemory,
         session: &mut Session,
         world: &mut World,
         goal: PursuitGoal,
@@ -149,8 +149,8 @@ impl Runtime {
         out.justification.push_str(" Insuficiência motivou experiência explicitamente autorizada; MP09 decidiu sua incorporação; objetivo original preservado.");
         self.finish_predictive(memory, world, out, requests, goal.max_actions - 1, false)
     }
-    fn remembered_trials(&self, memory: &Runtime) -> Result<Vec<ActionTrial>, String> {
-        let mut trials = memory.action_trials.clone();
+    fn remembered_trials(&self, memory: &impl EpisodeMemory) -> Result<Vec<ActionTrial>, String> {
+        let mut trials = memory.memory_trials()?;
         for t in &self.action_trials {
             if trials
                 .iter()
@@ -202,7 +202,7 @@ impl Runtime {
     /// ações totais e uma reconsulta/revisão do plano, no orçamento já existente.
     pub fn pursue_with_consequences(
         &mut self,
-        memory: &Runtime,
+        memory: &impl EpisodeMemory,
         session: &Session,
         world: &mut World,
         goal: PursuitGoal,
@@ -229,10 +229,8 @@ impl Runtime {
         {
             return Err("objetivo, consulta ou autoridade de planejamento incompatível".into());
         }
-        if requests.iter().any(|r| {
-            memory.action_permits.contains(&r.permit.id)
-                || memory.action_trials.iter().any(|t| t.id == r.id)
-        }) {
+        memory.validate_memory(session, goal.task)?;
+        if requests.iter().any(|r| memory.memory_used(r)) {
             return Err("concessão/identidade já consumida no episódio de origem".into());
         }
         let mut out = PredictivePursuit {
@@ -257,7 +255,7 @@ impl Runtime {
             out.reason = PredictiveReason::Reached;
             return Ok(out);
         }
-        if self.consequence_contract.is_none() && memory.consequence_contract.is_some() {
+        if self.consequence_contract.is_none() && memory.memory_contract().is_some() {
             self.inherit_consequence_contract(memory)?;
         }
         let trials = self.remembered_trials(memory)?;
@@ -401,7 +399,7 @@ impl Runtime {
     }
     fn finish_predictive(
         &mut self,
-        memory: &Runtime,
+        memory: &impl EpisodeMemory,
         world: &mut World,
         mut out: PredictivePursuit,
         requests: &[Intervention],

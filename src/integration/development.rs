@@ -19,6 +19,11 @@ use crate::session::f1::Session;
 use crate::synapse::SynapseId;
 
 mod actions;
+mod archive;
+pub use archive::{
+    EpisodeArchive, EpisodeMemory, RecoveredTransition, RecoveredVersion, RetrievalBudget,
+    RetrievalStatus, RetrievedMemory, VersionRelation,
+};
 mod checkpoint;
 mod consequences;
 mod predictive;
