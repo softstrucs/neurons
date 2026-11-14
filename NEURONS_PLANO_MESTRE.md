@@ -976,3 +976,165 @@ Os25 testes novos cobrem ciclo completo pelo binário, suporte inicial sem ensin
 **Rastreabilidade conferida neste registro:** `/tmp/neurons-f2-audit-lfxtzn7q/AUDITORIA_F2.md`, `test-results.json`, `independent-results.json` e `checkpoint-results.json` estavam disponíveis e foram lidos somente para conferir a documentação. O relatório contém a matriz dos 15 critérios, componentes, referências de código, testes/execuções, resultados e limitações; os JSONs confirmam 224/0/0 com dois filtrados, 19 cenários e igualdade dos exemplares públicos de 439/235 bytes. Essa disponibilidade pontual não demonstra retenção permanente. Resultados essenciais, escopo, decisão e ressalvas ficam neste Plano Mestre; nenhum artefato de auditoria foi adicionado ao repositório ou promovido a caminho permanente. O relatório final anterior e os testes públicos versionados continuam referências, sem alegar nova reprodução neste registro.
 
 **Encerramento e próxima ação:** registro documental local preparado por autorização explícita; somente NEURONS_PLANO_MESTRE.md pode apresentar alteração rastreada. Preservados F1, MP05–MP09, consulta composta, TCR-01, sequência de publicações, decisões e critérios congelados. Sem acesso D/V/F, probes reservados, CIC-I6/P8 ou G2/G7, alteração de H23/verify_path/formatos, integração MP05 ou início MP10. F3 e outros intervalos não iniciados nem autorizados. Sem git add, commit ou push; o aceite ainda não foi publicado. Próxima ação exclusivamente mediante nova autorização específica para publicar esta atualização documental, sem iniciar outra fase.
+
+
+## 10. F3 — Contrato científico inicial e pré-registro do Experimento 01
+
+**Situação documental em 2026-11-13: contrato inicial em preparação, pré-registro local para avaliação; F3 ainda não implementada e F3-01 NÃO EXECUTADO.** Mandato exclusivamente documental sobre a base `devs`, HEAD `60dcad1d8fdde4209e4ccf5abf2f64483b1338f9`, coincidente com origin/devs e consulta remota somente leitura. Índice inicialmente vazio, árvore rastreada limpa, 450 caminhos não rastreados e 702 ignorados conferidos. Não existia contrato F3 anterior neste Plano Mestre. O aceite F2 publicado e suas ressalvas R1–R9 permanecem íntegros. Esta seção não constitui contrato completo de encerramento da F3, autorização de implementação/execução ou resultado experimental.
+
+### 10.1. Finalidade, natureza e princípios
+
+**Finalidade:** investigar progressivamente novas integrações funcionais entre capacidades cognitivas existentes, utilizando hipóteses falsificáveis, evidências independentes e limites explícitos de autonomia e recursos.
+
+**Natureza:** fase experimental incremental, sem compromisso antecipado com planejamento geral, agentes, integração neural causal ou linguagem livre. Um resultado favorável no F3-01 demonstraria apenas a integração delimitada especificada abaixo, não novidade do algoritmo MP06, vantagem neural, verdade absoluta ou generalização ampla. Nenhum critério de encerramento integral da F3 é definido antecipadamente.
+
+Princípios obrigatórios:
+
+1. Evolução por dependências demonstradas; capacidade ausente não é presumida a partir de enums, documentação ou compilação.
+2. Separação entre hipótese, evidência, inferência e fato admitido; conclusão consultada não concede autoridade de admissão.
+3. Preservação e relato dos resultados negativos, falhas, recusas e inconclusões, sem seleção posterior dos casos favoráveis.
+4. Avaliação por referências independentes, com correção separada do candidato e sem gabarito no fluxo cognitivo.
+5. Permissões explícitas, independentes e vinculadas ao objetivo/escopo; nenhuma concessão criada pelo candidato.
+6. Recursos limitados e contabilizados inclusive na verificação; nenhuma renovação silenciosa por reconstrução de episódio.
+7. Ausência de promoção factual automática ou incorporação de classificação/prova como observação.
+8. Compatibilidade regressiva com F1/F2; contratos e resultados aceitos não são reinterpretados para acomodar a extensão.
+9. Não extrapolação científica; distinguir esperado, observado, reproduzido e ainda não demonstrado.
+
+### 10.2. F3-01 — identificação e hipótese prospectiva
+
+**Nome:** Consulta Composta Fundamentada em Cadeia Relacional de Duas Premissas.
+
+**Objetivo:** avaliar se uma classificação conceitual sustentada pode ser combinada, de maneira verificável e somente leitura, com uma prova relacional independente formada por duas premissas encadeadas.
+
+**Hipótese principal H-F3-01:** quando a classificação conceitual é sustentada positivamente e ambas as premissas relacionais são elegíveis, a consulta composta pode produzir um relatório sustentado e verificável sem admitir automaticamente um novo fato derivado.
+
+**Hipótese nula operacional H0-F3-01:** a extensão não demonstra composição correta e verificável sob os critérios pré-registrados. Não se trata de teste de significância estatística; a família finita será avaliada por condições necessárias e controles, sem estimativa de generalização populacional.
+
+**Unidade experimental:** uma consulta composta delimitada, incluindo sua conferência semântica, com objetivo, conceito, item, atributos, vínculo, contexto e destino explicitamente identificados e imutáveis. Dois itens positivos são duas unidades distintas; repetir a mesma unidade não aumenta a amostra independente.
+
+**Intervenção:** suporte a um caminho de exatamente duas premissas no contrato aditivo experimental F3-01. **Controle principal:** API F2 publicada permanece recusando duas premissas. Ambos recebem estados iniciais equivalentes e concessões correspondentes; diferenças de teto são declaradas, sem ampliar qualquer orçamento para obter sucesso. Não se modifica a API F2 para convertê-la no candidato F3 nem se altera seu teste de recusa.
+
+**Semântica do resultado:** conjunção de classificação positiva sustentada de x no conceito C e prova independente de C⊆B⊆D. O relatório não é uma nova observação x∈D ou C⊆D. Relações negativa/ausente, classificação negativa/insuficiente e recusa de contrato permanecem distintas.
+
+### 10.3. Dependências inspecionadas e fronteira de integração
+
+| Contrato existente | Reutilização prevista e limite preservado |
+|---|---|
+| `src/integration/query.rs`: QueryCoordinator::query_three, PathAuthorization, PathQueryReport, verify_path | MP06 já fornece/verifica caminhos de até três premissas; F3-01 exige duas, sem alterar a regra, verify_path ou teto MP06. A porta do coordenador recebe orçamento explícito. |
+| `src/integration/concepts.rs`: ConceptCoordinator::query; `src/curriculum.rs`: PedagogyHost::pedagogy_query | Consulta conceitual somente leitura, com exemplos, evidências e versão existentes. MP09/teach_concept e Episode::teach_once são dependências futuras, não ações permitidas no F3-01. |
+| `src/integration/composed.rs`: Binding, SyntheticRegistry, Permissions, relatórios/dependências, Episode::query/check_current/verify | Reaproveitar os contratos de identidade, independência, atualidade e conferência; a implementação F2 restringe prova a uma premissa em query e diagnose. Essa restrição continua ativa na API original. |
+| `src/session/f1.rs`: Session, memory/metadata/concepts, encode/snapshot e portas internas composed_coordinator/composed_statement | Mesmo estado de conhecimento; não outro núcleo ou armazenamento. Session::query_three fixa 64 eventos por chamada e não serve diretamente ao teto32 proposto; usar a porta existente do coordenador com limite explícito, sem modificar o wrapper legado. |
+| `tests/mp06_paths.rs`, `tests/composed_query.rs`, `tests/composed_goal_supervision.rs`, `tests/composed_cli.rs`, `tests/tcr01_transfer.rs` | Referências públicas de prova, oposição, integridade, ausência de promoção e regressão; inspeção não é execução nem novo resultado. |
+
+A menor integração futura deverá ser aditiva e explicitamente identificada como experimental, preservando comportamento, padrões e testes F2. Não basta remover o teste one_premise ou aceitar o relatório do candidato como sua própria prova. Nome/assinatura da nova API e organização interna poderão ser definidos no desenvolvimento autorizado, sem duplicar os coordenadores existentes. Necessidade de alterar contrato congelado ou criar outro motor interrompe o intervalo para decisão.
+
+### 10.4. Dados públicos fixados antes da implementação
+
+Família sintética finita; cada caso parte de uma instância independente, preparada pelo harness por atos públicos autorizados. A preparação do conhecimento não é executada pelo candidato nem contada como aprendizagem produzida pela consulta. Medir e registrar seu custo separadamente. Após a preparação, capturar o estado inicial e iniciar a unidade somente leitura; zero ensino/admissão/revisão durante a unidade. Não há execução dessa preparação nesta etapa documental.
+
+**Escopo S fixo:** catálogo391, contexto341, regra351 versão1, validade[0,10000], instante lógico100 após a preparação. Símbolos relacionais3101=C, 3103=B, 3105=D; nomes opacos, sem significado numérico. Conceito3501, nome opaco, vinculado explicitamente a3101. Fontes sintéticas conhecidas7/8 conforme a política F1 existente; o vínculo tem fonte sintética9, sem alegação de autenticação.
+
+| Conhecimento inicial | IDs, conteúdo, proveniência e estado fixados |
+|---|---|
+| Exemplo E1 | Engram3401, exemplar3601, atributos `100001`, rótulo positivo, fonte7, evidência4401, escopo S, observação explicitamente admitida e revisada. |
+| Exemplo E2 | Engram3402, exemplar3602, atributos `000001`, rótulo negativo, fonte7, evidência4402, escopo S, observação explicitamente admitida e revisada depois de E1. |
+| Modelo conceitual | Versões0→1→2 pela sequência E1/E2, com suporte e eliminações preservados; versão2 é a base das consultas, sem revisões pelo candidato. |
+| Premissa R1 | Engram3111, 3101→3103 positiva, fonte8, evidência4811, escopo S, AdmittedObservation/Observed, sem disposição impeditiva, recebida/incorporada antes de100. |
+| Premissa R2 | Engram3112, 3103→3105 positiva, fonte8, evidência4812, mesmos requisitos de R1. |
+| Ausências obrigatórias | Nenhum fato direto3101→3105, nenhuma observação sobre os itens consultados no destino, nenhuma hipótese admitida implicitamente. |
+
+| Unidade positiva | Objetivo | Binding / item / atributos | Registro sintético independente |
+|---|---|---|---|
+| P01 | 39001 | vínculo3801, item39010, `110001`, conceito3501, origem relacional3101, destino3105, S, fonte9, evidência49901 | Mesmos campos, revisão1, origem ExternalSyntheticObservation; fixado independentemente do pedido. |
+| P02 | 39002 | vínculo3802, item39011, `101001`, demais campos como P01, evidência49902 | Registro próprio, mesmos campos da unidade, revisão1, mesma origem. |
+
+**Expectativa prospectiva, não resultado observado:** com posições A..F na ordem dos seis caracteres, E1/E2 deixam na H23 os critérios A e A∧F; ambos classificam P01/P02 positivamente. Os itens não coincidem com E1/E2 e não serão admitidos. Essa dedução por inspeção deverá ser conferida pela referência externa na execução autorizada, sem mudar exemplos para obter aprovação. Uma divergência de montagem do estado ou da dedução é registrada como impedimento/resultado, não corrigida silenciosamente após observar o candidato.
+
+Concessões normais: autorização base da regra S já declarada na preparação, consulta conceitual para S, PathAuthorization::inclusion_three(S) para consulta relacional e composição exata do Binding da unidade, em campos independentes. Essa concessão MP06 não amplia o recorte F3-01 para três premissas. Não há permissões de ensino, investigação ou admissão. Limites normais (conceituais, relacionais, neurais agregados)=(2,2,64), com32 por chamada relacional.
+
+### 10.5. Matriz prospectiva de condições, expectativas e rejeição
+
+Cada variante altera somente o campo indicado de P01; P02 é o segundo positivo fixo. Subvariantes separadas não são agregadas como uma aprovação única. **Todos os resultados abaixo são esperados, não observados.** Os nomes de estado são requisitos semânticos; não anunciam tipos/API F3 já implementados.
+
+| Caso | Entrada ou intervenção fixa | Resultado esperado / condição de rejeição |
+|---|---|---|
+| P01/P02 | E1/E2, R1/R2, identidade e concessões normais | Sustentado e semanticamente verificado; prova exatamente[3111,3112], classificação positiva na versão2, mesmas identidades; rejeitar qualquer sucesso sem essas dependências. |
+| C-F2-01/C-F2-02 | Mesmos dois estados/objetivos pela API F2 original, sem ensino; tetos F2 publicados8/3/96 | Composição não sustentada por recorte de uma premissa; supervisor F2 encerra ContractBlocked/Interrupted se não houver limite anterior. Se o motor atingir limite, registrar ResourceLimited/Interrupted. Qualquer aceitação de duas premissas pela API F2 rejeita a regressão. |
+| N01 | Omitir R1; conservar R2 | Insuficiência relacional, sem sustentação ou admissão de elo faltante. |
+| N02 | Omitir R2; conservar R1 | Insuficiência relacional, sem sustentação ou admissão de elo faltante. |
+| N03a/N03b | Acrescentar Engram3113, fonte8/evidência4813: respectivamente3103→3105 negativa ou3101→3105 negativa, em S | Oposição preservada; composição não sustentada, sem escolha conveniente de cadeia. |
+| N04 | Acrescentar exemplo3403/exemplar3603 `100001 -`, fonte7/evidência4403, admissível em S e revisado na preparação | Evidência conceitual contraditória; composição não sustentada e zero ensino para apagá-la. |
+| N05 | Pedido troca somente item39010 por39012, registro P01 permanece original | Negação/incompatibilidade de vínculo antes das consultas; consumo cognitivo zero. |
+| N06a/N06b/N06c | Negar separadamente a concessão conceitual, relacional ou de composição; manter as demais | Negação antes do núcleo; zero consultas conceituais/relacionais, nenhuma exposição de dependências não autorizadas. |
+| N07a/N07b/N07c | Orçamento respectivamente(1,2,64), (2,1,64) ou(2,2,63), teto por chamada32 | Interrupção na reserva do ciclo consulta+verificação, antes do núcleo; não elevar o teto ou executar ciclo incompleto como sucesso. |
+| N08a/N08b | Trocar somente evidência de R1 por4401 ou49901, compartilhando respectivamente evidência conceitual ou origem do vínculo | Independência não demonstrada; negar composição, nunca sustentar usando a evidência compartilhada. |
+| N09 | Tentativa de preparar R2 também com evidência4811, mantendo R1 | Recusa de duplicidade na preparação, conforme contrato existente; registrar controle de entrada, sem fabricar uma base inválida ou contá-lo como consulta aprovada. Admissão inesperada da duplicidade interrompe a montagem para decisão, sem executar consulta sobre essa base. |
+| N10 | Pedido e registro com origem BindingOrigin::ComposedReport(39001), demais campos de P01 | Origem circular recusada pelo construtor/contrato antes das consultas; não criar identidade a partir da própria resposta. |
+| N11 | Substituir R2 por3112:3103→3101 positiva, fonte8/evidência4812; destino do pedido continua3105 | Nenhuma prova simples até3105. Insuficiência se a avaliação terminar; interrupção somente se houver limite neural efetivamente relatado. Nunca sustentar por ciclo ou repetir premissa. |
+| N12a/N12b/N12c | Em cópias do relatório P01 emitido, alterar separadamente decisão conceitual para negativa, segunda premissa3112 para3111 ou versão2 para1 | Verificador recusa adulteração; não procura prova substituta nem aceita recibo como prova semântica. |
+| N13a/N13b/N13c | Conferir relatório P01 original contra estado externo com instante101, registro com revisão2 ou outra fixture pré-preparada com versão3 após exemplo3403/exemplar3603 `101001 +`, fonte7/evidência4403 | Atualidade não demonstrada; requer reavaliação/interrompe sem sucesso final com relatório antigo, mesmo se a classificação permanecer positiva. Fixtures alternativas preparadas antes da unidade; candidato não altera tempo, registro ou conhecimento. |
+| N14 | Requisitar segunda execução após o ciclo ou tentar reusar suas concessões em objetivo39002 sem nova concessão exata | Recusa sem consulta extra ou renovação de orçamento; verificação interna única não é reexecução livre. Relatório pode ser reapresentado somente leitura, sem conferir autoridade. |
+| N15 | Omitir R2 da base e entregar cópia de prova[3111,3112] referindo Engram inexistente; variante separada troca o contexto da segunda premissa na cópia para342 | Prova ausente/adulterada ou fora do escopo recusada; nunca materializar premissa para justificar o resultado. |
+| N16 | Item39010 recebe atributos `010001` no pedido e em registro independente correspondente | Classificação negativa na base E1/E2; composição positiva não sustentada, sem tratar classificação negativa como negação relacional. |
+| N17 | Item39010 recebe atributos `100010` no pedido e registro correspondente | Desacordo entre A e A∧F: insuficiência conceitual, zero ensino e composição não sustentada. |
+| I01 | Capturar conhecimento/estado lógico antes e depois de cada chamada do candidato e de sua verificação | Mesmos engramas/metadados, exemplos, versões/evidências, journal, autorizações base e relógio; encode/snapshot idênticos. Apenas relatórios/logs transitórios e contadores locais podem crescer. Escrita ou promoção factual rejeita o caso. |
+
+Os controles N09/N10 podem terminar nos construtores existentes: distinguir recusa da preparação de uma consulta efetivamente executada, sem bypass ou alteração dos contratos para construir um caso conveniente. Nos controles de adulteração/obsolescência, a intervenção é externa ao candidato; comparar imutabilidade antes/depois de cada chamada sobre a fixture recebida, sem atribuir a troca externa de fixture ao candidato. Uma nova fixture/unidade precisa de novas concessões; nunca reconstruir o episódio para reembolsar recursos do mesmo objetivo.
+
+A matriz não admite sucesso baseado somente na soma de consultas corretas separadas: o relatório composto precisa ligar objetivo, vínculo, classificação, cadeia completa, proveniência, versões, atualidade e permissões. F3-01 não aceita três premissas nem acrescenta relação direta para contornar a cadeia de duas.
+
+### 10.6. Referência independente e conferência de integridade
+
+O avaliador externo ficará separado do candidato e receberá somente entradas públicas autorizadas, estado preparado e relatórios/traços efetivos. Não fornecerá votos, respostas esperadas ou catálogo de soluções ao candidato durante a execução.
+
+1. Recalcular H23 fora das rotinas family/revise/evaluate do candidato: duas constantes, seis atributos e quinze conjunções de dois atributos; filtrar por E1/E2 e por qualquer variante explicitamente admitida na preparação. Julgar por unanimidade, preservar contradição e comparar rótulos/abstenções, versões, suporte e evidências. Não chamar o indutor do candidato para gerar o gabarito.
+2. Conferir cada premissa contra a memória/metadados admitidos: ID, conteúdo, polaridade, fonte sintética reconhecida, evidência, estado epistêmico, disposição, catálogo/contexto/regra/versão, validade e cronologia. IDs iguais não estabelecem identidade semântica.
+3. Recalcular simbolicamente o caminho simples3101→3103→3105 por duas arestas elegíveis, sem repetir nós/IDs ou aceitar elo ausente. Verificar oposição à conclusão e às premissas relevantes com as mesmas evidências consultáveis. Oposição não pode ser ocultada por alternativa conveniente.
+4. Conferir independência: nenhuma premissa usa evidência do vínculo ou dos exemplos conceituais; evidências das duas premissas distintas; origem não derivada do próprio relatório. Recusar ciclos como prova e compartilhamento indevido.
+5. Conferir campos contra a unidade original e sua base imutável, registro/revisão, versão conceitual e snapshot lógico; detectar alterações de relatório, dependências ou estado. Além da referência, a conferência de produção deve recalcular as consultas, não apenas validar recibo ou igualdade de IDs. verify_path permanece adicionalmente utilizado e inalterado; não é o único gabarito externo.
+6. Comparar memória e estado antes/depois, inclusive encode/snapshot e conjuntos exatos de engramas/metadados/exemplos. Conferir zero novas admissões/revisões e ausência de fatos C→D ou x no destino. Relacionar contadores aos relatórios brutos MP06/motor e aos tetos; ausência de erro não prova, sozinha, respeito ao orçamento.
+
+Custo CPU/tempo/RSS do avaliador e da preparação registrado separadamente do candidato; esse trabalho externo não substitui a verificação de produção cobrada no orçamento da unidade. Se uma fixture não puder ser montada pelos contratos públicos, preservar a recusa e interromper a interpretação dependente, sem substituir dados depois de observar resultados.
+
+### 10.7. Limites prospectivos de execução e autorização
+
+**Tetos propostos para avaliar viabilidade, ainda não exercitados no F3-01:** um objetivo por unidade; até duas consultas conceituais; até duas relacionais; até32 eventos neurais por consulta relacional e64 agregados; zero ensino, zero investigação, zero escrita/admissão de fatos ou exemplos, zero revisão e nenhuma ação externa. Consulta e conferência semântica compartilham os mesmos contadores, sem reset, retry ou reembolso implícito. Concessões conceitual, relacional e de composição permanecem independentes e não são persistidas/restauradas como autoridade.
+
+Fluxo mínimo prospectivo: validar identidade/autoridade e reservar o ciclo completo → consultar → conferir relatório e dependências com recálculo → encerrar. Reservar duas vagas de cada consulta e64 eventos antes do núcleo; reservar32 antes de cada chamada MP06, contabilizando o consumo observado e preservando o saldo agregado. Se faltar reserva, interromper antes da consulta; se a execução atingir o teto, não declarar sustentação sem conferência concluída. Zero eventos observados não equivale a custo computacional nulo. Estado/tempo da Session não avançam pela consulta; relatórios e logs ficam externos e transitórios.
+
+Mantêm-se os limites F1/F2 de fatos, símbolos, exemplos, versões e operações; o conjunto proposto cabe por inspeção nessas capacidades, sem afirmar viabilidade experimental. Para futura execução pública isolada, propor timeout10s e RSS256MiB por executável com instrumento externo, mantendo orçamento de trabalho/target≤1GiB e reserva≥3GiB em /home conforme seção6; valores observados deverão ser registrados, não presumidos. Regressões preservam seus próprios contratos; não reduzir ou ampliar seus tetos para obter comparação favorável.
+
+**Autorizações distintas:** este mandato cobre somente especificação documental local e sua revisão. Publicação documental exige nova autorização; implementação/testes/execução de F3-01 exigem autorização posterior explícita que identifique revisão aprovada do pré-registro, arquivos/APIs abrangidos, dados/matriz, controles, orçamento, evidências e condições de interrupção. F3-02/F3-03 não são liberados por essas autorizações. Decisões rotineiras de organização interna podem ocorrer dentro do futuro mandato, sem alterar hipótese, dados, limites, comportamento F2 ou critérios pré-fixados.
+
+### 10.8. Critérios prospectivos de sucesso, rejeição e relato
+
+Condições necessárias de sucesso do F3-01, cumulativas e restritas à matriz pré-registrada:
+
+1. P01 e P02 sustentados e verificados, com prova completa elegível de duas premissas e classificação positiva correta.
+2. Todos os controles negativos corretamente recusados ou classificados como insuficientes/interrompidos segundo as condições específicas da matriz e a referência, distinguindo recusa de preparação de execução.
+3. Zero sucesso indevido diante de oposição conceitual ou relacional.
+4. Ausência de uso de evidência circular ou compartilhada indevidamente.
+5. Relatórios, versões, integridade e atualidade conferidos pela referência independente e verificação de produção.
+6. Memória e estado lógico inalterados por cada consulta/verificação do candidato.
+7. Ausência de promoção factual automática ou nova admissão de classificação/composição.
+8. Respeito integral às permissões e aos limites, incluindo custo da verificação.
+9. Regressões públicas pertinentes F1/F2 preservadas, incluindo MP06–MP09, objetivo conceitual, consulta composta, TCR-01, supervisor e CLI; MP05 apenas como compatibilidade isolada.
+10. API F2 original continua recusando a composição de duas premissas, sem reclassificar seu controle como falha do produto aceito.
+
+Compilação e contagem de testes não substituem essas condições. Os224 testes/19 cenários da auditoria F2 são referências históricas, não resultados F3 nem contagens garantidas de uma execução futura. Cobrir os critérios não constitui encerramento integral da F3.
+
+**Rejeitar a hipótese operacional de composição correta na execução avaliada** se houver sustentação sem prova elegível completa, oposição ignorada, classificação incorreta, evidência circular/compartilhada usada, relatório adulterado/obsoleto aceito, escrita/promoção factual, violação de permissão/orçamento ou alteração do comportamento F2. Caso positivo não sustentado sob as condições normais também impede sucesso de H-F3-01. Falha de infraestrutura/fixture ou evidência indisponível deve ser distinguida de refutação funcional e relatada como inconclusão/impedimento; nunca como aprovação.
+
+**Interromper para decisão, sem corrigir fora do escopo ou ampliar recursos automaticamente**, se for necessário alterar H23, verify_path, codecs/contratos congelados, comportamento F2, arquitetura cognitiva, escopo, dados ou tetos. Incompatibilidade dos limites com a implementação existente é impedimento, não licença para gastar mais. Sem D/V/F, probes reservados, CIC-I6/P8, G2/G7, integração cognitiva MP05 ou MP10. Falha científica não pode ser apagada pela aprovação das regressões.
+
+Relatar separadamente entradas e resultados esperados pré-fixados, observados, conferidos independentemente e não demonstrados; preservar todas as falhas/recusas/limites e não ajustar denominadores ou substituir cenários após observar resultados. Mudança do pré-registro exige decisão explícita e registro prospectivo próprio no Plano Mestre antes de nova execução; resultados anteriores permanecem históricos, nunca convertidos retroativamente em confirmação.
+
+### 10.9. Sequência prospectiva e encerramento desta preparação
+
+Hipótese de planejamento, não compromisso de implementação nem contrato integral de conclusão da F3:
+
+- **F3-01:** consulta composta de duas premissas, somente leitura; especificada, não implementada/executada.
+- **F3-02:** uma experiência conceitual supervisionada sobre objetivo encadeado, condicionada ao sucesso/evidências de F3-01 e a autorização própria; hipótese, dados e reservas deverão ser aprovados prospectivamente, sem herdar execução deste pré-registro.
+- **F3-03:** integração mínima à Sessão/CLI e avaliação de retenção, condicionadas às evidências anteriores e a autorização própria; não implica persistência de supervisor ou novo formato.
+
+Preservados integralmente o aceite F2/R1–R9, consulta composta original, MP06/MP07/MP08/MP09, MP05 isolado, MP10 opcional, F1 v1/MP05 v1, H23/verify_path e resultados históricos. Nenhuma implementação, teste, benchmark, preparação de fixture ou experimento executado nesta atividade; nenhuma declaração de validação funcional F3. Somente NEURONS_PLANO_MESTRE.md atualizado localmente; sem documento paralelo, git add, commit ou push. Próxima ação: avaliação do responsável e autorização específica para publicar exclusivamente esta atualização documental; implementar ou executar F3-01 continua dependendo de autorização posterior explícita.
