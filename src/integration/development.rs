@@ -27,7 +27,11 @@ pub use archive::{
 };
 mod checkpoint;
 mod consequences;
+mod discrimination;
 mod epistemic;
+pub use discrimination::{
+    DiscriminatingInvestigation, DiscriminatingOption, InvestigationOffer, InvestigationResult,
+};
 mod predictive;
 pub use actions::{
     ActionPermit, ActionTrial, Execution, ExecutionReason, Intervention, OutcomeEvidence, Plan,

@@ -219,3 +219,19 @@ O ciclo limitado também pode escolher, pelo BFS existente, uma rota inteirament
 observada que exclua a ação ligada à hipótese refutada. O objetivo pode ser
 atingido sem resolver a limitação. Permissões, oposição e reserva integral
 continuam obrigatórias; divergência da rota interrompe a execução.
+
+`investigate_disagreement` transforma dúvida/conflito em uma experiência
+conceitual limitada. Compara previsões dos critérios H23 elegíveis em até quatro
+ofertas de atributos atuais declarados por sensores autorizados. Escolhe a
+separação mais equilibrada, com desempate por ID; não recebe rótulos ou destinos
+futuros do ambiente. Se não houver discriminação/autoridade/reserva, não age.
+
+A experiência selecionada reutiliza observe_attributes, forecast_using, intervene,
+review_consequence e o currículo MP09. Retidos/refutados no relatório são
+diagnósticos transitórios; somente a incorporação MP09 altera o modelo. Uma
+revisão invalida vistas anteriores, e o conflito histórico permanece registrado.
+Até uma intervenção, três percepções, reserva neural 48, duas consultas de
+previsão/conferência e cinco de ensino opcional, nos tetos existentes. Novos
+critérios, causas e independência de fontes não são inventados. MP07 permanece a
+porta de investigação relacional; a experiência conceitual não admite relações.
+Teste: `python3 scripts/test_public.py --target development_discrimination`.
