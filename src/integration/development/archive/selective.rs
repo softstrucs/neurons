@@ -55,6 +55,8 @@ pub struct EpisodeCatalog {
     storage: SnapshotStorage,
     canonical: BTreeMap<u32, Location>,
     observations: Vec<RecoveredTransition>,
+    sample_sources: BTreeMap<Context, Vec<Location>>,
+    samples: Vec<ConsequenceSample>,
     segments: BTreeMap<u32, EpisodeArchive>,
     outgoing: BTreeMap<(Context, i32), Vec<Posting>>,
     models: BTreeMap<Context, Vec<ModelGroup>>,
@@ -212,10 +214,46 @@ impl EpisodeCatalog {
     // inclui identidade e procedência, não somente valores observados.
     fn consolidate_observations(&mut self) {
         self.observations.clear();
+        self.sample_sources.clear();
+        let mut samples: Vec<ConsequenceSample> = vec![];
         let mut outgoing: BTreeMap<(Context, i32), Vec<Posting>> = BTreeMap::new();
         self.context_counts.clear();
         for (&segment, archive) in &self.segments {
             for (episode, e) in archive.episodes.iter().enumerate() {
+                if let Ok(version) = e.session.pedagogy_version() {
+                    for sample in e.runtime.recorded_samples(version) {
+                        if !samples.iter().any(|old| {
+                            old.contract == sample.contract
+                                && old.recorded_version == sample.recorded_version
+                                && old.attributes == sample.attributes
+                                && old.trial == sample.trial
+                                && old.before == sample.before
+                                && old.after == sample.after
+                        }) {
+                            let c = sample.contract;
+                            self.sample_sources
+                                .entry((c.world, c.revision, c.scope.context.get(), c.source.get()))
+                                .or_default()
+                                .push(Location {
+                                    segment,
+                                    episode,
+                                    trial: 0,
+                                });
+                            let mut sample = sample;
+                            sample.origins.push(e.id);
+                            samples.push(sample);
+                        } else if let Some(old) = samples.iter_mut().find(|old| {
+                            old.contract == sample.contract
+                                && old.recorded_version == sample.recorded_version
+                                && old.attributes == sample.attributes
+                                && old.trial == sample.trial
+                                && old.before == sample.before
+                                && old.after == sample.after
+                        }) {
+                            old.origins.push(e.id);
+                        }
+                    }
+                }
                 for (trial, t) in e.runtime.action_trials.iter().enumerate() {
                     let before = e
                         .runtime
@@ -270,6 +308,7 @@ impl EpisodeCatalog {
             o.origins.sort_by_key(|id| id.get());
             o.origins.dedup();
         }
+        self.samples = samples;
         self.cost.unique_postings = outgoing.values().map(Vec::len).sum();
         self.outgoing = outgoing;
     }
@@ -292,6 +331,7 @@ pub struct SearchCoverage {
     pub closed_states: Vec<i32>,
     pub pending_states: usize,
     pub pending_models: usize,
+    pub pending_samples: usize,
     pub pending_postings: usize,
     pub selected_episodes: usize,
     pub index_scans: usize,
@@ -315,6 +355,7 @@ pub struct SelectiveSearch<'a> {
     query: SelectiveQuery,
     memory: RetrievedMemory,
     models_done: usize,
+    samples_done: usize,
     frontier: VecDeque<i32>,
     seen: Vec<i32>,
     closed: Vec<i32>,
@@ -351,6 +392,11 @@ impl SelectiveSearch<'_> {
             closed_states: self.closed.clone(),
             pending_states: self.frontier.len() + usize::from(self.current.is_some()),
             pending_models: groups.map_or(0, |g| g.len().saturating_sub(self.models_done)),
+            pending_samples: self
+                .catalog
+                .sample_sources
+                .get(&context(self.query.goal))
+                .map_or(0, |s| s.len().saturating_sub(self.samples_done)),
             pending_postings,
             selected_episodes: self.sources.len(),
             index_scans: self.index_scans,
@@ -400,6 +446,7 @@ impl Runtime {
             query,
             memory,
             models_done: 0,
+            samples_done: 0,
             frontier,
             seen,
             closed: vec![],
@@ -466,6 +513,22 @@ impl Runtime {
                     return Ok(());
                 }
                 search.models_done += 1;
+                continue;
+            }
+            if let Some(loc) = search
+                .catalog
+                .sample_sources
+                .get(&ctx)
+                .and_then(|s| s.get(search.samples_done))
+                .copied()
+            {
+                if !consume(self, search, &mut left) {
+                    return Ok(());
+                }
+                if !search.add_source(loc) {
+                    return Ok(());
+                }
+                search.samples_done += 1;
                 continue;
             }
             if let Some((state, index)) = search.current {
@@ -583,6 +646,18 @@ impl Runtime {
                     o.trial == entry.trial && o.before == entry.before && o.after == entry.after
                 }) {
                     entry.origins = group.origins.clone();
+                }
+            }
+            for sample in &mut memory.samples {
+                if let Some(group) = search.catalog.samples.iter().find(|old| {
+                    old.contract == sample.contract
+                        && old.recorded_version == sample.recorded_version
+                        && old.attributes == sample.attributes
+                        && old.trial == sample.trial
+                        && old.before == sample.before
+                        && old.after == sample.after
+                }) {
+                    sample.origins = group.origins.clone();
                 }
             }
             memory.coverage = Some(GoalCoverage {

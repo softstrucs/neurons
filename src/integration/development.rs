@@ -27,6 +27,7 @@ pub use archive::{
 };
 mod checkpoint;
 mod consequences;
+mod epistemic;
 mod predictive;
 pub use actions::{
     ActionPermit, ActionTrial, Execution, ExecutionReason, Intervention, OutcomeEvidence, Plan,
@@ -37,6 +38,7 @@ pub use consequences::{
     AttributeFrame, ConsequenceContract, ConsequenceForecast, ConsequenceReview,
     ConsequenceTraining,
 };
+pub use epistemic::{ConsequenceSample, EpistemicDiagnosis, EpistemicQuestion, EpistemicReport};
 pub use predictive::{PredictiveChoice, PredictivePursuit, PredictiveReason, PredictiveRevision};
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]

@@ -191,3 +191,20 @@ mantém resultado da execução separado da incorporação. Revisão invalida vi
 antigas; não há reexecução automática após mudar o modelo. Contraexemplo que
 refuta toda a família atual permanece como experiência e não é forçado a entrar
 no conceito. A recuperação dessa família continua uma limitação explícita.
+
+`assess_epistemic` reconstrói limitações a partir dos atributos, ações e
+consequências persistidos em NRNPIFI3/NRNARC01. Não modifica codecs nem admite
+fatos. `EpistemicDiagnosis` distingue insuficiência, candidato refutado, conflito
+de observações e limitação expressiva relativa à base H23 admitida. O relatório
+conserva a versão da sessão no snapshot, versão avaliada, contexto e evidências;
+não afirma que o relatório histórico da previsão tenha sido serializado.
+
+A recuperação seletiva inclui amostras conceituais relevantes ao contexto mesmo
+fora do fechamento dos estados do objetivo, sob os mesmos quatro slots/oito
+evidências/32 inspeções. A avaliação cobra atenção por registro (até oito) e
+reutiliza até 23 avaliações de critérios H23. Cobertura incompleta suspende a
+aplicação. No ciclo integrado, atributos completos iguais com contraexemplo
+relevante bloqueiam a ação automática; relatórios H23 anteriores permanecem
+subordinados à limitação. Questões indicam investigação de fontes/contexto, busca
+de evidência independente ou revisão representacional autorizada. Não conferem
+autoridade. Os testes públicos estão em `development_epistemic`.

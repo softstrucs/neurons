@@ -35,6 +35,7 @@ pub enum PredictiveReason {
 pub struct PredictivePursuit {
     pub goal: PursuitGoal,
     pub forecast: Option<ConsequenceForecast>,
+    pub epistemic: Option<EpistemicReport>,
     pub observed_alternative: Option<PlanOutcome>,
     pub prefix_alternative: Option<PlanOutcome>,
     pub choice: PredictiveChoice,
@@ -268,6 +269,7 @@ impl Runtime {
         let mut out = PredictivePursuit {
             goal,
             forecast: None,
+            epistemic: None,
             observed_alternative: None,
             prefix_alternative: None,
             choice: PredictiveChoice::None,
@@ -292,6 +294,37 @@ impl Runtime {
         }
         let trials = self.remembered_trials(memory)?;
         let frame = self.observe_attributes(world, contract.action, attributes)?;
+        let epistemic = self.assess_epistemic(
+            memory,
+            session,
+            contract,
+            crate::cognition::concepts::Attributes::decode(attributes.event.payload())
+                .map_err(|e| format!("{e:?}"))?,
+        )?;
+        if epistemic.blocks_application() {
+            out.reason = if epistemic.state == EpistemicDiagnosis::ResourceLimited {
+                PredictiveReason::ResourceLimited
+            } else {
+                PredictiveReason::ConflictingEvidence
+            };
+            out.justification = epistemic.justification.clone();
+            if epistemic.state != EpistemicDiagnosis::ResourceLimited {
+                // Mantém o relatório H23/relacional anterior para auditoria,
+                // subordinado à limitação; nunca o executa como conclusão.
+                out.forecast = Some(self.forecast_using(
+                    session,
+                    contract,
+                    &frame,
+                    goal.objective,
+                    &trials,
+                )?);
+                self.consequence_pending.take();
+                self.cognitive_resources.operations_without_report -= 1;
+            }
+            out.epistemic = Some(epistemic);
+            return Ok(out);
+        }
+        out.epistemic = Some(epistemic);
         let forecast = self.forecast_using(session, contract, &frame, goal.objective, &trials)?;
         let direct = self.plan_using(
             goal.task,

@@ -23,6 +23,7 @@ pub trait EpisodeMemory: sealed::Sealed {
     /// transitória resolvível; não substitui o ID original da evidência.
     fn memory_trials(&self) -> Result<Vec<ActionTrial>, String>;
     fn memory_contract(&self) -> Option<ConsequenceContract>;
+    fn memory_samples(&self, session: &Session) -> Result<Vec<ConsequenceSample>, String>;
     fn memory_used(&self, request: &Intervention) -> bool;
     fn validate_memory(&self, session: &Session, goal: PlanningGoal) -> Result<(), String>;
     fn validate_plan_goal(&self, _: PlanningGoal) -> Result<(), String> {
@@ -44,6 +45,9 @@ pub trait EpisodeMemory: sealed::Sealed {
 }
 impl sealed::Sealed for Runtime {}
 impl EpisodeMemory for Runtime {
+    fn memory_samples(&self, session: &Session) -> Result<Vec<ConsequenceSample>, String> {
+        Ok(self.recorded_samples(session.pedagogy_version()?))
+    }
     fn memory_trials(&self) -> Result<Vec<ActionTrial>, String> {
         Ok(self.action_trials.clone())
     }
@@ -298,6 +302,7 @@ pub struct RetrievedMemory {
     used_permits: Vec<u32>,
     used_trials: Vec<u32>,
     rejected: Option<RecoveredTransition>,
+    samples: Vec<ConsequenceSample>,
 }
 impl RetrievedMemory {
     pub fn evidence_profile(&self) -> EvidenceProfile {
@@ -416,6 +421,13 @@ impl RetrievedMemory {
 }
 impl sealed::Sealed for RetrievedMemory {}
 impl EpisodeMemory for RetrievedMemory {
+    fn memory_samples(&self, session: &Session) -> Result<Vec<ConsequenceSample>, String> {
+        if self.basis != session.encode() {
+            return Err("limitações recuperadas obsoletas; refaça a recuperação".into());
+        }
+        self.memory_trials()?;
+        Ok(self.samples.clone())
+    }
     fn memory_trials(&self) -> Result<Vec<ActionTrial>, String> {
         if self.status != RetrievalStatus::Complete {
             return Err(format!("recuperação não utilizável: {:?}", self.status));
@@ -522,6 +534,7 @@ impl Runtime {
             used_permits: vec![],
             used_trials: vec![],
             rejected: None,
+            samples: vec![],
             coverage: None,
         };
         // Somente tombstones de consumo, não permissões restauráveis. Incluem
@@ -568,6 +581,25 @@ impl Runtime {
                     continue;
                 }
                 relevant = true;
+                if let Some(mut sample) = e
+                    .runtime
+                    .recorded_samples(e.session.pedagogy_version()?)
+                    .into_iter()
+                    .find(|s| s.trial == *trial)
+                {
+                    if out.samples.iter().any(|old| {
+                        (old.attributes.evidence == sample.attributes.evidence
+                            || (old.trial == sample.trial
+                                && old.before == sample.before
+                                && old.after == sample.after))
+                            && (old.attributes != sample.attributes || old.trial != sample.trial)
+                    }) {
+                        out.status = RetrievalStatus::AmbiguousIdentity;
+                        return Ok(out);
+                    }
+                    sample.origins.push(e.id);
+                    out.samples.push(sample);
+                }
                 if let Some(old) = out.entries.iter_mut().find(|p| {
                     p.trial.permit == trial.permit
                         || p.before.evidence == before.evidence
