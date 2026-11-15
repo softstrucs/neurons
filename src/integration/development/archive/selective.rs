@@ -54,7 +54,7 @@ pub enum SnapshotStorage {
 pub struct EpisodeCatalog {
     storage: SnapshotStorage,
     canonical: BTreeMap<u32, Location>,
-    snapshot_origins: BTreeMap<u32, Vec<EpisodeId>>,
+    observations: Vec<RecoveredTransition>,
     segments: BTreeMap<u32, EpisodeArchive>,
     outgoing: BTreeMap<(Context, i32), Vec<Posting>>,
     models: BTreeMap<Context, Vec<ModelGroup>>,
@@ -145,58 +145,13 @@ impl EpisodeCatalog {
             } else {
                 local
             };
-            let canonical_id = if representative == local {
-                e.id
-            } else if representative.segment == id {
-                prior[representative.episode].id
-            } else {
-                self.episode(representative).id
-            };
             self.canonical.insert(e.id.get(), representative);
-            self.snapshot_origins
-                .entry(canonical_id.get())
-                .or_default()
-                .push(e.id);
             self.cost.episodes += 1;
             self.cost.image_bytes += e.bytes.len();
             self.cost.trials += e.runtime.action_trials.len();
             self.used_permits.extend(&e.runtime.action_permits);
             self.used_trials
                 .extend(e.runtime.action_trials.iter().map(|t| t.id));
-            if representative != local {
-                continue;
-            }
-            for (j, t) in e.runtime.action_trials.iter().enumerate() {
-                self.cost.unique_postings += 1;
-                let c = (t.world, t.revision, t.context, t.source.get());
-                self.outgoing.entry((c, t.from)).or_default().push(Posting {
-                    location: Location {
-                        segment: id,
-                        episode: i,
-                        trial: j,
-                    },
-                    to: t.to,
-                    before_at: e
-                        .runtime
-                        .experiences
-                        .iter()
-                        .find(|v| v.record == t.before)
-                        .expect("snapshot validado")
-                        .reading
-                        .event
-                        .logical_time(),
-                    after_at: e
-                        .runtime
-                        .experiences
-                        .iter()
-                        .find(|v| v.record == t.after)
-                        .expect("snapshot validado")
-                        .reading
-                        .event
-                        .logical_time(),
-                });
-                *self.context_counts.entry(c).or_default() += 1;
-            }
         }
         for (i, key) in keys {
             let c = key.contract;
@@ -219,6 +174,7 @@ impl EpisodeCatalog {
             }
         }
         self.segments.insert(id, archive);
+        self.consolidate_observations();
         let segments = &self.segments;
         for postings in self.outgoing.values_mut() {
             postings.sort_by_key(|p| {
@@ -232,10 +188,6 @@ impl EpisodeCatalog {
                     .origins
                     .sort_by_key(|l| segments[&l.segment].episodes[l.episode].id.get());
             }
-        }
-        for origins in self.snapshot_origins.values_mut() {
-            origins.sort_by_key(|e| e.get());
-            origins.dedup();
         }
         self.used_permits.sort_unstable();
         self.used_permits.dedup();
@@ -255,6 +207,71 @@ impl EpisodeCatalog {
         self.cost.segments += 1;
         self.cost.construction_nanos += started.elapsed().as_nanos();
         Ok(())
+    }
+    // Construção do índice, contabilizada separadamente da consulta. Igualdade
+    // inclui identidade e procedência, não somente valores observados.
+    fn consolidate_observations(&mut self) {
+        self.observations.clear();
+        let mut outgoing: BTreeMap<(Context, i32), Vec<Posting>> = BTreeMap::new();
+        self.context_counts.clear();
+        for (&segment, archive) in &self.segments {
+            for (episode, e) in archive.episodes.iter().enumerate() {
+                for (trial, t) in e.runtime.action_trials.iter().enumerate() {
+                    let before = e
+                        .runtime
+                        .experiences
+                        .iter()
+                        .find(|v| v.record == t.before)
+                        .expect("snapshot validado")
+                        .reading;
+                    let after = e
+                        .runtime
+                        .experiences
+                        .iter()
+                        .find(|v| v.record == t.after)
+                        .expect("snapshot validado")
+                        .reading;
+                    let old = self
+                        .observations
+                        .iter_mut()
+                        .find(|o| o.trial == *t && o.before == before && o.after == after);
+                    let duplicate = if let Some(old) = old {
+                        old.origins.push(e.id);
+                        true
+                    } else {
+                        self.observations.push(RecoveredTransition {
+                            reference: 0,
+                            origins: vec![e.id],
+                            trial: t.clone(),
+                            before,
+                            after,
+                        });
+                        false
+                    };
+                    if duplicate && self.storage == SnapshotStorage::Coalesced {
+                        continue;
+                    }
+                    let ctx = (t.world, t.revision, t.context, t.source.get());
+                    outgoing.entry((ctx, t.from)).or_default().push(Posting {
+                        location: Location {
+                            segment,
+                            episode,
+                            trial,
+                        },
+                        to: t.to,
+                        before_at: before.event.logical_time(),
+                        after_at: after.event.logical_time(),
+                    });
+                    *self.context_counts.entry(ctx).or_default() += 1;
+                }
+            }
+        }
+        for o in &mut self.observations {
+            o.origins.sort_by_key(|id| id.get());
+            o.origins.dedup();
+        }
+        self.cost.unique_postings = outgoing.values().map(Vec::len).sum();
+        self.outgoing = outgoing;
     }
     fn episode(&self, l: Location) -> &ArchivedEpisode {
         &self.segments[&l.segment].episodes[l.episode]
@@ -559,18 +576,14 @@ impl Runtime {
                     }
                 }
             }
-            // Origens são aliases de armazenamento, jamais votos adicionais.
+            // Só expande origens da MESMA observação completa. Não transmite
+            // evidências exclusivas ou versões entre snapshots sobrepostos.
             for entry in memory.entries.iter_mut().chain(memory.rejected.iter_mut()) {
-                let original = std::mem::take(&mut entry.origins);
-                for id in original {
-                    if let Some(aliases) = search.catalog.snapshot_origins.get(&id.get()) {
-                        entry.origins.extend(aliases)
-                    } else {
-                        entry.origins.push(id)
-                    }
+                if let Some(group) = search.catalog.observations.iter().find(|o| {
+                    o.trial == entry.trial && o.before == entry.before && o.after == entry.after
+                }) {
+                    entry.origins = group.origins.clone();
                 }
-                entry.origins.sort_by_key(|id| id.get());
-                entry.origins.dedup();
             }
             memory.coverage = Some(GoalCoverage {
                 closed: search.closed.clone(),

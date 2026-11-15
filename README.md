@@ -177,3 +177,9 @@ construção 185465/132440 ns e consulta 414626/433611 ns (coalescido/separado).
 Tempos pontuais sem inferência de ganho de velocidade. Com 64 réplicas, a busca
 coalescida completa usando uma imagem; o controle separado atinge quatro slots e
 suspende, sem produzir conclusão definitiva ou ampliar limites.
+
+Sobreposição parcial também consolida postagens de transições integralmente iguais
+(ActionTrial e ambas as Reading), mantendo todas as origens. Igualdade de valores
+sem igualdade de identidade/procedência não basta. Observações exclusivas, versões
+e consumos de cada snapshot permanecem separados. O índice é reconstruído na
+inserção, com custo de construção explícito; não há alegação de ganho de latência.

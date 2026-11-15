@@ -40,7 +40,7 @@ def main():
     env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir))
     # Workers só recebem entradas geradas pelos próprios testes-pai. Uma variável
     # herdada da sessão não deve transformar o teste normal em leitura de arquivo.
-    for key in ("NEURONS_FUNCTIONAL_CHECKPOINT", "NEURONS_PIFI_RESTORE", "NEURONS_ACTION_RESTORE", "NEURONS_CONSEQUENCE_RESTORE", "NEURONS_PREDICTIVE_RESTORE", "NEURONS_ARCHIVE_RESTORE", "NEURONS_SELECTIVE_RESTORE", "NEURONS_COALESCENCE_RESTORE"):
+    for key in ("NEURONS_FUNCTIONAL_CHECKPOINT", "NEURONS_PIFI_RESTORE", "NEURONS_ACTION_RESTORE", "NEURONS_CONSEQUENCE_RESTORE", "NEURONS_PREDICTIVE_RESTORE", "NEURONS_ARCHIVE_RESTORE", "NEURONS_SELECTIVE_RESTORE", "NEURONS_COALESCENCE_RESTORE", "NEURONS_OVERLAP_RESTORE"):
         env.pop(key, None)
     if args.build:
         command = ["cargo", "build", "--offline", "--locked", "--lib", "--bin", "neurons"]

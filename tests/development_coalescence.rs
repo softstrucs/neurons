@@ -658,3 +658,167 @@ fn report_memory_and_processing_costs_without_assuming_latency_improvement() {
             search.coverage().index_scans,search.coverage().materialization_scans,catalog.cost().construction_nanos,fixture_ns,query_ns);
     }
 }
+
+fn overlapping(mode: SnapshotStorage, conflict: bool) -> (EpisodeCatalog, Session) {
+    let (mut h, s) = history();
+    let mut a = EpisodeArchive::new();
+    a.insert(eid(1), &h, &s).unwrap();
+    let (from, action, to) = if conflict { (20, 9, 77) } else { (30, 11, 40) };
+    let mut w = world(from, &[(from, action, to)]);
+    h.intervene(&mut w, &request(3, action, 20)).unwrap();
+    a.insert(eid(2), &h, &s).unwrap();
+    let mut c = EpisodeCatalog::with_storage(mode);
+    c.insert(1, a).unwrap();
+    (c, s)
+}
+#[test]
+fn partial_overlap_shares_postings_not_snapshots_or_exclusive_observations() {
+    let mut controls = vec![];
+    for mode in [SnapshotStorage::Coalesced, SnapshotStorage::Separate] {
+        let (c, s) = overlapping(mode, false);
+        assert_eq!(c.cost().retained_images, 2);
+        assert_eq!(
+            c.cost().unique_postings,
+            if mode == SnapshotStorage::Coalesced {
+                3
+            } else {
+                5
+            }
+        );
+        let mut r = runtime();
+        let g = task(20, 40);
+        let selected = select(&mut r, &c, &s, g);
+        assert!(selected.coverage().complete_for_goal);
+        let m = selected.memory();
+        assert_eq!(m.entries().len(), 3);
+        for e in m.entries() {
+            assert_eq!(
+                e.origins,
+                if e.trial.id == 3 {
+                    vec![eid(2)]
+                } else {
+                    vec![eid(1), eid(2)]
+                }
+            );
+        }
+        assert_eq!(m.evidence_profile().h23_support_references, 1);
+        let plan = r
+            .plan_retrieved(&s, g, PlanningBudget::default(), m)
+            .unwrap()
+            .plan
+            .unwrap();
+        assert_eq!(plan.steps().len(), 2);
+        controls.push(keys(m));
+    }
+    assert_eq!(controls[0], controls[1]);
+}
+#[test]
+fn partial_overlap_preserves_conflicts_and_suspends_under_small_budget() {
+    for mode in [SnapshotStorage::Coalesced, SnapshotStorage::Separate] {
+        let (c, s) = overlapping(mode, true);
+        let mut r = runtime();
+        let g = task(20, 30);
+        let partial = r
+            .select_evidence(
+                &c,
+                &s,
+                query(g),
+                RetrievalBudget {
+                    scans: 1,
+                    entries: 8,
+                },
+            )
+            .unwrap();
+        assert!(!partial.coverage().complete_for_goal);
+        assert!(r
+            .plan_retrieved(&s, g, PlanningBudget::default(), partial.memory())
+            .is_err());
+        let mut fresh = runtime();
+        let selected = select(&mut fresh, &c, &s, g);
+        assert!(selected.coverage().complete_for_goal);
+        assert_eq!(
+            outcomes(&mut fresh, &s, g, selected.memory()),
+            BTreeSet::from([30, 77])
+        );
+        assert_eq!(
+            fresh
+                .plan_retrieved(&s, g, PlanningBudget::default(), selected.memory())
+                .unwrap()
+                .reason,
+            PlanReason::ContradictoryEvidence
+        );
+    }
+}
+#[test]
+fn overlap_survives_new_process_and_preserves_original_archive_bytes() {
+    let (c, s) = overlapping(SnapshotStorage::Coalesced, false);
+    let dir = std::env::temp_dir().join(format!("neurons-overlap-{}", std::process::id()));
+    assert!(!dir.exists());
+    std::fs::create_dir(&dir).unwrap();
+    let path = dir.join("archive.bin");
+    c.segment(1).unwrap().save(&path).unwrap();
+    std::fs::write(dir.join("session.bin"), s.encode()).unwrap();
+    let before = std::fs::read(&path).unwrap();
+    let out = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "overlap_restore_worker", "--nocapture"])
+        .env("NEURONS_OVERLAP_RESTORE", &path)
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(std::fs::read(&path).unwrap(), before);
+    std::fs::remove_file(path).unwrap();
+    std::fs::remove_file(dir.join("session.bin")).unwrap();
+    std::fs::remove_dir(dir).unwrap();
+}
+#[test]
+fn overlap_restore_worker() {
+    let Some(path) = std::env::var_os("NEURONS_OVERLAP_RESTORE") else {
+        return;
+    };
+    let a = EpisodeArchive::load(
+        std::path::Path::new(&path),
+        &[(eid(1), sensors()), (eid(2), sensors())],
+    )
+    .unwrap();
+    let mut c = EpisodeCatalog::new();
+    c.insert(1, a).unwrap();
+    assert_eq!(c.cost().unique_postings, 3);
+    let s = Session::decode(
+        &std::fs::read(
+            std::path::Path::new(&path)
+                .parent()
+                .unwrap()
+                .join("session.bin"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let mut denied = runtime_with(Access::default(), Limits::default());
+    assert!(denied
+        .select_evidence(&c, &s, query(task(20, 40)), RetrievalBudget::default())
+        .is_err());
+    let mut r = runtime();
+    let g = task(20, 40);
+    let selected = select(&mut r, &c, &s, g);
+    let plan = r
+        .plan_retrieved(&s, g, PlanningBudget::default(), selected.memory())
+        .unwrap()
+        .plan
+        .unwrap();
+    assert_eq!(plan.steps().len(), 2);
+    assert_eq!(
+        selected
+            .memory()
+            .entries()
+            .iter()
+            .find(|e| e.trial.id == 3)
+            .unwrap()
+            .origins,
+        vec![eid(2)]
+    );
+}
