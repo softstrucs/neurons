@@ -149,7 +149,10 @@ impl Runtime {
         out.justification.push_str(" Insuficiência motivou experiência explicitamente autorizada; MP09 decidiu sua incorporação; objetivo original preservado.");
         self.finish_predictive(memory, world, out, requests, goal.max_actions - 1, false)
     }
-    fn remembered_trials(&self, memory: &impl EpisodeMemory) -> Result<Vec<ActionTrial>, String> {
+    pub(super) fn remembered_trials(
+        &self,
+        memory: &impl EpisodeMemory,
+    ) -> Result<Vec<ActionTrial>, String> {
         let mut trials = memory.memory_trials()?;
         for t in &self.action_trials {
             if trials
@@ -162,7 +165,7 @@ impl Runtime {
         }
         Ok(trials)
     }
-    fn choose_requests(
+    pub(super) fn choose_requests(
         &mut self,
         world: &World,
         actions: &[u32],

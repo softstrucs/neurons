@@ -148,3 +148,11 @@ Teste público: `python3 scripts/test_public.py --target development_selective`.
 A referência exaustiva dos testes lê registros brutos e enumera caminhos sem usar
 índice/candidato como gabarito. Menos inspeções não implica menor tempo: o cenário
 amostral de 40 episódios teve custo de seleção superior ao oráculo simples.
+
+Após revisão de H23 ou descoberta de estado não coberto, refaça/expanda a busca
+antes de continuar. `execute_retrieved_plan` reutiliza seleção de concessões e
+executor existentes, confere a vista/sessão e oposição das experiências locais
+novas, e exige reserva integral. Não reinicia o episódio. A continuação pode
+suspender por cobertura, autoridade ou saldo insuficientes; isso não é uma prova
+de ausência de solução. Os limites de quatro materializações/32 inspeções podem
+impedir consultas mesmo quando o catálogo contém a evidência necessária.

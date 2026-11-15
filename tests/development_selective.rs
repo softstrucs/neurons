@@ -995,3 +995,181 @@ fn existing_planner_agrees_with_independent_exhaustive_path_enumeration() {
         }
     }
 }
+
+#[test]
+fn learning_then_recovery_resumes_execution_in_the_same_episode_without_reset() {
+    let (mut catalog, mut s, _) = corpus(false, false);
+    let mut extra = runtime();
+    let mut w0 = world(77, &[(77, 11, 40)]);
+    let mut req = request(1, 11, 20);
+    req.permit.id = 50001;
+    req.before_evidence = EvidenceId::new(50002).unwrap();
+    req.after_evidence = EvidenceId::new(50003).unwrap();
+    extra.intervene(&mut w0, &req).unwrap();
+    let mut archive = EpisodeArchive::new();
+    archive.insert(eid(50), &extra, &s).unwrap();
+    catalog.insert(11, archive).unwrap();
+    let mut r = runtime();
+    let original = task(999, 40);
+    let selected = r
+        .select_evidence(&catalog, &s, selector(original), RetrievalBudget::default())
+        .unwrap();
+    let c = contract(&s);
+    let grant = PredictiveRevision {
+        record: EngramId::new(502).unwrap(),
+        receipt: 902,
+        assessment: PedagogyAssessment::new(
+            &[Attributes::new([0, 1, 0, 1, 0, 0]).unwrap().into()],
+            &[Attributes::new([1, 1, 0, 1, 0, 0]).unwrap().into()],
+        )
+        .unwrap(),
+        permissions: PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(502).unwrap()],
+        },
+    };
+    let mut w = world(999, &[(999, 7, 77), (77, 11, 40)]);
+    let out = r
+        .pursue_learning_goal(
+            selected.memory(),
+            &mut s,
+            &mut w,
+            PursuitGoal {
+                task: original,
+                max_actions: 3,
+                ..goal(999)
+            },
+            c,
+            reading(9, [0, 0, 0, 0, 0, 0], 30),
+            &tickets()[..1],
+            Some(grant),
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::InsufficientEvidence);
+    assert_eq!(out.goal.task, original);
+    assert_eq!(w.state(), 77);
+    assert_eq!(out.revision.unwrap().pedagogy.final_version.number, 2);
+    let spent = r.attention_scans();
+    assert!(r
+        .plan_retrieved(
+            &s,
+            task(77, 40),
+            PlanningBudget::default(),
+            selected.memory()
+        )
+        .is_err());
+    let next = r
+        .select_evidence(
+            &catalog,
+            &s,
+            SelectiveQuery {
+                goal: task(w.state(), 40),
+                conceptual_seed: None,
+            },
+            RetrievalBudget::default(),
+        )
+        .unwrap();
+    let plan = r
+        .plan_retrieved(
+            &s,
+            task(w.state(), 40),
+            PlanningBudget::default(),
+            next.memory(),
+        )
+        .unwrap()
+        .plan
+        .unwrap();
+    let execution = r
+        .execute_retrieved_plan(&s, &mut w, &plan, &tickets()[2..], next.memory())
+        .unwrap();
+    assert_eq!(execution.reason, ExecutionReason::Reached);
+    assert_eq!(w.state(), original.to);
+    assert_eq!(r.experiences().len(), 5);
+    assert_eq!(r.action_attempts(), 2);
+    assert!(r.attention_scans() > spent);
+    assert!(r.attention_scans() <= 32);
+    assert_eq!(r.cognitive_resources().conceptual_queries, 4);
+    assert!(r.planning_scans() <= 32);
+    assert!(s.memory().is_empty());
+    println!("SELECTIVE_RESUME_METRICS attention={} model_scans={} observations={} conceptual_queries={} perceptual_events={}",r.attention_scans(),r.planning_scans(),r.experiences().len(),r.cognitive_resources().conceptual_queries,r.neural().circuit().unwrap().engine_metrics().dispatched);
+}
+#[test]
+fn recovered_execution_refuses_local_opposition_without_erasing_either_source() {
+    let (catalog, s, _) = corpus(false, false);
+    let mut r = runtime();
+    let mut w0 = world(20, &[(20, 9, 77)]);
+    r.intervene(&mut w0, &request(500, 9, 0)).unwrap();
+    let q = selector(task(20, 40));
+    let selected = r
+        .select_evidence(&catalog, &s, q, RetrievalBudget::default())
+        .unwrap();
+    let plan = r
+        .plan_retrieved(&s, q.goal, PlanningBudget::default(), selected.memory())
+        .unwrap()
+        .plan
+        .unwrap();
+    let mut w = world(20, &[(20, 9, 30), (30, 11, 40)]);
+    let before = r.action_attempts();
+    assert!(r
+        .execute_retrieved_plan(&s, &mut w, &plan, &tickets()[1..], selected.memory())
+        .is_err());
+    assert_eq!(w.action_count(), 0);
+    assert_eq!(r.action_attempts(), before);
+    assert_eq!(r.action_trials()[0].to, 77);
+    assert!(selected
+        .memory()
+        .entries()
+        .iter()
+        .any(|e| e.trial.from == 20 && e.trial.to == 30));
+}
+#[test]
+fn recovered_execution_requires_authority_and_full_resource_reserve() {
+    let (catalog, s, _) = corpus(false, false);
+    let mut reader = runtime();
+    let q = selector(task(20, 40));
+    let selected = reader
+        .select_evidence(&catalog, &s, q, RetrievalBudget::default())
+        .unwrap();
+    let plan = reader
+        .plan_retrieved(&s, q.goal, PlanningBudget::default(), selected.memory())
+        .unwrap()
+        .plan
+        .unwrap();
+    for case in 0..3 {
+        let mut a = access();
+        let mut limits = Limits::default();
+        match case {
+            0 => a.explore = false,
+            1 => limits.neural_events = 32,
+            _ => limits.attention_scans = 1,
+        }
+        let mut r = runtime_with(a, limits);
+        let mut w = world(20, &[(20, 9, 30), (30, 11, 40)]);
+        assert!(r
+            .execute_retrieved_plan(&s, &mut w, &plan, &tickets()[1..], selected.memory())
+            .is_err());
+        assert_eq!(w.action_count(), 0);
+        assert_eq!(r.action_attempts(), 0);
+    }
+}
+#[test]
+fn changed_session_cannot_execute_a_previously_recovered_plan() {
+    let (catalog, mut s, _) = corpus(false, false);
+    let mut r = runtime();
+    let q = selector(task(20, 40));
+    let selected = r
+        .select_evidence(&catalog, &s, q, RetrievalBudget::default())
+        .unwrap();
+    let plan = r
+        .plan_retrieved(&s, q.goal, PlanningBudget::default(), selected.memory())
+        .unwrap()
+        .plan
+        .unwrap();
+    s.execute("agora 120").unwrap();
+    let mut w = world(20, &[(20, 9, 30), (30, 11, 40)]);
+    assert!(r
+        .execute_retrieved_plan(&s, &mut w, &plan, &tickets()[1..], selected.memory())
+        .is_err());
+    assert_eq!(w.action_count(), 0);
+}

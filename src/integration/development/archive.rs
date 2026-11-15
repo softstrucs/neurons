@@ -588,4 +588,45 @@ impl Runtime {
         memory.validate_memory(session, goal)?;
         self.plan_using(goal, budget, &memory.memory_trials()?)
     }
+    /// Continuação explícita com permissões frescas e saldo corrente. O plano
+    /// continua sendo o do motor existente; oposição local invalida a execução.
+    pub fn execute_retrieved_plan(
+        &mut self,
+        session: &Session,
+        world: &mut World,
+        plan: &Plan,
+        requests: &[Intervention],
+        memory: &RetrievedMemory,
+    ) -> Result<Execution, String> {
+        if !self.access.read_knowledge
+            || !self.access.explore
+            || !self.access.record
+            || requests.len() > 4
+        {
+            return Err("execução recuperada não autorizada/inválida".into());
+        }
+        memory.validate_memory(session, plan.goal())?;
+        if requests.iter().any(|r| memory.memory_used(r)) {
+            return Err("identidade/concessão recuperada não é autoridade nova".into());
+        }
+        let combined = self.remembered_trials(memory)?;
+        for step in plan.steps() {
+            let q = TransitionQuery {
+                world: step.world,
+                revision: step.revision,
+                context: step.context,
+                source: step.source,
+                from: step.from,
+                action: step.action,
+            };
+            if Self::outcomes_in(&combined, q).len() > 1 {
+                return Err("oposição local invalida o plano recuperado".into());
+            }
+        }
+        let actions: Vec<_> = plan.steps().iter().map(|s| s.action).collect();
+        let chosen = self
+            .choose_requests(world, &actions, requests)
+            .map_err(|e| format!("{e:?}"))?;
+        Ok(self.execute_plan_using(world, plan, &chosen, &memory.memory_trials()?))
+    }
 }
