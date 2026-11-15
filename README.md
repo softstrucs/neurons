@@ -208,3 +208,14 @@ relevante bloqueiam a ação automática; relatórios H23 anteriores permanecem
 subordinados à limitação. Questões indicam investigação de fontes/contexto, busca
 de evidência independente ou revisão representacional autorizada. Não conferem
 autoridade. Os testes públicos estão em `development_epistemic`.
+
+`revise_recovered_counterexample` permite encaminhar uma experiência recuperada
+admissível a MP09 com novas permissões de avaliação, apresentação e admissão.
+Reutiliza a mesma reserva de cinco consultas e o mesmo episódio de ensino; não
+repete a ação nem aceita rótulo fornecido pelo chamador. Limitação expressiva e
+conflito não geram incorporação forçada. A revisão torna a vista anterior obsoleta.
+
+O ciclo limitado também pode escolher, pelo BFS existente, uma rota inteiramente
+observada que exclua a ação ligada à hipótese refutada. O objetivo pode ser
+atingido sem resolver a limitação. Permissões, oposição e reserva integral
+continuam obrigatórias; divergência da rota interrompe a execução.

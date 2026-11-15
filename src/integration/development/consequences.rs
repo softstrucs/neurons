@@ -229,6 +229,39 @@ impl Runtime {
                 evidence: after.reading.evidence,
             });
         }
+        self.teach_observed_lessons(
+            session,
+            c,
+            samples.iter().map(|s| s.1).collect(),
+            lessons,
+            assessment,
+            permissions,
+        )
+    }
+    /// Mesma porta MP09/reserva para experiências locais e recuperadas.
+    pub(super) fn teach_observed_lessons(
+        &mut self,
+        session: &mut Session,
+        c: ConsequenceContract,
+        trials: Vec<u32>,
+        lessons: Vec<Lesson>,
+        assessment: PedagogyAssessment,
+        permissions: PedagogyPermissions,
+    ) -> Result<ConsequenceTraining, String> {
+        if !self.access.learn_concepts
+            || !self.access.read_knowledge
+            || self.conceptual_attempted
+            || lessons.is_empty()
+            || lessons.len() > 2
+            || trials.len() != lessons.len()
+            || permissions.evaluation != Some(c.scope)
+            || permissions.presentation != Some(c.scope)
+            || lessons
+                .iter()
+                .any(|l| !permissions.admissions.contains(&l.id))
+        {
+            return Err("ensino observado negado, consumido ou excessivo".into());
+        }
         let plan = TeachingPlan::new(c.concept, c.scope, &lessons)?;
         session.pedagogy_capacity(lessons.len())?;
         self.conceptual_attempted = true;
@@ -244,7 +277,7 @@ impl Runtime {
         );
         Ok(ConsequenceTraining {
             contract: c,
-            trials: samples.iter().map(|s| s.1).collect(),
+            trials,
             pedagogy: report,
         })
     }

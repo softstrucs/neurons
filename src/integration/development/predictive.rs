@@ -321,7 +321,44 @@ impl Runtime {
                 self.consequence_pending.take();
                 self.cognitive_resources.operations_without_report -= 1;
             }
+            let limited = epistemic.state == EpistemicDiagnosis::ResourceLimited;
             out.epistemic = Some(epistemic);
+            if !limited {
+                // Alternativa inteiramente observada, sem depender da ação
+                // cujo vínculo conceitual está refutado. Mesmo BFS/executor.
+                let independent: Vec<_> = trials
+                    .iter()
+                    .filter(|t| t.action != contract.action)
+                    .cloned()
+                    .collect();
+                let alternative = self.plan_using(
+                    goal.task,
+                    PlanningBudget {
+                        steps: goal.max_actions,
+                        scans: 32,
+                    },
+                    &independent,
+                )?;
+                if let Some(plan) = alternative.plan.as_ref() {
+                    match self.choose_requests(
+                        world,
+                        &plan.steps().iter().map(|s| s.action).collect::<Vec<_>>(),
+                        requests,
+                    ) {
+                        Ok(chosen) => {
+                            let execution =
+                                self.execute_plan_using(world, plan, &chosen, &independent);
+                            out.observed = world.state();
+                            out.reason = reason_of(execution.reason);
+                            out.choice = PredictiveChoice::ObservedRoute;
+                            out.execution = Some(execution);
+                            out.justification.push_str(" Alternativa observada exclui a ação ligada à hipótese refutada; não resolve a limitação conceitual.");
+                        }
+                        Err(reason) => out.reason = reason,
+                    }
+                }
+                out.observed_alternative = Some(alternative);
+            }
             return Ok(out);
         }
         out.epistemic = Some(epistemic);

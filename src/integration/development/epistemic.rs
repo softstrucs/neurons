@@ -254,3 +254,70 @@ impl Runtime {
         Ok(report)
     }
 }
+
+/// A avaliação é anterior ao ensino e permanece histórica depois da revisão.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EpistemicRevision {
+    pub diagnosis: EpistemicReport,
+    pub teaching: Option<ConsequenceTraining>,
+}
+impl Runtime {
+    /// Reaproveita uma consequência REAL, sem nova ação ou concessão herdada.
+    /// Não tenta adaptar um caso incompatível à família ou apagar exemplos.
+    pub fn revise_recovered_counterexample(
+        &mut self,
+        memory: &impl EpisodeMemory,
+        session: &mut Session,
+        c: ConsequenceContract,
+        attributes: Attributes,
+        grant: PredictiveRevision,
+    ) -> Result<EpistemicRevision, String> {
+        if !self.access.learn_concepts
+            || !self.access.read_knowledge
+            || self.conceptual_attempted
+            || grant.permissions.evaluation != Some(c.scope)
+            || grant.permissions.presentation != Some(c.scope)
+            || !grant.permissions.admissions.contains(&grant.record)
+            || grant.receipt == 0
+        {
+            return Err("revisão recuperada não autorizada ou consumida".into());
+        }
+        let diagnosis = self.assess_epistemic(memory, session, c, attributes)?;
+        if diagnosis.state != EpistemicDiagnosis::HypothesisRefuted {
+            return Ok(EpistemicRevision {
+                diagnosis,
+                teaching: None,
+            });
+        }
+        let sample = diagnosis
+            .evidence
+            .iter()
+            .find(|s| {
+                diagnosis.evaluated_version.candidate.is_some_and(|h| {
+                    h.evaluate(attributes) != Label::from_bool(s.trial.to == c.target)
+                })
+            })
+            .ok_or("contraexemplo recuperado ausente")?;
+        let lesson = crate::curriculum::Lesson {
+            id: grant.record,
+            receipt: grant.receipt,
+            exemplar: NodeId::new(grant.receipt).map_err(|e| format!("{e:?}"))?,
+            attributes,
+            label: Label::from_bool(sample.trial.to == c.target),
+            source: sample.trial.source,
+            evidence: sample.after.evidence,
+        };
+        let teaching = self.teach_observed_lessons(
+            session,
+            c,
+            vec![sample.trial.id],
+            vec![lesson],
+            grant.assessment,
+            grant.permissions,
+        )?;
+        Ok(EpistemicRevision {
+            diagnosis,
+            teaching: Some(teaching),
+        })
+    }
+}

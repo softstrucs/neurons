@@ -38,7 +38,9 @@ pub use consequences::{
     AttributeFrame, ConsequenceContract, ConsequenceForecast, ConsequenceReview,
     ConsequenceTraining,
 };
-pub use epistemic::{ConsequenceSample, EpistemicDiagnosis, EpistemicQuestion, EpistemicReport};
+pub use epistemic::{
+    ConsequenceSample, EpistemicDiagnosis, EpistemicQuestion, EpistemicReport, EpistemicRevision,
+};
 pub use predictive::{PredictiveChoice, PredictivePursuit, PredictiveReason, PredictiveRevision};
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
