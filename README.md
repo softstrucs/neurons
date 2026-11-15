@@ -156,3 +156,24 @@ novas, e exige reserva integral. Não reinicia o episódio. A continuação pode
 suspender por cobertura, autoridade ou saldo insuficientes; isso não é uma prova
 de ausência de solução. Os limites de quatro materializações/32 inspeções podem
 impedir consultas mesmo quando o catálogo contém a evidência necessária.
+
+Snapshots byte a byte idênticos compartilham uma imagem imutável no catálogo
+(`SnapshotStorage::Coalesced`, padrão); `Separate` permite comparação sob os mesmos
+tetos. IDs de episódio, origens, versões, observações e consumos permanecem
+rastreáveis. NRNARC01 e os arquivos originais não são compactados ou alterados.
+Imagens com versões, metadados ou tombstones diferentes não são fundidas.
+
+`RetrievedMemory::evidence_profile` separa origens de armazenamento, registros, IDs
+de evidência, fontes e referências de suporte H23. Essas contagens se sobrepõem e
+não devem ser somadas como votos independentes. IDs distintos não certificam
+independência causal; observações diferentes da mesma fonte continuam com uma
+única fonte. Réplicas não completam uma premissa ausente nem superam oposição.
+
+Teste público: `python3 scripts/test_public.py --target development_coalescence`.
+Comparação sintética com quatro réplicas: payload retido 1768 contra 7072 bytes;
+capacidade dos buffers 3424 contra 13696; postagens 2 contra 8; inspeções de índice
+4 contra 7 e materialização 3 contra 12. Não é medição da RAM total. Amostra debug:
+construção 185465/132440 ns e consulta 414626/433611 ns (coalescido/separado).
+Tempos pontuais sem inferência de ganho de velocidade. Com 64 réplicas, a busca
+coalescida completa usando uma imagem; o controle separado atinge quatro slots e
+suspende, sem produzir conclusão definitiva ou ampliar limites.

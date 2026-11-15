@@ -23,6 +23,10 @@ struct Posting {
 }
 #[derive(Clone, Debug, Default)]
 pub struct CatalogCost {
+    pub retained_images: usize,
+    pub retained_payload_bytes: usize,
+    pub retained_payload_capacity: usize,
+    pub unique_postings: usize,
     pub segments: usize,
     pub episodes: usize,
     pub trials: usize,
@@ -40,8 +44,17 @@ struct ModelGroup {
     key: ModelKey,
     origins: Vec<Location>,
 }
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum SnapshotStorage {
+    #[default]
+    Coalesced,
+    Separate,
+}
 #[derive(Default)]
 pub struct EpisodeCatalog {
+    storage: SnapshotStorage,
+    canonical: BTreeMap<u32, Location>,
+    snapshot_origins: BTreeMap<u32, Vec<EpisodeId>>,
     segments: BTreeMap<u32, EpisodeArchive>,
     outgoing: BTreeMap<(Context, i32), Vec<Posting>>,
     models: BTreeMap<Context, Vec<ModelGroup>>,
@@ -54,6 +67,18 @@ impl EpisodeCatalog {
     pub fn new() -> Self {
         Self::default()
     }
+    pub fn with_storage(storage: SnapshotStorage) -> Self {
+        Self {
+            storage,
+            ..Self::default()
+        }
+    }
+    pub fn storage(&self) -> SnapshotStorage {
+        self.storage
+    }
+    fn canonical_location(&self, l: Location) -> Location {
+        self.canonical[&self.episode(l).id.get()]
+    }
     pub fn cost(&self) -> &CatalogCost {
         &self.cost
     }
@@ -65,7 +90,7 @@ impl EpisodeCatalog {
     }
     /// Armazenamento segmentado explícito: até 16 arquivos existentes, cada um
     /// ainda com quatro episódios. Não é ampliação de orçamento de consulta.
-    pub fn insert(&mut self, id: u32, archive: EpisodeArchive) -> Result<(), String> {
+    pub fn insert(&mut self, id: u32, mut archive: EpisodeArchive) -> Result<(), String> {
         let started = std::time::Instant::now();
         if id == 0 || self.segments.contains_key(&id) || self.segments.len() >= MAX_SEGMENTS {
             return Err("segmento duplicado/inválido ou catálogo cheio".into());
@@ -96,14 +121,53 @@ impl EpisodeCatalog {
                 keys.push((i, key));
             }
         }
-        for (i, e) in archive.episodes.iter().enumerate() {
+        for i in 0..archive.episodes.len() {
+            let (prior, rest) = archive.episodes.split_at_mut(i);
+            let e = &mut rest[0];
+            let local = Location {
+                segment: id,
+                episode: i,
+                trial: 0,
+            };
+            let same = if self.storage == SnapshotStorage::Coalesced {
+                self.segments
+                    .values()
+                    .flat_map(|a| a.episodes.iter())
+                    .chain(prior.iter())
+                    .find(|old| old.bytes == e.bytes)
+                    .map(|old| (old.id, old.image.clone()))
+            } else {
+                None
+            };
+            let representative = if let Some((origin, image)) = same {
+                e.image = image;
+                self.canonical[&origin.get()]
+            } else {
+                local
+            };
+            let canonical_id = if representative == local {
+                e.id
+            } else if representative.segment == id {
+                prior[representative.episode].id
+            } else {
+                self.episode(representative).id
+            };
+            self.canonical.insert(e.id.get(), representative);
+            self.snapshot_origins
+                .entry(canonical_id.get())
+                .or_default()
+                .push(e.id);
             self.cost.episodes += 1;
             self.cost.image_bytes += e.bytes.len();
             self.cost.trials += e.runtime.action_trials.len();
             self.used_permits.extend(&e.runtime.action_permits);
             self.used_trials
                 .extend(e.runtime.action_trials.iter().map(|t| t.id));
+            if representative != local {
+                continue;
+            }
             for (j, t) in e.runtime.action_trials.iter().enumerate() {
+                self.cost.unique_postings += 1;
                 let c = (t.world, t.revision, t.context, t.source.get());
                 self.outgoing.entry((c, t.from)).or_default().push(Posting {
                     location: Location {
@@ -167,6 +231,25 @@ impl EpisodeCatalog {
                 group
                     .origins
                     .sort_by_key(|l| segments[&l.segment].episodes[l.episode].id.get());
+            }
+        }
+        for origins in self.snapshot_origins.values_mut() {
+            origins.sort_by_key(|e| e.get());
+            origins.dedup();
+        }
+        self.used_permits.sort_unstable();
+        self.used_permits.dedup();
+        self.used_trials.sort_unstable();
+        self.used_trials.dedup();
+        let mut pointers = std::collections::BTreeSet::new();
+        self.cost.retained_images = 0;
+        self.cost.retained_payload_bytes = 0;
+        self.cost.retained_payload_capacity = 0;
+        for e in self.segments.values().flat_map(|a| a.episodes.iter()) {
+            if pointers.insert(std::sync::Arc::as_ptr(&e.image) as usize) {
+                self.cost.retained_images += 1;
+                self.cost.retained_payload_bytes += e.bytes.len();
+                self.cost.retained_payload_capacity += e.bytes.capacity();
             }
         }
         self.cost.segments += 1;
@@ -260,6 +343,7 @@ impl SelectiveSearch<'_> {
         }
     }
     fn add_source(&mut self, l: Location) -> bool {
+        let l = self.catalog.canonical_location(l);
         if self
             .sources
             .iter()
@@ -474,6 +558,19 @@ impl Runtime {
                         }
                     }
                 }
+            }
+            // Origens são aliases de armazenamento, jamais votos adicionais.
+            for entry in memory.entries.iter_mut().chain(memory.rejected.iter_mut()) {
+                let original = std::mem::take(&mut entry.origins);
+                for id in original {
+                    if let Some(aliases) = search.catalog.snapshot_origins.get(&id.get()) {
+                        entry.origins.extend(aliases)
+                    } else {
+                        entry.origins.push(id)
+                    }
+                }
+                entry.origins.sort_by_key(|id| id.get());
+                entry.origins.dedup();
             }
             memory.coverage = Some(GoalCoverage {
                 closed: search.closed.clone(),

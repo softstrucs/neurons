@@ -7,6 +7,7 @@ use crate::learning::concepts::HypothesisVersion;
 mod selective;
 pub use selective::{
     CatalogCost, EpisodeCatalog, SearchCoverage, SearchLimit, SelectiveQuery, SelectiveSearch,
+    SnapshotStorage,
 };
 
 const MAX_EPISODES: usize = 4;
@@ -57,11 +58,20 @@ impl EpisodeMemory for Runtime {
         Ok(())
     }
 }
-struct ArchivedEpisode {
-    id: EpisodeId,
+struct EpisodeImage {
     bytes: Vec<u8>,
     runtime: Runtime,
     session: Session,
+}
+struct ArchivedEpisode {
+    id: EpisodeId,
+    image: std::sync::Arc<EpisodeImage>,
+}
+impl std::ops::Deref for ArchivedEpisode {
+    type Target = EpisodeImage;
+    fn deref(&self) -> &Self::Target {
+        &self.image
+    }
 }
 #[derive(Default)]
 pub struct EpisodeArchive {
@@ -129,9 +139,11 @@ impl EpisodeArchive {
         let (runtime, session) = Runtime::restore(&bytes, &runtime.sensors, Access::default())?;
         self.episodes.push(ArchivedEpisode {
             id,
-            bytes,
-            runtime,
-            session,
+            image: std::sync::Arc::new(EpisodeImage {
+                bytes,
+                runtime,
+                session,
+            }),
         });
         self.episodes.sort_by_key(|e| e.id.get());
         Ok(())
@@ -185,9 +197,11 @@ impl EpisodeArchive {
             let (runtime, session) = Runtime::restore(image, &ports[0].1, Access::default())?;
             out.episodes.push(ArchivedEpisode {
                 id,
-                bytes: image.to_vec(),
-                runtime,
-                session,
+                image: std::sync::Arc::new(EpisodeImage {
+                    bytes: image.to_vec(),
+                    runtime,
+                    session,
+                }),
             });
         }
         out.episodes.sort_by_key(|e| e.id.get());
@@ -256,6 +270,16 @@ pub struct RecoveredTransition {
     pub before: Reading,
     pub after: Reading,
 }
+/// Multiplicidade observável, sem certificação de independência causal ou de
+/// fontes. IDs distintos são necessários, não suficientes, para essa alegação.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct EvidenceProfile {
+    pub episode_origins: usize,
+    pub transition_records: usize,
+    pub transition_evidence_ids: usize,
+    pub sources: usize,
+    pub h23_support_references: usize,
+}
 /// Resultado completo ou recusa explícita; uma busca truncada nunca é prova.
 struct GoalCoverage {
     closed: Vec<i32>,
@@ -276,6 +300,31 @@ pub struct RetrievedMemory {
     rejected: Option<RecoveredTransition>,
 }
 impl RetrievedMemory {
+    pub fn evidence_profile(&self) -> EvidenceProfile {
+        use std::collections::BTreeSet;
+        let mut episodes = BTreeSet::new();
+        let mut observations = BTreeSet::new();
+        let mut sources = BTreeSet::new();
+        let mut support = BTreeSet::new();
+        for e in &self.entries {
+            episodes.extend(e.origins.iter().map(|id| id.get()));
+            sources.insert(e.trial.source.get());
+            observations.insert((e.before.source.get(), e.before.evidence.get()));
+            observations.insert((e.after.source.get(), e.after.evidence.get()));
+        }
+        for v in &self.versions {
+            for e in &v.version.support {
+                support.insert((e.record.get(), e.evidence.get()));
+            }
+        }
+        EvidenceProfile {
+            episode_origins: episodes.len(),
+            transition_records: self.entries.len(),
+            transition_evidence_ids: observations.len(),
+            sources: sources.len(),
+            h23_support_references: support.len(),
+        }
+    }
     fn validate_basis(&self, s: &Session, g: PlanningGoal) -> Result<(), String> {
         self.memory_trials()?;
         if s.encode() != self.basis
