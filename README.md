@@ -183,3 +183,11 @@ Sobreposição parcial também consolida postagens de transições integralmente
 sem igualdade de identidade/procedência não basta. Observações exclusivas, versões
 e consumos de cada snapshot permanecem separados. O índice é reconstruído na
 inserção, com custo de construção explícito; não há alegação de ganho de latência.
+
+`pursue_learning_goal` também pode aproveitar o feedback de uma rota observada:
+a conferência usa a reserva existente e, com concessão pedagógica explícita, MP09
+pode reduzir incerteza H23 mesmo quando o objetivo já foi atingido. O relatório
+mantém resultado da execução separado da incorporação. Revisão invalida vistas
+antigas; não há reexecução automática após mudar o modelo. Contraexemplo que
+refuta toda a família atual permanece como experiência e não é forçado a entrar
+no conceito. A recuperação dessa família continua uma limitação explícita.

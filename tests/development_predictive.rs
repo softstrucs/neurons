@@ -799,3 +799,212 @@ fn authorized_negative_experience_refines_h23_and_replans_a_new_goal() {
     assert_eq!(out.choice, PredictiveChoice::ObservedRoute);
     assert_eq!(out.reason, PredictiveReason::Reached);
 }
+
+#[test]
+fn refuted_prediction_is_not_forced_into_incompatible_h23_family() {
+    let (h, mut s) = history();
+    let mut r = runtime();
+    let mut w = world(999, &[(999, 7, 77), (20, 9, 30)]);
+    let c = contract(&s);
+    let grant = revision(&s, 502, 902, [0, 1, 0, 1, 0, 0], [1, 1, 0, 1, 0, 0]);
+    let out = r
+        .pursue_learning_goal(
+            &h,
+            &mut s,
+            &mut w,
+            goal(999),
+            c,
+            reading(9, [1, 1, 1, 0, 0, 0], 30),
+            &tickets(),
+            Some(grant),
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::Diverged);
+    assert_eq!(out.review.as_ref().unwrap().agreement, Some(false));
+    assert_eq!(out.observed, 77);
+    assert_eq!(w.action_count(), 1);
+    let report = out.revision.unwrap();
+    assert_eq!(report.pedagogy.initial_version.number, 1);
+    assert_eq!(report.pedagogy.final_version.number, 1);
+    assert!(report.pedagogy.lessons.is_empty());
+    assert!(out.failure.is_some());
+    assert_eq!(r.action_trials()[0].to, 77);
+    assert!(out.revised_query.is_none());
+    assert!(r.cognitive_resources().conceptual_queries <= 7);
+}
+#[test]
+fn refuted_prediction_without_pedagogy_authority_preserves_model_and_observed_failure() {
+    for denied in 0..4 {
+        let (h, mut s) = history();
+        let before = s.encode();
+        let mut a = access();
+        if denied == 0 {
+            a.learn_concepts = false;
+        }
+        let mut r = runtime_with(a, Limits::default());
+        let mut w = world(999, &[(999, 7, 77), (20, 9, 30)]);
+        let c = contract(&s);
+        let mut grant = revision(&s, 502, 902, [0, 1, 0, 1, 0, 0], [1, 1, 0, 1, 0, 0]);
+        match denied {
+            1 => grant.permissions.evaluation = None,
+            2 => grant.permissions.presentation = None,
+            3 => grant.permissions.admissions.clear(),
+            _ => {}
+        }
+        let out = r
+            .pursue_learning_goal(
+                &h,
+                &mut s,
+                &mut w,
+                goal(999),
+                c,
+                reading(9, [1, 1, 1, 0, 0, 0], 30),
+                &tickets(),
+                Some(grant),
+            )
+            .unwrap();
+        assert_eq!(out.reason, PredictiveReason::Diverged);
+        assert!(out.revision.is_none());
+        assert!(out.failure.is_some());
+        assert_eq!(s.encode(), before);
+        assert_eq!(w.action_count(), 1);
+    }
+}
+#[test]
+fn correct_prediction_does_not_trigger_unnecessary_feedback_teaching() {
+    let (h, mut s) = history();
+    let before = s.encode();
+    let mut r = runtime();
+    let mut w = world(999, &[(999, 7, 20), (20, 9, 30)]);
+    let c = contract(&s);
+    let grant = revision(&s, 502, 902, [0, 1, 0, 1, 0, 0], [1, 1, 0, 1, 0, 0]);
+    let out = r
+        .pursue_learning_goal(
+            &h,
+            &mut s,
+            &mut w,
+            goal(999),
+            c,
+            reading(9, [1, 1, 1, 0, 0, 0], 30),
+            &tickets(),
+            Some(grant),
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert!(out.revision.is_none());
+    assert_eq!(s.encode(), before);
+}
+
+fn observed_feedback(authorized: bool) -> (Runtime, Session, PredictivePursuit, World) {
+    let (mut h, mut s) = history();
+    let mut sample = world(999, &[(999, 7, 77)]);
+    h.intervene(&mut sample, &request(3, 7, 20)).unwrap();
+    let mut r = runtime();
+    let mut w = world(999, &[(999, 7, 77)]);
+    let c = contract(&s);
+    let grant = revision(&s, 502, 902, [0, 1, 0, 1, 0, 0], [1, 1, 0, 1, 0, 0]);
+    let mut g = goal(999);
+    g.task.to = 77;
+    let out = r
+        .pursue_learning_goal(
+            &h,
+            &mut s,
+            &mut w,
+            g,
+            c,
+            reading(9, [0, 0, 0, 0, 0, 0], 30),
+            &tickets(),
+            authorized.then_some(grant),
+        )
+        .unwrap();
+    (r, s, out, w)
+}
+#[test]
+fn achieved_observed_route_can_still_learn_from_conceptual_uncertainty() {
+    let (r, _s, out, w) = observed_feedback(true);
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(out.choice, PredictiveChoice::ObservedRoute);
+    assert_eq!(out.review.as_ref().unwrap().agreement, None);
+    assert_eq!(w.action_count(), 1);
+    let trained = out.revision.unwrap();
+    assert_eq!(trained.pedagogy.final_version.number, 2);
+    assert!(trained
+        .pedagogy
+        .lessons
+        .iter()
+        .any(|l| l.admitted && l.lesson.label == neurons::cognition::concepts::Label::Negative));
+    assert!(out.revised_query.is_none());
+    assert!(r.cognitive_resources().conceptual_queries <= 7);
+}
+
+#[test]
+fn same_observed_route_without_feedback_grant_leaves_concept_unchanged() {
+    let (_, s, out, w) = observed_feedback(false);
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(w.action_count(), 1);
+    assert_eq!(s.pedagogy_version().unwrap().number, 1);
+    assert!(out.revision.is_none());
+}
+#[test]
+fn feedback_learning_is_retained_for_unseen_attributes_after_new_process() {
+    let (r, s, _, _) = observed_feedback(true);
+    let path = std::env::temp_dir().join(format!("neurons-feedback-{}.bin", std::process::id()));
+    assert!(!path.exists());
+    let bytes = r.checkpoint(&s).unwrap();
+    std::fs::write(&path, &bytes).unwrap();
+    let out = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "feedback_restore_worker", "--nocapture"])
+        .env("NEURONS_FEEDBACK_RESTORE", &path)
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(std::fs::read(&path).unwrap(), bytes);
+    std::fs::remove_file(path).unwrap();
+}
+#[test]
+fn feedback_restore_worker() {
+    let Some(path) = std::env::var_os("NEURONS_FEEDBACK_RESTORE") else {
+        return;
+    };
+    let bytes = std::fs::read(path).unwrap();
+    let (mut old, s) = Runtime::restore(&bytes, &sensors(), Access::default()).unwrap();
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+    let w = world(1234, &[(1234, 7, 55)]);
+    let attributes = reading(19, [0, 1, 0, 1, 1, 0], 50);
+    let (baseline, baseline_session) = history();
+    let mut control = runtime();
+    control.inherit_consequence_contract(&baseline).unwrap();
+    let control_frame = control.observe_attributes(&w, 7, attributes).unwrap();
+    let control_report = control
+        .forecast_consequence(
+            &baseline_session,
+            contract(&baseline_session),
+            &control_frame,
+            EpisodeId::new(88).unwrap(),
+        )
+        .unwrap();
+    assert!(matches!(
+        control_report.report().decision,
+        neurons::metacognition::concepts::ConceptDecision::Abstain(_)
+    ));
+    assert!(old.observe_attributes(&w, 7, attributes).is_err());
+    let mut fresh = runtime();
+    fresh.inherit_consequence_contract(&old).unwrap();
+    let frame = fresh.observe_attributes(&w, 7, attributes).unwrap();
+    let forecast = fresh
+        .forecast_consequence(&s, contract(&s), &frame, EpisodeId::new(88).unwrap())
+        .unwrap();
+    assert_eq!(
+        forecast.report().decision,
+        neurons::metacognition::concepts::ConceptDecision::Supported(
+            neurons::cognition::concepts::Label::Negative
+        )
+    );
+    assert_eq!(forecast.report().version.as_ref().unwrap().number, 2);
+    assert_eq!(old.checkpoint(&s).unwrap(), bytes);
+}

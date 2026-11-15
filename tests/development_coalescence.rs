@@ -822,3 +822,60 @@ fn overlap_restore_worker() {
         vec![eid(2)]
     );
 }
+
+#[test]
+fn overlapped_memory_drives_experience_revision_and_old_view_becomes_obsolete() {
+    let (c, mut s) = overlapping(SnapshotStorage::Coalesced, false);
+    let mut r = runtime();
+    let g = task(10, 20);
+    let selected = select(&mut r, &c, &s, g);
+    assert_eq!(
+        selected
+            .memory()
+            .entries()
+            .iter()
+            .find(|e| e.trial.id == 1)
+            .unwrap()
+            .origins,
+        vec![eid(1), eid(2)]
+    );
+    let contract = contract(&s);
+    let revision = PredictiveRevision {
+        record: EngramId::new(502).unwrap(),
+        receipt: 902,
+        assessment: PedagogyAssessment::new(
+            &[Attributes::new([0, 1, 0, 1, 0, 0]).unwrap().into()],
+            &[Attributes::new([0, 0, 0, 1, 1, 0]).unwrap().into()],
+        )
+        .unwrap(),
+        permissions: PedagogyPermissions {
+            evaluation: Some(contract.scope),
+            presentation: Some(contract.scope),
+            admissions: vec![EngramId::new(502).unwrap()],
+        },
+    };
+    let mut w = world(10, &[(10, 7, 20)]);
+    let out = r
+        .pursue_learning_goal(
+            selected.memory(),
+            &mut s,
+            &mut w,
+            PursuitGoal {
+                task: g,
+                max_actions: 1,
+                ..goal(10)
+            },
+            contract,
+            reading(9, [0, 0, 0, 0, 0, 0], 30),
+            &[request(100, 7, 32)],
+            Some(revision),
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(out.revision.unwrap().pedagogy.final_version.number, 2);
+    assert!(r
+        .plan_retrieved(&s, g, PlanningBudget::default(), selected.memory())
+        .is_err());
+    assert_eq!(w.action_count(), 1);
+    assert!(r.attention_scans() <= 32);
+}

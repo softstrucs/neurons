@@ -70,6 +70,35 @@ impl Runtime {
         let Some(revision) = revision else {
             return Ok(out);
         };
+        // A conferência foi produzida neste fluxo, não aceita como entrada do
+        // chamador. Contraexemplo real pode motivar revisão, mesmo se a rota
+        // alternativa alcançou o objetivo. Não reexecuta ações após mudar H23.
+        if let Some(review) = out.review.as_ref().filter(|r| r.agreement != Some(true)) {
+            let frame = review.forecast.frame().clone();
+            let trial = review.trial.id;
+            let teaching = self.teach_consequences(
+                session,
+                contract,
+                &[(frame, trial, revision.record, revision.receipt)],
+                revision.assessment,
+                revision.permissions,
+            );
+            match teaching {
+                Ok(report) => {
+                    if !report.pedagogy.lessons.iter().any(|l| l.admitted) {
+                        out.failure = Some("feedback observado preservado; currículo não encontrou incorporação admissível na família H23 atual".into());
+                    }
+                    out.justification.push_str(" Consequência refutou ou deixou insuficiente a previsão; revisão explicitamente autorizada pelo currículo MP09. Conferência anterior permanece histórica; nova decisão exige recuperação atualizada.");
+                    out.revision = Some(report);
+                }
+                Err(e) => {
+                    out.failure = Some(format!("revisão do contraexemplo não realizada: {e}"));
+                }
+            }
+            // Preserva Reached/Diverged e o erro observado. Aprender não é
+            // atender o objetivo, e não há nova reserva de verificação.
+            return Ok(out);
+        }
         if out.reason != PredictiveReason::InsufficientEvidence {
             return Ok(out);
         }
@@ -388,9 +417,26 @@ impl Runtime {
             return Ok(out);
         }
         if out.choice == PredictiveChoice::ObservedRoute {
-            self.consequence_pending.take();
-            self.cognitive_resources.operations_without_report -= 1;
             let execution = self.execute_plan_using(world, direct_plan.unwrap(), &chosen, &trials);
+            if let Some(first) = execution
+                .trials
+                .first()
+                .filter(|t| t.action == contract.action)
+            {
+                match self.review_consequence(session, forecast, first.id) {
+                    Ok(review) => out.review = Some(review),
+                    Err(e) => {
+                        out.failure = Some(e);
+                        out.observed = world.state();
+                        out.reason = PredictiveReason::Interrupted;
+                        out.execution = Some(execution);
+                        return Ok(out);
+                    }
+                }
+            } else {
+                self.consequence_pending.take();
+                self.cognitive_resources.operations_without_report -= 1;
+            }
             out.observed = world.state();
             out.reason = reason_of(execution.reason);
             if execution.reason == ExecutionReason::Diverged {
