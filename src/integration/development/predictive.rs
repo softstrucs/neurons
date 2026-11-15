@@ -269,17 +269,31 @@ impl Runtime {
             },
             &trials,
         )?;
-        let tail = self.plan_using(
-            PlanningGoal {
-                from: contract.target,
-                ..goal.task
-            },
-            PlanningBudget {
-                steps: goal.max_actions - 1,
-                scans: 32,
-            },
-            &trials,
-        )?;
+        let tail_goal = PlanningGoal {
+            from: contract.target,
+            ..goal.task
+        };
+        let tail = if let Err(e) = memory.validate_plan_goal(tail_goal) {
+            out.failure = Some(e);
+            PlanOutcome {
+                reason: PlanReason::InsufficientEvidence,
+                plan: None,
+                question: Some(TransitionQuestion {
+                    goal: tail_goal,
+                    observed_trials: trials.len(),
+                }),
+                scans: 0,
+            }
+        } else {
+            self.plan_using(
+                tail_goal,
+                PlanningBudget {
+                    steps: goal.max_actions - 1,
+                    scans: 32,
+                },
+                &trials,
+            )?
+        };
         out.forecast = Some(forecast.clone());
         out.observed_alternative = Some(direct.clone());
         out.prefix_alternative = Some(tail.clone());
@@ -358,6 +372,7 @@ impl Runtime {
                         .iter()
                         .any(|o| o.to != contract.target))
                 || direct.reason == PlanReason::ContradictoryEvidence
+                || tail.reason == PlanReason::ContradictoryEvidence
             {
                 PredictiveReason::ConflictingEvidence
             } else {
@@ -417,6 +432,11 @@ impl Runtime {
             from: world.state(),
             ..goal.task
         };
+        if let Err(e) = memory.validate_plan_goal(actual) {
+            out.reason = PredictiveReason::InsufficientEvidence;
+            out.failure = Some(e);
+            return Ok(out);
+        }
         let updated = self.remembered_trials(memory)?;
         let replanning = self.plan_using(
             actual,

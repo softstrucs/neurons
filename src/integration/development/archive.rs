@@ -4,6 +4,11 @@ use super::*;
 use crate::curriculum::PedagogyHost;
 use crate::learning::concepts::HypothesisVersion;
 
+mod selective;
+pub use selective::{
+    CatalogCost, EpisodeCatalog, SearchCoverage, SearchLimit, SelectiveQuery, SelectiveSearch,
+};
+
 const MAX_EPISODES: usize = 4;
 const MAX_IMAGE: usize = 128 * 1024;
 const MAX_ARCHIVE: usize = MAX_EPISODES * MAX_IMAGE + 128;
@@ -19,6 +24,22 @@ pub trait EpisodeMemory: sealed::Sealed {
     fn memory_contract(&self) -> Option<ConsequenceContract>;
     fn memory_used(&self, request: &Intervention) -> bool;
     fn validate_memory(&self, session: &Session, goal: PlanningGoal) -> Result<(), String>;
+    fn validate_plan_goal(&self, _: PlanningGoal) -> Result<(), String> {
+        Ok(())
+    }
+    fn validate_prediction(&self, session: &Session, query: TransitionQuery) -> Result<(), String> {
+        self.validate_memory(
+            session,
+            PlanningGoal {
+                world: query.world,
+                revision: query.revision,
+                context: query.context,
+                source: query.source,
+                from: query.from,
+                to: query.from,
+            },
+        )
+    }
 }
 impl sealed::Sealed for Runtime {}
 impl EpisodeMemory for Runtime {
@@ -236,7 +257,12 @@ pub struct RecoveredTransition {
     pub after: Reading,
 }
 /// Resultado completo ou recusa explícita; uma busca truncada nunca é prova.
+struct GoalCoverage {
+    closed: Vec<i32>,
+    goal: PlanningGoal,
+}
 pub struct RetrievedMemory {
+    coverage: Option<GoalCoverage>,
     status: RetrievalStatus,
     goal: PlanningGoal,
     entries: Vec<RecoveredTransition>,
@@ -250,6 +276,71 @@ pub struct RetrievedMemory {
     rejected: Option<RecoveredTransition>,
 }
 impl RetrievedMemory {
+    fn validate_basis(&self, s: &Session, g: PlanningGoal) -> Result<(), String> {
+        self.memory_trials()?;
+        if s.encode() != self.basis
+            || g.world != self.goal.world
+            || g.revision != self.goal.revision
+            || g.context != self.goal.context
+            || g.source != self.goal.source
+        {
+            return Err("recuperação obsoleta ou de outro contexto".into());
+        }
+        Ok(())
+    }
+    fn add_model(&mut self, e: &ArchivedEpisode, session: &Session) -> Result<(), String> {
+        if self.versions.iter().any(|v| v.episode == e.id) {
+            return Ok(());
+        }
+        if let Some(c) = e.runtime.consequence_contract {
+            let version = e.session.pedagogy_version()?;
+            let active = session.pedagogy_version()?;
+            let old_examples = e
+                .session
+                .concepts()
+                .ok_or("conceito de origem ausente")?
+                .examples()
+                .map_err(|e| format!("{e:?}"))?;
+            let active_examples = session
+                .concepts()
+                .ok_or("conceito atual ausente")?
+                .examples()
+                .map_err(|e| format!("{e:?}"))?;
+            // IDs/contadores iguais não bastam para provar ancestralidade:
+            // conteúdo, procedência e histórico da versão precisam coincidir.
+            let lineage = old_examples.iter().all(|old| active_examples.contains(old))
+                && session
+                    .concepts()
+                    .unwrap()
+                    .models()
+                    .iter()
+                    .any(|m| m.scope() == c.scope && m.versions().contains(&version));
+            let relation = if lineage && version == active {
+                VersionRelation::Current
+            } else if lineage
+                && version.number < active.number
+                && version.support.iter().all(|x| active.support.contains(x))
+                && active.criteria.iter().all(|x| version.criteria.contains(x))
+            {
+                VersionRelation::Ancestor
+            } else {
+                VersionRelation::Incompatible
+            };
+            if relation == VersionRelation::Incompatible
+                || session.pedagogy_identity()? != (c.concept, c.scope)
+                || self.contract.is_some_and(|old| old != c)
+            {
+                self.status = RetrievalStatus::ConflictingVersions;
+            }
+            self.versions.push(RecoveredVersion {
+                episode: e.id,
+                version,
+                relation,
+            });
+            self.contract = Some(c);
+        }
+        Ok(())
+    }
     pub fn resolve_reference(&self, reference: u32) -> Option<&RecoveredTransition> {
         self.entries
             .iter()
@@ -301,14 +392,35 @@ impl EpisodeMemory for RetrievedMemory {
             || self.resolve_reference(r.id).is_some()
     }
     fn validate_memory(&self, s: &Session, g: PlanningGoal) -> Result<(), String> {
-        self.memory_trials()?;
-        if s.encode() != self.basis
-            || g.world != self.goal.world
-            || g.revision != self.goal.revision
-            || g.context != self.goal.context
-            || g.source != self.goal.source
+        self.validate_basis(s, g)?;
+        self.validate_plan_goal(g)
+    }
+    fn validate_plan_goal(&self, g: PlanningGoal) -> Result<(), String> {
+        if let Some(c) = &self.coverage {
+            if g.to != c.goal.to || (!c.closed.contains(&g.from) && g.from != g.to) {
+                return Err("cobertura seletiva insuficiente para este objetivo/estado".into());
+            }
+        }
+        Ok(())
+    }
+    fn validate_prediction(&self, s: &Session, q: TransitionQuery) -> Result<(), String> {
+        self.validate_basis(
+            s,
+            PlanningGoal {
+                world: q.world,
+                revision: q.revision,
+                context: q.context,
+                source: q.source,
+                from: q.from,
+                to: q.from,
+            },
+        )?;
+        if self
+            .coverage
+            .as_ref()
+            .is_some_and(|c| !c.closed.contains(&q.from))
         {
-            return Err("recuperação obsoleta ou de outro contexto".into());
+            return Err("estado fora da cobertura da recuperação seletiva".into());
         }
         Ok(())
     }
@@ -319,6 +431,16 @@ impl Runtime {
     pub fn retrieve_context(
         &mut self,
         archive: &EpisodeArchive,
+        session: &Session,
+        goal: PlanningGoal,
+        budget: RetrievalBudget,
+    ) -> Result<RetrievedMemory, String> {
+        let episodes: Vec<_> = archive.episodes.iter().collect();
+        self.retrieve_episodes(&episodes, session, goal, budget)
+    }
+    fn retrieve_episodes(
+        &mut self,
+        episodes: &[&ArchivedEpisode],
         session: &Session,
         goal: PlanningGoal,
         budget: RetrievalBudget,
@@ -351,15 +473,16 @@ impl Runtime {
             used_permits: vec![],
             used_trials: vec![],
             rejected: None,
+            coverage: None,
         };
         // Somente tombstones de consumo, não permissões restauráveis. Incluem
         // fontes irrelevantes para impedir reciclar autoridade omitida na busca.
-        for e in &archive.episodes {
+        for e in episodes {
             out.used_permits.extend(&e.runtime.action_permits);
             out.used_trials
                 .extend(e.runtime.action_trials.iter().map(|t| t.id));
         }
-        for e in &archive.episodes {
+        for e in episodes {
             if !self.retrieval_scan(&mut out, budget) {
                 return Ok(out);
             }
@@ -430,53 +553,7 @@ impl Runtime {
                 });
             }
             if relevant {
-                if let Some(c) = e.runtime.consequence_contract {
-                    let version = e.session.pedagogy_version()?;
-                    let active = session.pedagogy_version()?;
-                    let old_examples = e
-                        .session
-                        .concepts()
-                        .ok_or("conceito de origem ausente")?
-                        .examples()
-                        .map_err(|e| format!("{e:?}"))?;
-                    let active_examples = session
-                        .concepts()
-                        .ok_or("conceito atual ausente")?
-                        .examples()
-                        .map_err(|e| format!("{e:?}"))?;
-                    // IDs/contadores iguais não bastam para provar ancestralidade:
-                    // conteúdo, procedência e histórico da versão precisam coincidir.
-                    let lineage = old_examples.iter().all(|old| active_examples.contains(old))
-                        && session
-                            .concepts()
-                            .unwrap()
-                            .models()
-                            .iter()
-                            .any(|m| m.scope() == c.scope && m.versions().contains(&version));
-                    let relation = if lineage && version == active {
-                        VersionRelation::Current
-                    } else if lineage
-                        && version.number < active.number
-                        && version.support.iter().all(|x| active.support.contains(x))
-                        && active.criteria.iter().all(|x| version.criteria.contains(x))
-                    {
-                        VersionRelation::Ancestor
-                    } else {
-                        VersionRelation::Incompatible
-                    };
-                    if relation == VersionRelation::Incompatible
-                        || session.pedagogy_identity()? != (c.concept, c.scope)
-                        || out.contract.is_some_and(|old| old != c)
-                    {
-                        out.status = RetrievalStatus::ConflictingVersions;
-                    }
-                    out.versions.push(RecoveredVersion {
-                        episode: e.id,
-                        version,
-                        relation,
-                    });
-                    out.contract = Some(c);
-                }
+                out.add_model(e, session)?;
             }
         }
         Ok(out)
@@ -497,17 +574,7 @@ impl Runtime {
         query: TransitionQuery,
         memory: &RetrievedMemory,
     ) -> Result<Prediction, String> {
-        memory.validate_memory(
-            session,
-            PlanningGoal {
-                world: query.world,
-                revision: query.revision,
-                context: query.context,
-                source: query.source,
-                from: query.from,
-                to: query.from,
-            },
-        )?;
+        memory.validate_prediction(session, query)?;
         self.predict_using(query, &memory.memory_trials()?)
     }
     /// As provas usam referências desta vista e preservam as origens em entries.

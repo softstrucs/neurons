@@ -127,3 +127,24 @@ são resolvidos por `RetrievedMemory::resolve_reference`; não são novos fatos 
 concessões. Essas referências não são persistidas como planos/autoridade. Episódios
 com evidência compartilhada indevidamente continuam bloqueados. Uma nova consulta
 ou reinicialização exige resolver suas próprias referências.
+
+`EpisodeCatalog` indexa até 16 segmentos NRNARC01 existentes (cada um continua
+limitado a quatro episódios). O custo de construção é separado da consulta.
+`select_evidence` procura por contexto e fechamento dos estados do objetivo,
+incluindo todas as consequências das ações nesses estados, não só as favoráveis.
+O seed conceitual é explícito. Não há novo planejador ou classificador.
+
+`SelectiveSearch::coverage` distingue cobertura do objetivo, estados fechados,
+postagens/modelos pendentes e limite atingido. Até quatro snapshots materializados,
+oito evidências e 32 inspeções totais da busca, compartilhadas com a atenção da
+instância, inclusive em retomadas. `resume_selection` continua uma página pendente;
+`extend_selection` pesquisa explicitamente um novo estado, sem reset de consumo.
+Uma vista parcial não pode sustentar previsão/plano; uma vista seletiva completa
+não autoriza consultar estados ou outro destino fora de sua cobertura. Cada nova
+materialização invalida referências transitórias anteriores. O empréstimo do
+catálogo impede modificá-lo enquanto a busca/vista estiver em uso.
+
+Teste público: `python3 scripts/test_public.py --target development_selective`.
+A referência exaustiva dos testes lê registros brutos e enumera caminhos sem usar
+índice/candidato como gabarito. Menos inspeções não implica menor tempo: o cenário
+amostral de 40 episódios teve custo de seleção superior ao oráculo simples.

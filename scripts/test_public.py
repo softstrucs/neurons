@@ -16,7 +16,7 @@ TARGETS = (
     "mp07_investigation", "mp08_regulation", "mp09_pedagogy",
     "concept_goal_supervision", "composed_query", "tcr01_transfer",
     "composed_goal_supervision", "composed_cli", "f3_01_composed_two",
-    "experiential_cycle", "development_runtime", "development_actions", "development_consequences", "development_predictive", "development_archive",
+    "experiential_cycle", "development_runtime", "development_actions", "development_consequences", "development_predictive", "development_archive", "development_selective",
 )
 EXCLUDED = ("bounded_update_probe", "bounded_cost_probe_for_activation_and_communication")
 
@@ -40,7 +40,7 @@ def main():
     env = dict(os.environ, CARGO_TARGET_DIR=str(target_dir))
     # Workers só recebem entradas geradas pelos próprios testes-pai. Uma variável
     # herdada da sessão não deve transformar o teste normal em leitura de arquivo.
-    for key in ("NEURONS_FUNCTIONAL_CHECKPOINT", "NEURONS_PIFI_RESTORE", "NEURONS_ACTION_RESTORE", "NEURONS_CONSEQUENCE_RESTORE", "NEURONS_PREDICTIVE_RESTORE", "NEURONS_ARCHIVE_RESTORE"):
+    for key in ("NEURONS_FUNCTIONAL_CHECKPOINT", "NEURONS_PIFI_RESTORE", "NEURONS_ACTION_RESTORE", "NEURONS_CONSEQUENCE_RESTORE", "NEURONS_PREDICTIVE_RESTORE", "NEURONS_ARCHIVE_RESTORE", "NEURONS_SELECTIVE_RESTORE"):
         env.pop(key, None)
     if args.build:
         command = ["cargo", "build", "--offline", "--locked", "--lib", "--bin", "neurons"]
