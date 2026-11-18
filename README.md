@@ -235,3 +235,11 @@ previsão/conferência e cinco de ensino opcional, nos tetos existentes. Novos
 critérios, causas e independência de fontes não são inventados. MP07 permanece a
 porta de investigação relacional; a experiência conceitual não admite relações.
 Teste: `python3 scripts/test_public.py --target development_discrimination`.
+
+A continuação pública em `development_discrimination` liga investigação,
+recuperação multiepisódio e planejamento: sem investigação, a meta inédita fica
+insuficiente; com revisão admitida, um prefixo conceitual e uma transição observada
+atingem a meta em duas ações. Um controle de transferência incorreta preserva a
+previsão refutada e interrompe a execução; o contraexemplo é recuperável como
+limitação expressiva. Esses cenários não demonstram generalização ampla nem
+resolução do conflito histórico entre observações.

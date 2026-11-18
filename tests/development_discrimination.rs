@@ -600,3 +600,117 @@ fn discrimination_restore_worker() {
         )
         .is_err());
 }
+
+fn transfer_after_investigation(
+    investigated: bool,
+    actual: i32,
+) -> (Runtime, Session, PredictivePursuit, World) {
+    let (h, hs) = history();
+    let (m, mut s) = conflict([1, 0, 0, 0, 0, 0]);
+    let mut archive = EpisodeArchive::new();
+    archive.insert(eid(1), &h, &hs).unwrap();
+    archive.insert(eid(2), &m, &s).unwrap();
+    if investigated {
+        let mut acquisition = runtime();
+        let (out, _, _) = investigate(&mut acquisition, &m, &mut s, 20, true);
+        assert_eq!(out.result, InvestigationResult::ConflictRetained);
+        archive.insert(eid(3), &acquisition, &s).unwrap();
+    }
+    let mut catalog = EpisodeCatalog::new();
+    catalog.insert(1, archive).unwrap();
+    let mut r = runtime();
+    let goal = PursuitGoal {
+        objective: eid(900),
+        task: PlanningGoal {
+            world: 501,
+            revision: 1,
+            context: 61,
+            source: source(),
+            from: 1234,
+            to: 30,
+        },
+        max_actions: 2,
+    };
+    let selected = r
+        .select_evidence(
+            &catalog,
+            &s,
+            SelectiveQuery {
+                goal: goal.task,
+                conceptual_seed: Some(20),
+            },
+            RetrievalBudget::default(),
+        )
+        .unwrap();
+    assert!(selected.coverage().complete_for_goal);
+    assert!(selected
+        .memory()
+        .entries()
+        .iter()
+        .any(|e| e.trial.from == 999 && e.trial.to == 77 && e.origins == vec![eid(2)]));
+    let mut w = world(1234, &[(1234, 7, actual), (20, 9, 30)]);
+    let c = contract(&s);
+    let out = r
+        .pursue_with_consequences(
+            selected.memory(),
+            &s,
+            &mut w,
+            goal,
+            c,
+            reading(39, [0, 1, 1, 0, 0, 1], 70),
+            &[request(40, 7, 72), request(41, 9, 90)],
+        )
+        .unwrap();
+    (r, s, out, w)
+}
+#[test]
+fn discriminating_learning_enables_a_novel_multistep_goal_but_no_investigation_does_not() {
+    let (_, _, control, control_world) = transfer_after_investigation(false, 20);
+    assert_eq!(control.reason, PredictiveReason::InsufficientEvidence);
+    assert_eq!(control_world.action_count(), 0);
+    let (r, s, out, w) = transfer_after_investigation(true, 20);
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(out.choice, PredictiveChoice::ConceptualPrefix);
+    assert_eq!(out.goal.objective, eid(900));
+    assert_eq!(out.goal.task.from, 1234);
+    assert_eq!(out.goal.task.to, 30);
+    assert_eq!(
+        out.forecast
+            .unwrap()
+            .report()
+            .version
+            .as_ref()
+            .unwrap()
+            .number,
+        2
+    );
+    assert_eq!(out.review.unwrap().agreement, Some(true));
+    assert_eq!(w.action_count(), 2);
+    assert_eq!(w.state(), 30);
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+    assert!(r.attention_scans() <= 32);
+    assert!(r.planning_scans() <= 32);
+    assert_eq!(r.experiences().len(), 5);
+}
+#[test]
+fn failed_transfer_is_retained_as_a_new_expressive_limit_not_success() {
+    let (r, s, out, w) = transfer_after_investigation(true, 77);
+    assert_ne!(out.reason, PredictiveReason::Reached);
+    assert_eq!(out.review.unwrap().agreement, Some(false));
+    assert_eq!(w.state(), 77);
+    assert_eq!(w.action_count(), 1);
+    assert_eq!(out.goal.objective, eid(900));
+    let mut next = runtime();
+    let report = next
+        .assess_epistemic(
+            &r,
+            &s,
+            contract(&s),
+            Attributes::new([0, 1, 1, 0, 0, 1]).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(report.state, EpistemicDiagnosis::ModelExpressiveness);
+    assert_eq!(report.evidence[0].trial.from, 1234);
+    assert_eq!(report.evidence[0].trial.to, 77);
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+}
