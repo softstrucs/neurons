@@ -280,3 +280,31 @@ testes: sessão alheia pode motivar uma ação refutada depois; o caminho condic
 recupera o modelo correto e evita essa ação no cenário avaliado. Não há prova de
 autenticidade da identidade física nem descoberta autônoma de condições por entidade.
 Teste público: `python3 scripts/test_public.py --target development_entity_conditions`.
+
+### Sondas discriminantes no fluxo operacional PIFI
+
+`Runtime::select_discriminating_probes` propõe duas combinações hipotéticas de
+atributos, sem rótulos, a partir da discordância H23 atual. Exclui atributos das
+experiências já admitidas e das ofertas de aquisição. Proposta não é observação,
+fato, permissão de intervenção ou autorização pedagógica.
+
+`Runtime::investigate_with_selected_probes` constrói a avaliação sem receber
+`PedagogyAssessment` do harness e delega ao investigador existente. Recebe ofertas
+reais e permissões explícitas; `ProbeTeaching` contém somente registro, recibo e
+concessões pedagógicas independentes. Sem essa concessão, uma observação pode
+filtrar alternativas provisórias, mas não alterar o conhecimento admitido.
+
+`ProbeBudget` limita a busca a até 32 padrões e 736 avaliações de critérios. Cada
+padrão inspecionado consome o teto compartilhado de atenção (32), inclusive quando
+excluído. A ordem é determinística, de 63 a 0; `Ready` significa duas sondas úteis,
+sem garantir cobertura exaustiva ou seleção ótima. `ResourceLimited` impede a
+investigação automática, inclusive quando uma única sonda já foi encontrada.
+O relatório informa padrões/avaliações/exclusões, versão e cobertura, além do
+diagnóstico epistemológico. `NoDisagreement` não comprova verdade: uma hipótese
+única ainda pode ser refutada por experiências posteriores.
+
+As sondas são de avaliação; experiências executáveis continuam dependendo dos
+sensores e ofertas do ambiente. O prefixo pode não alcançar padrões úteis dentro
+do teto: o controle de eixos (5,0) suspende a busca em 32 inspeções, sem ação ou
+aprendizagem. Não há nova família H23, formato persistente, autoridade restaurada,
+conhecimento de destinos futuros ou demonstração de contribuição causal neural.

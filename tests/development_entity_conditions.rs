@@ -1436,3 +1436,430 @@ fn a_context_switch_between_rules_exceeds_h23_despite_successful_conjunctive_gat
     assert_eq!(out.evidence[0].trial.to, 20);
     println!("NEGATIVE: contextual multiplexer outside all 23 criteria; novel result contradicts A&C, observation retained");
 }
+
+// Mesmo ambiente dos controles fixo/assistido. A seleção das sondas agora é
+// responsabilidade do Runtime; nenhum assessment ou eixo é passado a ele.
+fn operational_contextual_probe(
+    a: usize,
+    b: usize,
+    actual: i32,
+    teach: bool,
+    budget: ProbeBudget,
+) -> (Runtime, Session, OperationalInvestigation, usize) {
+    let (memory, mut s) = contextual_acquisition(a, b);
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let mut boring = world(501, 7, 61, 777, 20);
+    let mut useful = world(501, 7, 61, 888, actual);
+    let mut cross = std::array::from_fn(|i| (i % 2) as u8);
+    cross[a] = 0;
+    cross[b] = 1;
+    let teaching = teach.then(|| ProbeTeaching {
+        record: EngramId::new(999).unwrap(),
+        receipt: 1999,
+        permissions: PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(999).unwrap()],
+        },
+    });
+    let out = r
+        .investigate_with_selected_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(cross).unwrap(),
+            &mut [
+                InvestigationOffer {
+                    world: &mut boring,
+                    attributes: reading(501, 7, [1; 6], 9, 20, 50),
+                    intervention: request(501, 7, 61, 9, 20, 52),
+                },
+                InvestigationOffer {
+                    world: &mut useful,
+                    attributes: reading(501, 7, cross, 9, 21, 50),
+                    intervention: request(501, 7, 61, 9, 21, 52),
+                },
+            ],
+            teaching,
+            budget,
+        )
+        .unwrap();
+    assert_eq!(boring.action_count(), 0);
+    (r, s, out, useful.action_count())
+}
+
+#[test]
+fn operational_probe_selection_matches_assisted_learning_across_all_context_pairs() {
+    let mut inspected = 0;
+    let mut evaluations = 0;
+    let mut max_inspected = 0;
+    let mut max_evaluations = 0;
+    let mut max_attention = 0;
+    for a in 0..6 {
+        for b in a + 1..6 {
+            let (r, s, operational, actions) =
+                operational_contextual_probe(a, b, 77, true, ProbeBudget::default());
+            assert_eq!(actions, 1);
+            assert_eq!(operational.probes.status, ProbeStatus::Ready);
+            assert_eq!(operational.probes.patterns.len(), 2);
+            assert!(!operational.probes.exhaustive);
+            assert_eq!(operational.probes.space_size, 64);
+            assert!(operational.probes.inspected <= 32);
+            assert!(r.attention_scans() <= 32);
+            inspected += operational.probes.inspected;
+            evaluations += operational.probes.evaluations;
+            max_inspected = max_inspected.max(operational.probes.inspected);
+            max_evaluations = max_evaluations.max(operational.probes.evaluations);
+            max_attention = max_attention.max(r.attention_scans());
+            let report = operational.investigation.unwrap();
+            assert_eq!(report.result, InvestigationResult::Learned);
+            assert_eq!(report.selected, Some(211));
+            assert_eq!(s.pedagogy_version().unwrap().number, 3);
+            let (_, assisted, _) = contextual_probe_assessment(a, b, 77, true, false, true, true);
+            assert_eq!(
+                s.pedagogy_version().unwrap(),
+                assisted.pedagogy_version().unwrap()
+            );
+            for mask in 0..64 {
+                let bits = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+                assert_eq!(
+                    prediction(&s, bits),
+                    ConceptDecision::Supported(Label::from_bool(bits[a] == 1 && bits[b] == 1))
+                );
+            }
+        }
+    }
+    println!("OPERATIONAL: 15/15 learned, 960/960 results; {inspected} pattern inspections, {evaluations} criterion evaluations across 15 fresh episodes; maxima: {max_inspected} patterns/{max_evaluations} evaluations/{max_attention} attention");
+}
+
+#[test]
+fn selected_probes_are_disjoint_unlabelled_hypotheses_not_observed_experiences() {
+    let (_, s) = contextual_acquisition(0, 1);
+    let before = s.encode();
+    let offered = [Attributes::new([0, 1, 0, 1, 0, 1]).unwrap()];
+    let mut r = runtime(7, 61);
+    let out = r
+        .select_discriminating_probes(&s, &offered, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(out.status, ProbeStatus::Ready);
+    assert_eq!(r.attention_scans(), out.inspected);
+    for probe in &out.patterns {
+        assert!(!offered.contains(probe));
+        assert!(!s.pedagogy_existing().unwrap().contains(probe));
+        assert!(out
+            .version
+            .criteria
+            .iter()
+            .any(|h| h.evaluate(*probe) == Label::Positive));
+        assert!(out
+            .version
+            .criteria
+            .iter()
+            .any(|h| h.evaluate(*probe) == Label::Negative));
+    }
+    assert_ne!(out.patterns[0], out.patterns[1]);
+    assert!(r.experiences().is_empty());
+    assert_eq!(r.action_attempts(), 0);
+    assert_eq!(s.encode(), before);
+}
+
+#[test]
+fn operational_selection_does_not_peek_at_hidden_consequences() {
+    let (_, a, oa, _) = operational_contextual_probe(0, 1, 77, true, ProbeBudget::default());
+    let (_, b, ob, _) = operational_contextual_probe(0, 1, 20, true, ProbeBudget::default());
+    assert_eq!(oa.probes, ob.probes);
+    let ra = oa.investigation.unwrap();
+    let rb = ob.investigation.unwrap();
+    assert_eq!(ra.selected, rb.selected);
+    assert_eq!(ra.options, rb.options);
+    assert_ne!(
+        a.pedagogy_version().unwrap().criteria,
+        b.pedagogy_version().unwrap().criteria
+    );
+}
+
+#[test]
+fn partial_probe_search_cannot_execute_or_admit_an_experience() {
+    let (_, initial) = contextual_acquisition(0, 1);
+    for budget in [
+        ProbeBudget {
+            patterns: 0,
+            evaluations: 736,
+        },
+        ProbeBudget {
+            patterns: 1,
+            evaluations: 736,
+        },
+        ProbeBudget {
+            patterns: 2,
+            evaluations: 736,
+        },
+        ProbeBudget {
+            patterns: 32,
+            evaluations: 0,
+        },
+    ] {
+        let (r, s, out, actions) = operational_contextual_probe(0, 1, 77, true, budget);
+        assert_eq!(out.probes.status, ProbeStatus::ResourceLimited);
+        assert!(out.investigation.is_none());
+        assert_eq!(actions, 0);
+        assert!(r.experiences().is_empty());
+        assert_eq!(s.encode(), initial.encode());
+        assert!(out.probes.inspected <= budget.patterns);
+        assert!(out.probes.evaluations <= budget.evaluations);
+    }
+}
+
+#[test]
+fn useful_patterns_outside_the_search_prefix_remain_unknown_under_current_ceiling() {
+    // Reversing the roles of two axes changes where their disagreement lies.
+    // The fixed descending order does not reach F=0 within 32 inspections.
+    let (_, initial) = contextual_acquisition(5, 0);
+    let (r, s, out, actions) = operational_contextual_probe(5, 0, 77, true, ProbeBudget::default());
+    assert_eq!(out.probes.status, ProbeStatus::ResourceLimited);
+    assert_eq!(out.probes.inspected, 32);
+    assert!(!out.probes.exhaustive);
+    assert!(out.probes.patterns.is_empty());
+    assert!(out.investigation.is_none());
+    assert_eq!(out.epistemic.state, EpistemicDiagnosis::ResourceLimited);
+    assert_eq!(actions, 0);
+    assert_eq!(r.attention_scans(), 32);
+    assert_eq!(s.encode(), initial.encode());
+    println!("COVERAGE NEGATIVE: reversed axis roles (5,0), useful patterns outside prefix; abstention at 32, not NoDisagreement");
+}
+
+#[test]
+fn cognitive_selection_does_not_grant_teaching_authority() {
+    let (_, initial) = contextual_acquisition(0, 1);
+    let (_, s, out, actions) =
+        operational_contextual_probe(0, 1, 77, false, ProbeBudget::default());
+    assert_eq!(actions, 1);
+    assert_eq!(out.probes.status, ProbeStatus::Ready);
+    assert_eq!(
+        out.investigation.unwrap().result,
+        InvestigationResult::Observed
+    );
+    assert_eq!(s.encode(), initial.encode());
+}
+
+#[test]
+fn a_single_retained_hypothesis_is_not_a_discriminating_probe_or_proof_of_truth() {
+    let (_, s) = learned(501, 61, 7, 0, 1);
+    let mut r = runtime(7, 61);
+    let out = r
+        .select_discriminating_probes(&s, &[], ProbeBudget::default())
+        .unwrap();
+    assert_eq!(out.status, ProbeStatus::NoDisagreement);
+    assert!(out.patterns.is_empty());
+    assert_eq!(out.inspected, 0);
+    assert!(!out.exhaustive);
+    assert_eq!(r.action_attempts(), 0);
+}
+
+#[test]
+fn probe_search_obeys_shared_attention_and_denies_ceiling_increases() {
+    let (_, s) = contextual_acquisition(0, 1);
+    let mut limits = Limits::default();
+    limits.attention_scans = 1;
+    let mut r = Runtime::new(SynapticEpisode::new(), &[], rights(), limits).unwrap();
+    let out = r
+        .select_discriminating_probes(&s, &[], ProbeBudget::default())
+        .unwrap();
+    assert_eq!(out.status, ProbeStatus::ResourceLimited);
+    assert_eq!(r.attention_scans(), 1);
+    for budget in [
+        ProbeBudget {
+            patterns: 33,
+            evaluations: 736,
+        },
+        ProbeBudget {
+            patterns: 32,
+            evaluations: 737,
+        },
+    ] {
+        assert!(r.select_discriminating_probes(&s, &[], budget).is_err());
+    }
+    let mut denied = Runtime::new(
+        SynapticEpisode::new(),
+        &[],
+        Access::default(),
+        Limits::default(),
+    )
+    .unwrap();
+    assert!(denied
+        .select_discriminating_probes(&s, &[], ProbeBudget::default())
+        .is_err());
+    assert_eq!(denied.attention_scans(), 0);
+}
+
+#[test]
+fn selected_probes_do_not_override_independent_action_or_admission_permissions() {
+    for denied in 0..5 {
+        let (memory, mut s) = contextual_acquisition(0, 1);
+        let before = s.encode();
+        let c = contract(&s, 501, 7);
+        let mut access = rights();
+        if denied == 0 {
+            access.explore = false;
+        }
+        if denied == 1 {
+            access.learn_concepts = false;
+        }
+        let mut r = Runtime::new(
+            SynapticEpisode::new(),
+            &sensors(7, 61),
+            access,
+            Limits::default(),
+        )
+        .unwrap();
+        let mut w = world(501, 7, 61, 888, 77);
+        let mut permit = request(501, 7, 61, 9, 21, 52);
+        if denied == 4 {
+            permit.permit.action = 9;
+        }
+        let mut permissions = PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(999).unwrap()],
+        };
+        if denied == 2 {
+            permissions.evaluation = None;
+        }
+        if denied == 3 {
+            permissions.admissions.clear();
+        }
+        let out = r.investigate_with_selected_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new([0, 1, 0, 1, 0, 1]).unwrap(),
+            &mut [InvestigationOffer {
+                world: &mut w,
+                attributes: reading(501, 7, [0, 1, 0, 1, 0, 1], 9, 21, 50),
+                intervention: permit,
+            }],
+            Some(ProbeTeaching {
+                record: EngramId::new(999).unwrap(),
+                receipt: 1999,
+                permissions,
+            }),
+            ProbeBudget::default(),
+        );
+        if denied < 4 {
+            assert!(out.is_err());
+        } else {
+            assert_eq!(
+                out.unwrap().investigation.unwrap().result,
+                InvestigationResult::Denied
+            );
+        }
+        assert_eq!(w.action_count(), 0);
+        assert!(r.experiences().is_empty());
+        assert_eq!(s.encode(), before);
+    }
+}
+
+#[test]
+fn theoretical_probes_do_not_fabricate_a_discriminating_environment_offer() {
+    let (memory, mut s) = contextual_acquisition(0, 1);
+    let before = s.encode();
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 777, 20);
+    let out = r
+        .investigate_with_selected_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new([0, 1, 0, 1, 0, 1]).unwrap(),
+            &mut [InvestigationOffer {
+                world: &mut w,
+                attributes: reading(501, 7, [1; 6], 9, 20, 50),
+                intervention: request(501, 7, 61, 9, 20, 52),
+            }],
+            None,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(out.probes.status, ProbeStatus::Ready);
+    assert_eq!(
+        out.investigation.unwrap().result,
+        InvestigationResult::NoDiscriminatingOffer
+    );
+    assert_eq!(w.action_count(), 0);
+    assert_eq!(s.encode(), before);
+}
+
+#[test]
+fn operational_no_disagreement_preserves_refutation_and_expressivity_diagnosis() {
+    let (history, mut s) = learned(501, 61, 7, 0, 1);
+    let mut memory = runtime(7, 61);
+    memory.inherit_consequence_contract(&history).unwrap();
+    let bits = [1, 1, 1, 0, 0, 1];
+    let mut w = world(501, 7, 61, 999, 77);
+    memory
+        .observe_attributes(&w, 7, reading(501, 7, bits, 8, 1, 70))
+        .unwrap();
+    memory
+        .intervene(&mut w, &request(501, 7, 61, 8, 10, 72))
+        .unwrap();
+    let mut receiver = runtime(7, 61);
+    let c = contract(&s, 501, 7);
+    let out = receiver
+        .investigate_with_selected_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(bits).unwrap(),
+            &mut [],
+            None,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(out.probes.status, ProbeStatus::NoDisagreement);
+    assert!(out.investigation.is_none());
+    assert_eq!(out.epistemic.state, EpistemicDiagnosis::ModelExpressiveness);
+    assert!(out.epistemic.blocks_application());
+    assert_eq!(out.epistemic.evidence.len(), 1);
+    assert_eq!(receiver.action_attempts(), 0);
+}
+
+#[test]
+fn operational_investigation_cannot_reuse_a_consumed_episode_or_restore_authority() {
+    let (mut r, mut s, _, actions) =
+        operational_contextual_probe(0, 1, 77, false, ProbeBudget::default());
+    assert_eq!(actions, 1);
+    let bytes = r.checkpoint(&s).unwrap();
+    let before = s.encode();
+    let (memory, _) = contextual_acquisition(0, 1);
+    let c = contract(&s, 501, 7);
+    let question = Attributes::new([0, 1, 0, 1, 0, 1]).unwrap();
+    assert!(r
+        .investigate_with_selected_probes(
+            &memory,
+            &mut s,
+            c,
+            question,
+            &mut [],
+            None,
+            ProbeBudget::default(),
+        )
+        .is_err());
+    assert_eq!(r.action_attempts(), 1);
+    assert_eq!(s.encode(), before);
+    let (mut denied, mut restored) =
+        Runtime::restore(&bytes, &sensors(7, 61), Access::default()).unwrap();
+    assert!(denied
+        .investigate_with_selected_probes(
+            &memory,
+            &mut restored,
+            c,
+            question,
+            &mut [],
+            None,
+            ProbeBudget::default(),
+        )
+        .is_err());
+    assert_eq!(denied.checkpoint(&restored).unwrap(), bytes);
+}

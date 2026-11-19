@@ -10,6 +10,188 @@ pub struct InvestigationOffer<'a> {
     pub attributes: Reading,
     pub intervention: Intervention,
 }
+
+/// Suborçamento da atenção existente, não uma nova reserva independente.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ProbeBudget {
+    pub patterns: usize,
+    pub evaluations: usize,
+}
+impl Default for ProbeBudget {
+    fn default() -> Self {
+        Self {
+            patterns: 32,
+            evaluations: 32 * 23,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ProbeStatus {
+    Ready,
+    NoDisagreement,
+    RepresentationLimited,
+    ResourceLimited,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ProbeSelection {
+    pub version: HypothesisVersion,
+    pub status: ProbeStatus,
+    /// Propostas hipotéticas sem rótulos; não são observações do ambiente.
+    pub patterns: Vec<Attributes>,
+    pub inspected: usize,
+    pub evaluations: usize,
+    pub excluded: usize,
+    pub space_size: usize,
+    /// Ready pode cobrir somente um prefixo, sem alegar ótimo ou exaustividade.
+    pub exhaustive: bool,
+}
+/// Autoridade pedagógica explícita, independente da proposta de sondas.
+pub struct ProbeTeaching {
+    pub record: EngramId,
+    pub receipt: u32,
+    pub permissions: PedagogyPermissions,
+}
+pub struct OperationalInvestigation {
+    pub probes: ProbeSelection,
+    /// Diagnóstico existente, inclusive quando nenhuma investigação é liberada.
+    /// Uma versão unânime pode estar refutada por experiências posteriores.
+    pub epistemic: EpistemicReport,
+    /// Ausente quando a busca não forneceu duas sondas utilizáveis.
+    /// Não equivale a objetivo resolvido ou evidência suficiente.
+    pub investigation: Option<DiscriminatingInvestigation>,
+}
+
+impl Runtime {
+    /// Ordem fixa dos 64 padrões completos, sem regra-alvo ou consequência.
+    /// Duas sondas separadas das experiências conhecidas/ofertadas. Cada padrão
+    /// inspecionado consome atenção, mesmo quando excluído; cada avaliação é
+    /// contabilizada. Cobertura parcial sem duas sondas nunca libera avaliação.
+    pub fn select_discriminating_probes(
+        &mut self,
+        session: &Session,
+        offered: &[Attributes],
+        budget: ProbeBudget,
+    ) -> Result<ProbeSelection, String> {
+        if !self.access.read_knowledge
+            || offered.len() > 4
+            || budget.patterns > 32
+            || budget.evaluations > 32 * 23
+        {
+            return Err("seleção de sondas não autorizada ou orçamento inválido".into());
+        }
+        let (_, scope) = session.pedagogy_identity()?;
+        if !scope.validity.contains(session.logical_time()) {
+            return Err("sessão fora da validade".into());
+        }
+        let version = session.pedagogy_version()?;
+        let mut out = ProbeSelection {
+            version,
+            status: ProbeStatus::ResourceLimited,
+            patterns: vec![],
+            inspected: 0,
+            evaluations: 0,
+            excluded: 0,
+            space_size: 64,
+            exhaustive: false,
+        };
+        if out.version.criteria.is_empty() {
+            out.status = ProbeStatus::RepresentationLimited;
+            return Ok(out);
+        }
+        if out.version.criteria.len() == 1 {
+            // Prova estrutural de ausência de discordância na versão, não de
+            // correção do modelo no mundo; nenhuma enumeração é alegada.
+            out.status = ProbeStatus::NoDisagreement;
+            return Ok(out);
+        }
+        let known = session.pedagogy_existing()?;
+        for mask in (0..64).rev() {
+            if out.inspected >= budget.patterns
+                || self.attention_scans >= self.limits.attention_scans
+            {
+                return Ok(out);
+            }
+            out.inspected += 1;
+            self.attention_scans += 1;
+            let attributes = Attributes::new(std::array::from_fn(|i| ((mask >> i) & 1) as u8))
+                .map_err(|e| format!("{e:?}"))?;
+            if known.contains(&attributes) || offered.contains(&attributes) {
+                out.excluded += 1;
+                continue;
+            }
+            if out.evaluations + out.version.criteria.len() > budget.evaluations {
+                return Ok(out);
+            }
+            let mut positive = 0;
+            for h in &out.version.criteria {
+                out.evaluations += 1;
+                positive += usize::from(h.evaluate(attributes) == Label::Positive);
+            }
+            if positive > 0 && positive < out.version.criteria.len() {
+                out.patterns.push(attributes);
+                if out.patterns.len() == 2 {
+                    out.status = ProbeStatus::Ready;
+                    return Ok(out);
+                }
+            }
+        }
+        out.exhaustive = true;
+        out.status = ProbeStatus::NoDisagreement;
+        Ok(out)
+    }
+
+    /// Usa SOMENTE atributos atuais das ofertas; destinos de World continuam
+    /// privados. Propõe sondas de avaliação, depois delega diagnóstico, seleção
+    /// da experiência real, permissões, execução e admissão ao fluxo existente.
+    /// Sem concessão pedagógica pode observar, mas nunca incorporar por seleção.
+    pub fn investigate_with_selected_probes(
+        &mut self,
+        memory: &impl EpisodeMemory,
+        session: &mut Session,
+        contract: ConsequenceContract,
+        question: Attributes,
+        offers: &mut [InvestigationOffer<'_>],
+        teaching: Option<ProbeTeaching>,
+        budget: ProbeBudget,
+    ) -> Result<OperationalInvestigation, String> {
+        if offers.len() > 4 {
+            return Err("máximo de quatro ofertas".into());
+        }
+        let offered = offers
+            .iter()
+            .map(|o| Attributes::decode(o.attributes.event.payload()).map_err(|e| format!("{e:?}")))
+            .collect::<Result<Vec<_>, _>>()?;
+        let probes = self.select_discriminating_probes(session, &offered, budget)?;
+        if probes.status != ProbeStatus::Ready {
+            let epistemic = self.assess_epistemic(memory, session, contract, question)?;
+            return Ok(OperationalInvestigation {
+                probes,
+                epistemic,
+                investigation: None,
+            });
+        }
+        let revision = teaching
+            .map(|grant| -> Result<PredictiveRevision, String> {
+                Ok(PredictiveRevision {
+                    record: grant.record,
+                    receipt: grant.receipt,
+                    permissions: grant.permissions,
+                    assessment: PedagogyAssessment::new(
+                        &[probes.patterns[0].into()],
+                        &[probes.patterns[1].into()],
+                    )?,
+                })
+            })
+            .transpose()?;
+        let investigation =
+            self.investigate_disagreement(memory, session, contract, question, offers, revision)?;
+        Ok(OperationalInvestigation {
+            probes,
+            epistemic: investigation.origin.clone(),
+            investigation: Some(investigation),
+        })
+    }
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DiscriminatingOption {
     pub reading: Reading,
