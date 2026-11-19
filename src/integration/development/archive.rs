@@ -58,7 +58,22 @@ impl EpisodeMemory for Runtime {
         self.action_permits.contains(&r.permit.id)
             || self.action_trials.iter().any(|t| t.id == r.id)
     }
-    fn validate_memory(&self, _: &Session, _: PlanningGoal) -> Result<(), String> {
+    fn validate_memory(&self, session: &Session, goal: PlanningGoal) -> Result<(), String> {
+        // O vínculo persistido não autoriza transferir fonte/contexto. Rejeita
+        // ANTES de herdar contrato ou observar atributos na instância receptora.
+        if let Some(c) = self.consequence_contract {
+            if session.pedagogy_identity()? != (c.concept, c.scope)
+                || goal.world != c.world
+                || goal.revision != c.revision
+                || goal.context != c.scope.context.get()
+                || goal.source != c.source
+                || !c.scope.validity.contains(session.logical_time())
+            {
+                return Err(
+                    "memória conceitual de outro vínculo, fonte, contexto ou validade".into(),
+                );
+            }
+        }
         Ok(())
     }
 }

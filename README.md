@@ -243,3 +243,16 @@ atingem a meta em duas ações. Um controle de transferência incorreta preserva
 previsão refutada e interrompe a execução; o contraexemplo é recuperável como
 limitação expressiva. Esses cenários não demonstram generalização ampla nem
 resolução do conflito histórico entre observações.
+
+Experimentos de fonte/contexto: `development_source_context` distingue escopo
+conceitual de procedência. H23 mantém modelos por Scope e aceita evidências
+consistentes de fontes conhecidas distintas no mesmo escopo; SourceId não integra
+os seis atributos da hipótese. Não foi demonstrado aprendizado de regras
+condicionadas à fonte apenas por sua identidade. F1 preserva modelos de múltiplos
+contextos; a ponte pedagógica MP09/Runtime continua exigindo um contexto por sessão.
+
+Memória conceitual de Runtime agora valida identidade, escopo, fonte, mundo, revisão
+e validade antes de herdar o contrato ou registrar atributos. O defeito anterior
+já impedia a ação, mas deixava uma observação e um vínculo incompatível na instância
+receptora. A correção evita essa mutação parcial, sem alterar critérios H23,
+consulta científica ou formatos de checkpoint.
