@@ -2450,3 +2450,520 @@ fn resumed_proposal_cannot_replace_fresh_operational_permission() {
     assert_eq!(s.encode(), before);
     assert_eq!(a.action_count() + b.action_count(), 0);
 }
+
+fn equivalent_bits() -> [[u8; 6]; 2] {
+    [[0, 1, 0, 1, 0, 1], [0, 1, 1, 0, 1, 0]]
+}
+fn empirical_equivalent_episode(
+    choose_second: bool,
+    actuals: [i32; 2],
+    teach: bool,
+) -> (Runtime, Session, ContinuedInvestigation) {
+    let (memory, mut s) = contextual_acquisition(0, 1);
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let mut a = world(501, 7, 61, 4101, actuals[0]);
+    let mut b = world(501, 7, 61, 4102, actuals[1]);
+    let bits = equivalent_bits();
+    let mut first = request(501, 7, 61, 9, 21, 52);
+    if choose_second {
+        first.permit.action = 9;
+    }
+    let mut search = ProbeSearch::new(&s, c, &bits.map(|b| Attributes::new(b).unwrap())).unwrap();
+    let teaching = teach.then(|| ProbeTeaching {
+        record: EngramId::new(999).unwrap(),
+        receipt: 1999,
+        permissions: PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(999).unwrap()],
+        },
+    });
+    let out = r
+        .investigate_continued_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(bits[0]).unwrap(),
+            &mut [
+                InvestigationOffer {
+                    world: &mut a,
+                    attributes: reading(501, 7, bits[0], 9, 21, 50),
+                    intervention: first,
+                },
+                InvestigationOffer {
+                    world: &mut b,
+                    attributes: reading(501, 7, bits[1], 9, 22, 50),
+                    intervention: request(501, 7, 61, 9, 22, 52),
+                },
+            ],
+            teaching,
+            &mut search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(a.action_count(), usize::from(!choose_second));
+    assert_eq!(b.action_count(), usize::from(choose_second));
+    let feasibility = out.feasibility.as_ref().unwrap();
+    assert_eq!(
+        feasibility.options[0].predictions,
+        feasibility.options[1].predictions
+    );
+    assert_eq!(
+        out.outcome.investigation.as_ref().unwrap().selected,
+        Some(if choose_second { 212 } else { 211 })
+    );
+    assert!(r.attention_scans() <= 32);
+    (r, s, out)
+}
+fn empirical_archive(actuals: [i32; 2]) -> (EpisodeArchive, Session) {
+    let (base, s) = contextual_acquisition(0, 1);
+    let (a, sa, _) = empirical_equivalent_episode(false, actuals, false);
+    let (b, sb, _) = empirical_equivalent_episode(true, actuals, false);
+    assert_eq!(s.encode(), sa.encode());
+    assert_eq!(s.encode(), sb.encode());
+    let mut archive = EpisodeArchive::new();
+    archive.insert(eid(71), &base, &s).unwrap();
+    archive.insert(eid(72), &a, &s).unwrap();
+    archive.insert(eid(73), &b, &s).unwrap();
+    (archive, s)
+}
+fn empirical_memory(actuals: [i32; 2]) -> (RetrievedMemory, Session) {
+    let (archive, s) = empirical_archive(actuals);
+    let memory = runtime(7, 61)
+        .retrieve_context(&archive, &s, task(501, 61, 7), RetrievalBudget::default())
+        .unwrap();
+    assert_eq!(memory.status(), RetrievalStatus::Complete);
+    (memory, s)
+}
+
+#[test]
+fn predicted_equivalence_has_consistent_empirical_controls_without_claiming_physical_identity() {
+    for actual in [20, 77] {
+        let (_, sa, a) = empirical_equivalent_episode(false, [actual; 2], false);
+        let (_, sb, b) = empirical_equivalent_episode(true, [actual; 2], false);
+        assert_eq!(a.outcome.probes, b.outcome.probes);
+        let ra = a.outcome.investigation.unwrap();
+        let rb = b.outcome.investigation.unwrap();
+        assert_eq!(ra.trial.unwrap().to, rb.trial.unwrap().to);
+        assert_eq!(ra.retained, rb.retained);
+        assert_eq!(sa.encode(), sb.encode());
+        assert_eq!(sa.pedagogy_version().unwrap().number, 2);
+    }
+}
+
+#[test]
+fn different_numeric_failures_remain_distinct_without_fabricating_conceptual_opposition() {
+    let (_, _, a) = empirical_equivalent_episode(false, [77, 88], false);
+    let (_, _, b) = empirical_equivalent_episode(true, [77, 88], false);
+    let a = a.outcome.investigation.unwrap();
+    let b = b.outcome.investigation.unwrap();
+    assert_eq!(a.retained, b.retained); // ambos são negativos para o destino 20
+    assert_eq!(a.trial.unwrap().to, 77);
+    assert_eq!(b.trial.unwrap().to, 88);
+    let (memory, s) = empirical_memory([77, 88]);
+    let samples = memory.memory_samples(&s).unwrap();
+    assert!(samples
+        .iter()
+        .any(|e| e.origins == vec![eid(72)] && e.trial.to == 77));
+    assert!(samples
+        .iter()
+        .any(|e| e.origins == vec![eid(73)] && e.trial.to == 88));
+    let diagnosis = runtime(7, 61)
+        .assess_epistemic(
+            &memory,
+            &s,
+            contract(&s, 501, 7),
+            Attributes::new([1; 6]).unwrap(),
+        )
+        .unwrap();
+    assert_ne!(diagnosis.state, EpistemicDiagnosis::ModelExpressiveness);
+    println!("NUMERIC LIMIT: effects 77 and 88 remain different observations, despite equal negative target labels; no physical-equivalence claim");
+}
+
+#[test]
+fn equivalent_prediction_vectors_can_have_opposite_observed_consequences() {
+    let (_, s, a) = empirical_equivalent_episode(false, [20, 77], false);
+    let (_, _, b) = empirical_equivalent_episode(true, [20, 77], false);
+    assert_eq!(a.outcome.probes, b.outcome.probes);
+    let ra = a.outcome.investigation.unwrap();
+    let rb = b.outcome.investigation.unwrap();
+    assert_ne!(ra.trial.unwrap().to, rb.trial.unwrap().to);
+    assert!(ra.retained.iter().all(|h| !rb.retained.contains(h)));
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+    let (memory, current) = empirical_memory([20, 77]);
+    let samples = memory.memory_samples(&current).unwrap();
+    assert!(samples
+        .iter()
+        .any(|x| x.origins == vec![eid(72)] && x.trial.to == 20));
+    assert!(samples
+        .iter()
+        .any(|x| x.origins == vec![eid(73)] && x.trial.to == 77));
+    println!("EMPIRICAL COUNTEREXAMPLE: equal H23 prediction vectors, distinct observable attributes/states, outcomes 20 vs 77; both origins retained");
+}
+
+#[test]
+fn divergent_equivalent_observations_jointly_refute_the_version_beyond_exact_attributes() {
+    let (memory, s) = empirical_memory([20, 77]);
+    let out = runtime(7, 61)
+        .assess_epistemic(
+            &memory,
+            &s,
+            contract(&s, 501, 7),
+            Attributes::new([1, 1, 1, 1, 0, 0]).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(out.state, EpistemicDiagnosis::ModelExpressiveness);
+    assert!(out.blocks_application());
+    assert!(out.evidence.iter().any(|x| x.origins == vec![eid(72)]));
+    assert!(out.evidence.iter().any(|x| x.origins == vec![eid(73)]));
+}
+
+#[test]
+fn refuted_equivalence_does_not_authorize_transfer_to_a_novel_state() {
+    let (memory, s) = empirical_memory([20, 77]);
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 7777, 77);
+    let mut goal = task(501, 61, 7);
+    goal.from = 7777;
+    let out = r
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, [1, 1, 1, 1, 0, 0], 30, 1, 70),
+            &[request(501, 7, 61, 30, 40, 72)],
+        )
+        .unwrap();
+    assert_eq!(
+        w.action_count(),
+        0,
+        "uma versão refutada pelo conjunto não autoriza outra transferência"
+    );
+    assert_eq!(out.reason, PredictiveReason::ConflictingEvidence);
+}
+
+#[test]
+fn new_unadmitted_counterevidence_invalidates_operational_correspondence() {
+    let (memory, s) = empirical_memory([20, 77]);
+    let offered = [Attributes::new([0, 1, 1, 1, 0, 1]).unwrap()];
+    let mut r = runtime(7, 61);
+    let probes = r
+        .select_discriminating_probes(&s, &offered, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(probes.status, ProbeStatus::Ready);
+    let mut w = world(501, 7, 61, 7777, 20);
+    let out = r
+        .correlate_probe_offers(
+            &memory,
+            &s,
+            contract(&s, 501, 7),
+            &probes,
+            &[InvestigationOffer {
+                world: &mut w,
+                attributes: reading(501, 7, [0, 1, 1, 1, 0, 1], 30, 1, 70),
+                intervention: request(501, 7, 61, 30, 40, 72),
+            }],
+        )
+        .unwrap();
+    assert!(out.complete);
+    assert!(
+        out.correspondence.is_empty(),
+        "não liberar associação operacional apoiada em versão refutada"
+    );
+    assert_eq!(w.action_count(), 0);
+}
+
+#[test]
+fn unadmitted_divergence_blocks_operational_cursor_reuse_without_changing_h23() {
+    let (memory, mut s) = empirical_memory([20, 77]);
+    let c = contract(&s, 501, 7);
+    let bits = [0, 1, 1, 1, 0, 1];
+    let mut search = ProbeSearch::new(&s, c, &[Attributes::new(bits).unwrap()]).unwrap();
+    let before = search.encode().unwrap();
+    let knowledge = s.encode();
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 7777, 20);
+    let out = r
+        .investigate_continued_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(bits).unwrap(),
+            &mut [InvestigationOffer {
+                world: &mut w,
+                attributes: reading(501, 7, bits, 30, 1, 70),
+                intervention: request(501, 7, 61, 30, 40, 72),
+            }],
+            None,
+            &mut search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(w.action_count(), 0);
+    assert!(out.outcome.investigation.is_none());
+    assert_eq!(search.encode().unwrap(), before);
+    assert_eq!(s.encode(), knowledge);
+}
+
+#[test]
+fn consistent_experiences_revise_only_with_admission_and_generalize_within_the_reference() {
+    for actual in [20, 77] {
+        let (_, a, _) = empirical_equivalent_episode(false, [actual; 2], true);
+        let (_, b, _) = empirical_equivalent_episode(true, [actual; 2], true);
+        assert_eq!(a.pedagogy_version().unwrap().number, 3);
+        assert_eq!(
+            a.pedagogy_version().unwrap().criteria,
+            b.pedagogy_version().unwrap().criteria
+        );
+        for mask in 0..64 {
+            let v = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+            let reference = v[1] == 1 && (actual == 20 || v[0] == 1);
+            assert_eq!(
+                prediction(&a, v),
+                ConceptDecision::Supported(Label::from_bool(reference))
+            );
+            assert_eq!(prediction(&b, v), prediction(&a, v));
+        }
+    }
+}
+
+#[test]
+fn insufficient_empirical_evidence_does_not_justify_executing_an_equivalent_alternative() {
+    let (base, s) = contextual_acquisition(0, 1);
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 7777, 20);
+    let mut goal = task(501, 61, 7);
+    goal.from = 7777;
+    let out = r
+        .pursue_with_consequences(
+            &base,
+            &s,
+            &mut w,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, equivalent_bits()[0], 30, 1, 70),
+            &[request(501, 7, 61, 30, 40, 72)],
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::InsufficientEvidence);
+    assert_eq!(w.action_count(), 0);
+}
+
+#[test]
+fn permissions_change_the_selected_experiment_but_hidden_results_do_not() {
+    let (_, _, a) = empirical_equivalent_episode(false, [20, 77], false);
+    let (_, _, hidden_changed) = empirical_equivalent_episode(false, [77, 20], false);
+    let (_, _, alternative) = empirical_equivalent_episode(true, [20, 77], false);
+    assert_eq!(a.outcome.probes, hidden_changed.outcome.probes);
+    let a = a.outcome.investigation.unwrap();
+    let hidden = hidden_changed.outcome.investigation.unwrap();
+    let alternative = alternative.outcome.investigation.unwrap();
+    assert_eq!(a.selected, hidden.selected);
+    assert_ne!(a.retained, hidden.retained);
+    assert_ne!(a.selected, alternative.selected);
+    assert_ne!(a.retained, alternative.retained);
+}
+
+#[test]
+fn removing_counterevidence_changes_transfer_without_changing_model_or_private_world() {
+    let (memory, s) = empirical_memory([20, 77]);
+    let (base, base_s) = contextual_acquisition(0, 1);
+    assert_eq!(s.encode(), base_s.encode());
+    let mut archive = EpisodeArchive::new();
+    archive.insert(eid(71), &base, &s).unwrap();
+    let control_memory = runtime(7, 61)
+        .retrieve_context(&archive, &s, task(501, 61, 7), RetrievalBudget::default())
+        .unwrap();
+    assert_eq!(control_memory.status(), memory.status());
+    assert!(!control_memory.memory_used(&request(501, 7, 61, 30, 40, 72)));
+    assert!(!memory.memory_used(&request(501, 7, 61, 30, 40, 72)));
+    let bits = [1, 1, 1, 1, 0, 0];
+    let mut goal = task(501, 61, 7);
+    goal.from = 7777;
+    let mut control_world = world(501, 7, 61, 7777, 77);
+    let control = runtime(7, 61)
+        .pursue_with_consequences(
+            &control_memory,
+            &s,
+            &mut control_world,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, bits, 30, 1, 70),
+            &[request(501, 7, 61, 30, 40, 72)],
+        )
+        .unwrap();
+    let mut treatment_world = world(501, 7, 61, 7777, 77);
+    let treatment = runtime(7, 61)
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut treatment_world,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, bits, 30, 1, 70),
+            &[request(501, 7, 61, 30, 40, 72)],
+        )
+        .unwrap();
+    assert_eq!(control_world.action_count(), 1);
+    assert_eq!(control.review.unwrap().agreement, Some(false));
+    assert_eq!(treatment_world.action_count(), 0);
+    assert_eq!(treatment.reason, PredictiveReason::ConflictingEvidence);
+    println!("ABLATION: identical Session and hidden World, missing counterevidence -> one refuted action; retrieved divergence -> zero actions");
+}
+
+#[test]
+fn empirical_compatibility_requires_complete_evidence_coverage_within_attention() {
+    let (memory, s) = empirical_memory([20, 77]);
+    let c = contract(&s, 501, 7);
+    let mut limits = Limits::default();
+    limits.attention_scans = 2;
+    let mut r = Runtime::new(SynapticEpisode::new(), &sensors(7, 61), rights(), limits).unwrap();
+    let out = r
+        .assess_epistemic(&memory, &s, c, Attributes::new([1; 6]).unwrap())
+        .unwrap();
+    assert_eq!(out.state, EpistemicDiagnosis::ResourceLimited);
+    assert!(out.blocks_application());
+    assert_eq!(out.scans, 2);
+    assert!(out.criterion_evaluations <= 23 * 9);
+}
+
+#[test]
+fn admitted_revision_invalidates_old_prediction_associations_and_probe_files() {
+    let (_, old) = contextual_acquisition(0, 1);
+    let offered = equivalent_bits().map(|b| Attributes::new(b).unwrap());
+    let c = contract(&old, 501, 7);
+    let mut search = ProbeSearch::new(&old, c, &offered).unwrap();
+    let before = search.encode().unwrap();
+    let probes = runtime(7, 61)
+        .select_discriminating_probes(&old, &offered, ProbeBudget::default())
+        .unwrap();
+    let (memory, current, _) = empirical_equivalent_episode(false, [77; 2], true);
+    assert_eq!(current.pedagogy_version().unwrap().number, 3);
+    assert!(runtime(7, 61)
+        .continue_probe_search(&current, c, &offered, &mut search, ProbeBudget::default())
+        .is_err());
+    assert!(ProbeSearch::restore(&before, &current, c).is_err());
+    assert!(runtime(7, 61)
+        .correlate_probe_offers(&memory, &current, c, &probes, &[])
+        .is_err());
+    assert_eq!(search.encode().unwrap(), before);
+}
+
+#[test]
+fn empirical_divergences_survive_restart_without_restoring_authority() {
+    let (archive, s) = empirical_archive([20, 77]);
+    let offered = [Attributes::new([0, 1, 1, 1, 0, 1]).unwrap()];
+    let cursor = ProbeSearch::new(&s, contract(&s, 501, 7), &offered).unwrap();
+    let root = std::env::temp_dir().join(format!(
+        "neurons-empirical-equivalence-{}",
+        std::process::id()
+    ));
+    assert!(!root.exists());
+    std::fs::create_dir(&root).unwrap();
+    archive.save(&root.join("evidence.bin")).unwrap();
+    std::fs::write(root.join("knowledge.bin"), s.encode()).unwrap();
+    std::fs::write(root.join("search.bin"), cursor.encode().unwrap()).unwrap();
+    let originals: Vec<_> = ["evidence.bin", "knowledge.bin", "search.bin"]
+        .iter()
+        .map(|n| (*n, std::fs::read(root.join(n)).unwrap()))
+        .collect();
+    let out = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "empirical_equivalence_restore_worker",
+            "--nocapture",
+        ])
+        .env("NEURONS_EMPIRICAL_EQUIVALENCE_RESTORE", &root)
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    for (name, bytes) in originals {
+        assert_eq!(std::fs::read(root.join(name)).unwrap(), bytes);
+        std::fs::remove_file(root.join(name)).unwrap();
+    }
+    std::fs::remove_dir(root).unwrap();
+}
+#[test]
+fn empirical_equivalence_restore_worker() {
+    let Some(root) = std::env::var_os("NEURONS_EMPIRICAL_EQUIVALENCE_RESTORE") else {
+        return;
+    };
+    let root = std::path::PathBuf::from(root);
+    let mut s = Session::decode(&std::fs::read(root.join("knowledge.bin")).unwrap()).unwrap();
+    let archive = EpisodeArchive::load(
+        &root.join("evidence.bin"),
+        &[
+            (eid(71), sensors(7, 61)),
+            (eid(72), sensors(7, 61)),
+            (eid(73), sensors(7, 61)),
+        ],
+    )
+    .unwrap();
+    let mut denied = Runtime::new(
+        SynapticEpisode::new(),
+        &[],
+        Access::default(),
+        Limits::default(),
+    )
+    .unwrap();
+    assert!(denied
+        .retrieve_context(&archive, &s, task(501, 61, 7), RetrievalBudget::default())
+        .is_err());
+    let memory = runtime(7, 61)
+        .retrieve_context(&archive, &s, task(501, 61, 7), RetrievalBudget::default())
+        .unwrap();
+    let c = contract(&s, 501, 7);
+    let mut cursor =
+        ProbeSearch::restore(&std::fs::read(root.join("search.bin")).unwrap(), &s, c).unwrap();
+    let before = cursor.encode().unwrap();
+    let bits = [0, 1, 1, 1, 0, 1];
+    let mut w = world(501, 7, 61, 7777, 20);
+    let out = runtime(7, 61)
+        .investigate_continued_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(bits).unwrap(),
+            &mut [InvestigationOffer {
+                world: &mut w,
+                attributes: reading(501, 7, bits, 30, 1, 70),
+                intervention: request(501, 7, 61, 30, 40, 72),
+            }],
+            None,
+            &mut cursor,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(
+        out.outcome.epistemic.state,
+        EpistemicDiagnosis::ModelExpressiveness
+    );
+    assert!(out.outcome.investigation.is_none());
+    assert_eq!(w.action_count(), 0);
+    assert_eq!(cursor.encode().unwrap(), before);
+    assert!(out.feasibility.unwrap().correspondence.is_empty());
+}

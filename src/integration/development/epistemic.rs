@@ -162,6 +162,11 @@ impl Runtime {
         let mut expressive = false;
         let mut conflict = false;
         let mut labels = vec![];
+        // Equivalência empírica é relativa à versão vinculada no snapshot.
+        // Não reinterpretar conflitos históricos de versões anteriores como
+        // refutação automática de uma revisão posterior autorizada.
+        let mut same_version: Vec<(Attributes, Vec<Label>, Label, ConsequenceSample)> = vec![];
+        let mut joint_witnesses: Vec<ConsequenceSample> = vec![];
         for sample in unique {
             if report.scans == 8 || self.attention_scans >= self.limits.attention_scans {
                 report.state = EpistemicDiagnosis::ResourceLimited;
@@ -184,13 +189,33 @@ impl Runtime {
             {
                 continue;
             }
-            if Attributes::decode(sample.attributes.event.payload())
-                .map_err(|e| format!("{e:?}"))?
-                != attributes
-            {
+            let observed = Attributes::decode(sample.attributes.event.payload())
+                .map_err(|e| format!("{e:?}"))?;
+            let actual = Label::from_bool(sample.trial.to == contract.target);
+            if sample.recorded_version == version {
+                let signature: Vec<_> = version
+                    .criteria
+                    .iter()
+                    .map(|h| h.evaluate(observed))
+                    .collect();
+                report.criterion_evaluations += signature.len();
+                for (old_attributes, old_signature, old_actual, old_sample) in &same_version {
+                    if *old_attributes != observed
+                        && *old_signature == signature
+                        && *old_actual != actual
+                    {
+                        for witness in [old_sample, &sample] {
+                            if !joint_witnesses.contains(witness) {
+                                joint_witnesses.push(witness.clone());
+                            }
+                        }
+                    }
+                }
+                same_version.push((observed, signature, actual, sample.clone()));
+            }
+            if observed != attributes {
                 continue;
             }
-            let actual = Label::from_bool(sample.trial.to == contract.target);
             labels.push(actual);
             let compatible = predictions
                 .iter()
@@ -202,6 +227,17 @@ impl Runtime {
                 .find(|(h, _)| Some(*h) == version.candidate)
                 .is_some_and(|(_, label)| *label != actual);
             report.evidence.push(sample);
+        }
+        if !joint_witnesses.is_empty() && !expressive {
+            expressive = true;
+            // Mesmas previsões de TODOS os critérios e efeitos opostos: nenhum
+            // critério da versão acomoda conjuntamente essas duas experiências.
+            // Uma refutação local já suficiente conserva seu relatório/prova.
+            for witness in joint_witnesses {
+                if !report.evidence.contains(&witness) {
+                    report.evidence.push(witness);
+                }
+            }
         }
         // Mesmos atributos com rótulos opostos: conflito observado, não prova
         // de que uma nova família determinística resolveria a contradição.

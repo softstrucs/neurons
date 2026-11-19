@@ -342,3 +342,32 @@ armazenados tem até 64×23 avaliações, reportadas por `integrity_evaluations`
 separadas dos custos ativos/cumulativos da busca e sem eventos neurais ou ações.
 Os testes exercitam continuação 32+3, resto de atenção preservado, recusa de
 proveniência/versão obsoleta, ofertas negadas/inviáveis, exaustão e novo processo.
+
+### Evidências empíricas e limites da equivalência informacional
+
+`informational_alternatives` significa igualdade do vetor de previsões dos
+critérios atuais, não igualdade de efeitos físicos. Consequências observadas
+continuam registradas integralmente: 77 e 88, por exemplo, são efeitos distintos,
+ainda que ambos sejam negativos para o destino 20.
+
+O diagnóstico existente agora reconhece duas experiências com atributos
+distintos, vinculadas à mesma versão completa no snapshot, previsões iguais e
+rótulos observados opostos. Nenhum critério dessa versão acomoda conjuntamente
+essas testemunhas: retorna `ModelExpressiveness` e preserva origens/evidências.
+A regra não altera H23, não admite lições e não reinterpreta automaticamente
+conflitos de outras versões. `recorded_version` é a versão do snapshot; não é um
+relatório histórico de previsão supostamente persistido.
+
+`ProbeFeasibility.epistemic` expõe o diagnóstico. `complete` indica cobertura da
+verificação, não aprovação da equivalência. Versão refutada não libera
+correspondências operacionais; a investigação continuada suspende o cursor antes
+da execução. O planejador existente evita transferência pelo conceito refutado,
+conservando suas regras para alternativas inteiramente observadas.
+
+São até oito registros/32 inspeções compartilhadas, até 23×9 avaliações de
+critérios no diagnóstico e 28 comparações de assinaturas. O custo do diagnóstico
+aparece em seu relatório, separado das avaliações de ofertas; nenhuma reserva
+neural ou permissão é ampliada. Insuficiência/cobertura incompleta mantém
+abstenção ou investigação explicitamente autorizada, não certificação física.
+Os controles incluem consistência, divergência, ablação das evidências com a
+mesma representação de memória, revisão autorizada, cursor obsoleto e novo processo.

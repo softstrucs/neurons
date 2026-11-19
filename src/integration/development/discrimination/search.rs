@@ -273,6 +273,8 @@ pub struct ProbeFeasibility {
     pub correspondence: Vec<ProbeCorrespondence>,
     pub complete: bool,
     pub evaluations: usize,
+    /// Compatibilidade empírica da versão; não certifica equivalência física.
+    pub epistemic: Option<EpistemicReport>,
 }
 impl ProbeFeasibility {
     fn link(&mut self, probes: &ProbeSelection) -> Result<(), String> {
@@ -415,6 +417,7 @@ impl Runtime {
             correspondence: vec![],
             complete: false,
             evaluations: 0,
+            epistemic: None,
         };
         for offer in offers {
             if self.attention_scans >= self.limits.attention_scans {
@@ -426,8 +429,18 @@ impl Runtime {
             out.evaluations += option.predictions.len();
             out.options.push(option);
         }
-        out.link(probes)?;
-        out.complete = true;
+        let query = offers
+            .first()
+            .map(|o| Attributes::decode(o.attributes.event.payload()))
+            .or_else(|| probes.patterns.first().copied().map(Ok))
+            .unwrap_or_else(|| Attributes::new([0; 6]))
+            .map_err(|e| format!("{e:?}"))?;
+        let epistemic = self.assess_epistemic(memory, session, contract, query)?;
+        out.complete = epistemic.state != EpistemicDiagnosis::ResourceLimited;
+        if !epistemic.blocks_application() {
+            out.link(probes)?;
+        }
+        out.epistemic = Some(epistemic);
         Ok(out)
     }
     pub fn investigate_continued_probes(
@@ -455,9 +468,25 @@ impl Runtime {
         preview.patterns.clear();
         let mut feasibility =
             self.correlate_probe_offers(memory, session, contract, &preview, offers)?;
-        let probes = if feasibility.complete {
+        let probes = if feasibility
+            .epistemic
+            .as_ref()
+            .is_some_and(|e| e.state == EpistemicDiagnosis::ModelExpressiveness)
+        {
+            let mut probes = search.selection.clone();
+            probes.status = ProbeStatus::RepresentationLimited;
+            probes.round_inspected = 0;
+            probes.round_evaluations = 0;
+            probes
+        } else if feasibility.complete {
             let probes = self.continue_probe_search(session, contract, &offered, search, budget)?;
-            feasibility.link(&probes)?;
+            if !feasibility
+                .epistemic
+                .as_ref()
+                .is_some_and(EpistemicReport::blocks_application)
+            {
+                feasibility.link(&probes)?;
+            }
             probes
         } else {
             let mut probes = search.selection.clone();
