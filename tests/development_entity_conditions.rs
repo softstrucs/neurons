@@ -142,9 +142,6 @@ fn learned(
     axis: usize,
     serial: u32,
 ) -> (Runtime, Session) {
-    let mut r = runtime(reporter, context);
-    let mut s = session(context);
-    let c = contract(&s, entity, reporter);
     let mut positive = [0; 6];
     positive[axis] = 1;
     let negative = if axis == 0 {
@@ -152,10 +149,30 @@ fn learned(
     } else {
         [1, 0, 0, 0, 0, 0]
     };
+    acquired(
+        entity,
+        context,
+        reporter,
+        serial,
+        &[(positive, 20), (negative, 77)],
+    )
+}
+// A tabela de consequências é material do ambiente de avaliação. O candidato
+// recebe somente atributos atuais, depois ActionTrial, nunca o eixo/regra-alvo.
+fn acquired(
+    entity: u32,
+    context: u32,
+    reporter: u32,
+    serial: u32,
+    samples: &[([u8; 6], i32)],
+) -> (Runtime, Session) {
+    assert!(samples.len() <= 2);
+    let mut r = runtime(reporter, context);
+    let mut s = session(context);
+    let c = contract(&s, entity, reporter);
     let mut frames = vec![];
-    for (id, bits) in [(1, positive), (2, negative)] {
-        // Regra de referência só prepara World privado; aquisição recebe o efeito.
-        let actual = if bits[axis] == 1 { 20 } else { 77 };
+    for (index, &(bits, actual)) in samples.iter().enumerate() {
+        let id = index as u32 + 1;
         let at = (id as u64 - 1) * 10;
         let mut w = world(entity, reporter, context, 10 + id as i32, actual);
         let f = r
@@ -186,7 +203,7 @@ fn learned(
     let report = r
         .teach_consequences(&mut s, c, &frames, assessment, permissions)
         .unwrap();
-    assert_eq!(report.pedagogy.final_version.number, 2);
+    assert_eq!(report.pedagogy.final_version.number, samples.len() as u32);
     (r, s)
 }
 fn prediction(s: &Session, bits: [u8; 6]) -> ConceptDecision {
@@ -734,4 +751,281 @@ fn opposing_reporters_do_not_become_separate_truths_for_the_same_observed_entity
         assert!(out.counterevidence.iter().any(|e| e.trial.source == src(7)));
         assert!(out.counterevidence.iter().any(|e| e.trial.source == src(8)));
     }
+}
+
+// Experimentos prospectivos de relevância. Nenhum parâmetro do candidato diz
+// qual atributo interessa: o eixo só existe no gerador/oráculo deste teste.
+fn correlated() -> (Runtime, Session) {
+    acquired(501, 61, 7, 1, &[([1, 1, 0, 0, 0, 0], 20), ([0; 6], 77)])
+}
+fn separate_correlation(
+    actual: i32,
+    teaching: bool,
+    reverse: bool,
+) -> (DiscriminatingInvestigation, Session, usize) {
+    let (memory, mut s) = correlated();
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let mut redundant = world(501, 7, 61, 777, 20);
+    let mut discriminating = world(501, 7, 61, 888, actual);
+    let g = teaching.then(|| PredictiveRevision {
+        record: EngramId::new(999).unwrap(),
+        receipt: 1999,
+        assessment: PedagogyAssessment::new(
+            &[Attributes::new([0, 1, 1, 0, 0, 1]).unwrap().into()],
+            &[Attributes::new([1, 0, 1, 1, 0, 0]).unwrap().into()],
+        )
+        .unwrap(),
+        permissions: PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(999).unwrap()],
+        },
+    });
+    let mut offers = [
+        InvestigationOffer {
+            world: &mut redundant,
+            attributes: reading(501, 7, [1, 1, 1, 0, 1, 0], 9, 20, 50),
+            intervention: request(501, 7, 61, 9, 20, 52),
+        },
+        InvestigationOffer {
+            world: &mut discriminating,
+            attributes: reading(501, 7, [1, 0, 0, 1, 0, 1], 9, 21, 50),
+            intervention: request(501, 7, 61, 9, 21, 52),
+        },
+    ];
+    if reverse {
+        offers.swap(0, 1);
+    }
+    let out = r
+        .investigate_disagreement(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new([1, 0, 0, 1, 0, 1]).unwrap(),
+            &mut offers,
+            g,
+        )
+        .unwrap();
+    assert_eq!(redundant.action_count(), 0);
+    assert_eq!(discriminating.action_count(), 1);
+    assert!(out.selection_scans <= 4);
+    assert!(out.criterion_evaluations <= 4 * 23);
+    assert!(r.attention_scans() <= 32);
+    (out, s, r.experiences().len())
+}
+
+#[test]
+fn relevant_attribute_is_learned_for_all_six_axes_without_target_rule_input() {
+    use neurons::cognition::concepts::{Attribute, Criterion};
+    let mut novel = 0;
+    for axis in 0..6 {
+        let (_, s) = learned(501, 61, 7, axis, 1);
+        assert_eq!(
+            s.pedagogy_version().unwrap().criteria,
+            vec![Criterion::attribute(Attribute::ALL[axis])]
+        );
+        for mask in 0..64 {
+            let bits = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+            assert_eq!(
+                prediction(&s, bits),
+                ConceptDecision::Supported(Label::from_bool(bits[axis] == 1))
+            );
+            let positive = 1 << axis;
+            let negative = if axis == 0 { 0 } else { 1 };
+            if mask != positive && mask != negative {
+                novel += 1;
+            }
+        }
+    }
+    assert_eq!(novel, 372);
+    println!("RELEVANCE: 384/384 evaluations; 372 outside acquisition; six opaque axes");
+}
+
+#[test]
+fn perfect_training_correlation_does_not_establish_which_condition_is_relevant() {
+    let (_, s) = correlated();
+    assert_eq!(s.pedagogy_version().unwrap().criteria.len(), 3);
+    for bits in [[1, 0, 1, 0, 1, 0], [0, 1, 0, 1, 0, 1]] {
+        assert!(matches!(prediction(&s, bits), ConceptDecision::Abstain(_)));
+    }
+    let before = s.encode();
+    let (_, unexposed) = correlated();
+    assert_eq!(unexposed.encode(), before);
+}
+
+#[test]
+fn discriminating_experience_breaks_spurious_correlation_and_generalizes() {
+    let (out, s, observations) = separate_correlation(20, true, false);
+    assert_eq!(out.origin.state, EpistemicDiagnosis::InsufficientEvidence);
+    assert_eq!(out.selected, Some(211));
+    assert_eq!(out.options[0].separation, 0);
+    assert!(out.options[1].separation > 0);
+    assert_eq!(out.result, InvestigationResult::Learned);
+    assert_eq!(out.retained.len(), 1);
+    assert_eq!(s.pedagogy_version().unwrap().number, 3);
+    assert_eq!(observations, 3);
+    let mut novel = 0;
+    for mask in 0..64 {
+        let bits = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+        assert_eq!(
+            prediction(&s, bits),
+            ConceptDecision::Supported(Label::from_bool(bits[0] == 1))
+        );
+        if ![0, 3, 41].contains(&mask) {
+            novel += 1;
+        }
+    }
+    assert_eq!(novel, 61);
+    println!("DISCRIMINATION: ambiguous A/B/A&B -> A; 61 novel inputs, no hidden-result selection");
+}
+
+#[test]
+fn concealed_outcome_changes_revision_but_not_investigation_choice() {
+    let (positive, a, _) = separate_correlation(20, true, false);
+    let (negative, b, _) = separate_correlation(77, true, false);
+    assert_eq!(positive.selected, negative.selected);
+    assert_eq!(positive.options, negative.options);
+    assert_ne!(positive.retained, negative.retained);
+    assert!(matches!(
+        prediction(&b, [0, 1, 1, 1, 0, 0]),
+        ConceptDecision::Abstain(_)
+    ));
+    assert_ne!(a.pedagogy_version().unwrap(), b.pedagogy_version().unwrap());
+    println!("INTERVENTION: same observations/offers, hidden outcome changed only after selection; negative branch remains ambiguous");
+}
+
+#[test]
+fn offer_order_is_not_a_relevance_oracle() {
+    let (a, sa, _) = separate_correlation(20, true, false);
+    let (b, sb, _) = separate_correlation(20, true, true);
+    assert_eq!(a.selected, b.selected);
+    assert_eq!(a.retained, b.retained);
+    assert_eq!(sa.encode(), sb.encode());
+}
+
+#[test]
+fn observation_without_admission_keeps_learning_provisional() {
+    let (_, before) = correlated();
+    let (out, after, _) = separate_correlation(20, false, false);
+    assert_eq!(out.retained.len(), 1);
+    assert_eq!(out.result, InvestigationResult::Observed);
+    assert!(out.teaching.is_none());
+    assert_eq!(before.encode(), after.encode());
+    assert!(matches!(
+        prediction(&after, [1, 0, 1, 0, 0, 1]),
+        ConceptDecision::Abstain(_)
+    ));
+}
+
+#[test]
+fn missing_relevant_condition_abstains_but_missing_irrelevant_condition_does_not() {
+    use neurons::cognition::concepts::Observation;
+    let (_, s) = learned(501, 61, 7, 0, 1);
+    let mut bits = [Some(1), Some(0), Some(1), Some(0), Some(0), Some(1)];
+    bits[0] = None;
+    let absent = s
+        .pedagogy_query(eid(81), Observation::new(bits).unwrap())
+        .unwrap();
+    assert!(matches!(absent.decision, ConceptDecision::Abstain(_)));
+    bits[0] = Some(1);
+    bits[5] = None;
+    assert_eq!(
+        s.pedagogy_query(eid(82), Observation::new(bits).unwrap())
+            .unwrap()
+            .decision,
+        ConceptDecision::Supported(Label::Positive)
+    );
+}
+
+#[test]
+fn no_experience_cannot_select_a_relevant_axis() {
+    let s = session(61);
+    assert_eq!(s.pedagogy_version().unwrap().criteria.len(), 23);
+    for mask in 0..64 {
+        assert!(matches!(
+            prediction(&s, std::array::from_fn(|i| ((mask >> i) & 1) as u8)),
+            ConceptDecision::Abstain(_)
+        ));
+    }
+}
+
+#[test]
+fn unavailable_condition_yields_conflict_not_an_invented_context_partition() {
+    let (memory, s) = acquired(501, 61, 7, 1, &[([1, 0, 0, 0, 0, 0], 20)]);
+    let mut r = runtime(7, 61);
+    r.inherit_consequence_contract(&memory).unwrap();
+    // O ambiente mudou uma condição que não está em nenhum sensor/Scope.
+    // Fornecer um novo ContextId ao candidato resolveria artificialmente a questão.
+    let mut w = world(501, 7, 61, 999, 77);
+    r.observe_attributes(&w, 7, reading(501, 7, [1, 0, 0, 0, 0, 0], 8, 1, 50))
+        .unwrap();
+    r.intervene(&mut w, &request(501, 7, 61, 8, 10, 52))
+        .unwrap();
+    let bytes = s.encode();
+    let out = r
+        .assess_epistemic(
+            &memory,
+            &s,
+            contract(&s, 501, 7),
+            Attributes::new([1, 0, 0, 0, 0, 0]).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(out.state, EpistemicDiagnosis::ObservationConflict);
+    assert_eq!(out.question, Some(EpistemicQuestion::CheckSourceAndContext));
+    assert_eq!(out.evidence.len(), 2);
+    assert!(out.blocks_application());
+    assert_eq!(s.encode(), bytes);
+    println!("LIMIT: indistinguishable inputs/opposite effects -> retained conflict, no discovered latent context");
+}
+
+#[test]
+fn finite_family_can_select_a_spurious_rule_and_must_preserve_its_counterexample() {
+    // Oráculo independente XOR(A,B): os dois pontos de aquisição também cabem
+    // em A. H23 não contém XOR. A certeza interna não prova verdade universal.
+    let (memory, s) = learned(501, 61, 7, 0, 1);
+    let bits = [1, 1, 1, 0, 0, 1];
+    let actual = if (bits[0] == 1) ^ (bits[1] == 1) {
+        20
+    } else {
+        77
+    };
+    assert_eq!(
+        prediction(&s, bits),
+        ConceptDecision::Supported(Label::Positive)
+    );
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 888, actual);
+    let out = r
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                objective: eid(90),
+                task: task(501, 61, 7),
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, bits, 8, 1, 70),
+            &[request(501, 7, 61, 8, 10, 72)],
+        )
+        .unwrap();
+    assert_eq!(w.action_count(), 1);
+    assert_ne!(out.reason, PredictiveReason::Reached);
+    assert_eq!(out.review.unwrap().agreement, Some(false));
+    let assessed = r
+        .assess_epistemic(
+            &memory,
+            &s,
+            contract(&s, 501, 7),
+            Attributes::new(bits).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(assessed.state, EpistemicDiagnosis::ModelExpressiveness);
+    assert!(assessed.blocks_application());
+    assert_eq!(assessed.evidence.len(), 1);
+    assert_eq!(assessed.evidence[0].trial.to, actual);
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+    println!("COUNTEREXAMPLE: H23 learned A, external XOR oracle refutes novel A=B=1; observation retained, no invented family");
 }
