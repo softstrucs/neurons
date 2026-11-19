@@ -5,10 +5,27 @@ use crate::cognition::concepts::{Attributes, Criterion, Label};
 use crate::curriculum::PedagogyHost;
 use crate::learning::concepts::HypothesisVersion;
 
+mod search;
+pub use search::{ContinuedInvestigation, ProbeCorrespondence, ProbeFeasibility, ProbeSearch};
+
 pub struct InvestigationOffer<'a> {
     pub world: &'a mut World,
     pub attributes: Reading,
     pub intervention: Intervention,
+}
+
+fn validate_offer_identities(offers: &[InvestigationOffer<'_>]) -> Result<(), String> {
+    if offers.iter().enumerate().any(|(i, o)| {
+        offers[..i].iter().any(|old| {
+            old.attributes.id == o.attributes.id
+                || old.attributes.evidence == o.attributes.evidence
+                || old.intervention.id == o.intervention.id
+                || old.intervention.permit.id == o.intervention.permit.id
+        })
+    }) {
+        return Err("identidades de oferta ambíguas".into());
+    }
+    Ok(())
 }
 
 /// Suborçamento da atenção existente, não uma nova reserva independente.
@@ -31,6 +48,7 @@ pub enum ProbeStatus {
     NoDisagreement,
     RepresentationLimited,
     ResourceLimited,
+    Exhausted,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ProbeSelection {
@@ -44,6 +62,8 @@ pub struct ProbeSelection {
     pub space_size: usize,
     /// Ready pode cobrir somente um prefixo, sem alegar ótimo ou exaustividade.
     pub exhaustive: bool,
+    pub round_inspected: usize,
+    pub round_evaluations: usize,
 }
 /// Autoridade pedagógica explícita, independente da proposta de sondas.
 pub struct ProbeTeaching {
@@ -72,72 +92,8 @@ impl Runtime {
         offered: &[Attributes],
         budget: ProbeBudget,
     ) -> Result<ProbeSelection, String> {
-        if !self.access.read_knowledge
-            || offered.len() > 4
-            || budget.patterns > 32
-            || budget.evaluations > 32 * 23
-        {
-            return Err("seleção de sondas não autorizada ou orçamento inválido".into());
-        }
-        let (_, scope) = session.pedagogy_identity()?;
-        if !scope.validity.contains(session.logical_time()) {
-            return Err("sessão fora da validade".into());
-        }
-        let version = session.pedagogy_version()?;
-        let mut out = ProbeSelection {
-            version,
-            status: ProbeStatus::ResourceLimited,
-            patterns: vec![],
-            inspected: 0,
-            evaluations: 0,
-            excluded: 0,
-            space_size: 64,
-            exhaustive: false,
-        };
-        if out.version.criteria.is_empty() {
-            out.status = ProbeStatus::RepresentationLimited;
-            return Ok(out);
-        }
-        if out.version.criteria.len() == 1 {
-            // Prova estrutural de ausência de discordância na versão, não de
-            // correção do modelo no mundo; nenhuma enumeração é alegada.
-            out.status = ProbeStatus::NoDisagreement;
-            return Ok(out);
-        }
-        let known = session.pedagogy_existing()?;
-        for mask in (0..64).rev() {
-            if out.inspected >= budget.patterns
-                || self.attention_scans >= self.limits.attention_scans
-            {
-                return Ok(out);
-            }
-            out.inspected += 1;
-            self.attention_scans += 1;
-            let attributes = Attributes::new(std::array::from_fn(|i| ((mask >> i) & 1) as u8))
-                .map_err(|e| format!("{e:?}"))?;
-            if known.contains(&attributes) || offered.contains(&attributes) {
-                out.excluded += 1;
-                continue;
-            }
-            if out.evaluations + out.version.criteria.len() > budget.evaluations {
-                return Ok(out);
-            }
-            let mut positive = 0;
-            for h in &out.version.criteria {
-                out.evaluations += 1;
-                positive += usize::from(h.evaluate(attributes) == Label::Positive);
-            }
-            if positive > 0 && positive < out.version.criteria.len() {
-                out.patterns.push(attributes);
-                if out.patterns.len() == 2 {
-                    out.status = ProbeStatus::Ready;
-                    return Ok(out);
-                }
-            }
-        }
-        out.exhaustive = true;
-        out.status = ProbeStatus::NoDisagreement;
-        Ok(out)
+        let mut search = ProbeSearch::make(session, None, offered)?;
+        self.advance_probe_search(session, &mut search, budget)
     }
 
     /// Usa SOMENTE atributos atuais das ofertas; destinos de World continuam
@@ -162,6 +118,21 @@ impl Runtime {
             .map(|o| Attributes::decode(o.attributes.event.payload()).map_err(|e| format!("{e:?}")))
             .collect::<Result<Vec<_>, _>>()?;
         let probes = self.select_discriminating_probes(session, &offered, budget)?;
+        self.finish_probe_investigation(
+            memory, session, contract, question, offers, teaching, probes,
+        )
+    }
+
+    fn finish_probe_investigation(
+        &mut self,
+        memory: &impl EpisodeMemory,
+        session: &mut Session,
+        contract: ConsequenceContract,
+        question: Attributes,
+        offers: &mut [InvestigationOffer<'_>],
+        teaching: Option<ProbeTeaching>,
+        probes: ProbeSelection,
+    ) -> Result<OperationalInvestigation, String> {
         if probes.status != ProbeStatus::Ready {
             let epistemic = self.assess_epistemic(memory, session, contract, question)?;
             return Ok(OperationalInvestigation {
@@ -198,6 +169,8 @@ pub struct DiscriminatingOption {
     pub predictions: Vec<(Criterion, Label)>,
     /// Menor grupo separado, sem probabilidades ou confiança inventadas.
     pub separation: usize,
+    /// Controle habilitado no simulador; ainda sujeito a permissão e reserva.
+    pub realizable: bool,
     pub authorized: bool,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -233,6 +206,71 @@ pub struct DiscriminatingInvestigation {
     pub failure: Option<String>,
 }
 impl Runtime {
+    fn assess_investigation_offer(
+        &self,
+        memory: &impl EpisodeMemory,
+        session: &Session,
+        c: ConsequenceContract,
+        offer: &InvestigationOffer<'_>,
+        version: &HypothesisVersion,
+    ) -> Result<DiscriminatingOption, String> {
+        let q = offer.world.attribute_query(c.action);
+        let sensor = self
+            .sensors
+            .iter()
+            .find(|s| s.id == offer.attributes.sensor)
+            .ok_or("sensor da oferta ausente")?;
+        if q.world != c.world
+            || q.revision != c.revision
+            || q.context != c.scope.context.get()
+            || q.source != c.source
+            || offer.attributes.item.get() != q.world
+            || offer.attributes.source != q.source
+            || sensor.encoding != Encoding::BooleanAttributes
+            || sensor.context != q.context
+            || sensor.source != q.source
+            || !c
+                .scope
+                .validity
+                .contains(offer.attributes.event.logical_time())
+            || offer.attributes.event.logical_time() > session.logical_time()
+            || offer.attributes.event.logical_time() > offer.intervention.at
+            || !c.scope.validity.contains(offer.intervention.at)
+            || offer.intervention.at >= session.logical_time()
+        {
+            return Err("oferta fora do vínculo/contexto/validade".into());
+        }
+        let attributes =
+            Attributes::decode(offer.attributes.event.payload()).map_err(|e| format!("{e:?}"))?;
+        let predictions: Vec<_> = version
+            .criteria
+            .iter()
+            .map(|h| (*h, h.evaluate(attributes)))
+            .collect();
+        let positive = predictions
+            .iter()
+            .filter(|(_, l)| *l == Label::Positive)
+            .count();
+        let separation = positive.min(predictions.len() - positive);
+        let realizable =
+            offer.world.available_actions().contains(&c.action) && offer.world.action_count() < 8;
+        let authorized = realizable
+            && self.world_observable(offer.world)
+            && self.access.sensors.contains(&sensor.id)
+            && self.connected(sensor)
+            && self.permit_matches(offer.world, &offer.intervention)
+            && offer.intervention.permit.action == c.action
+            && !memory.memory_used(&offer.intervention)
+            && self.valid_requests(offer.world, std::slice::from_ref(&offer.intervention));
+        Ok(DiscriminatingOption {
+            reading: offer.attributes,
+            predictions,
+            separation,
+            realizable,
+            authorized,
+        })
+    }
+
     /// Até quatro ofertas, uma experiência e o episódio MP09 já existente.
     /// Todos os destinos permanecem privados até intervene. Sem investigação
     /// implícita, escolha por gabarito, nova família ou admissão relacional.
@@ -253,16 +291,7 @@ impl Runtime {
         {
             return Err("investigação negada, consumida ou excessiva".into());
         }
-        if offers.iter().enumerate().any(|(i, o)| {
-            offers[..i].iter().any(|old| {
-                old.attributes.id == o.attributes.id
-                    || old.attributes.evidence == o.attributes.evidence
-                    || old.intervention.id == o.intervention.id
-                    || old.intervention.permit.id == o.intervention.permit.id
-            })
-        }) {
-            return Err("identidades de oferta ambíguas".into());
-        }
+        validate_offer_identities(offers)?;
         if let Some(g) = &teaching {
             if !self.access.learn_concepts
                 || self.conceptual_attempted
@@ -318,59 +347,11 @@ impl Runtime {
             }
             self.attention_scans += 1;
             out.selection_scans += 1;
-            let q = offer.world.attribute_query(c.action);
-            let sensor = self
-                .sensors
-                .iter()
-                .find(|s| s.id == offer.attributes.sensor)
-                .ok_or("sensor da oferta ausente")?;
-            if q.world != c.world
-                || q.revision != c.revision
-                || q.context != c.scope.context.get()
-                || q.source != c.source
-                || offer.attributes.item.get() != q.world
-                || offer.attributes.source != q.source
-                || sensor.encoding != Encoding::BooleanAttributes
-                || sensor.context != q.context
-                || sensor.source != q.source
-                || !c
-                    .scope
-                    .validity
-                    .contains(offer.attributes.event.logical_time())
-                || offer.attributes.event.logical_time() > session.logical_time()
-                || offer.attributes.event.logical_time() > offer.intervention.at
-                || !c.scope.validity.contains(offer.intervention.at)
-                || offer.intervention.at >= session.logical_time()
-            {
-                return Err("oferta fora do vínculo/contexto/validade".into());
-            }
-            let attributes = Attributes::decode(offer.attributes.event.payload())
-                .map_err(|e| format!("{e:?}"))?;
-            let predictions: Vec<_> = version
-                .criteria
-                .iter()
-                .map(|h| (*h, h.evaluate(attributes)))
-                .collect();
-            out.criterion_evaluations += predictions.len();
-            let positive = predictions
-                .iter()
-                .filter(|(_, l)| *l == Label::Positive)
-                .count();
-            let separation = positive.min(predictions.len() - positive);
-            let authorized = offer.world.available_actions().contains(&c.action)
-                && self.world_observable(offer.world)
-                && self.access.sensors.contains(&sensor.id)
-                && self.connected(sensor)
-                && self.permit_matches(offer.world, &offer.intervention)
-                && offer.intervention.permit.action == c.action
-                && !memory.memory_used(&offer.intervention)
-                && self.valid_requests(offer.world, std::slice::from_ref(&offer.intervention));
-            out.options.push(DiscriminatingOption {
-                reading: offer.attributes,
-                predictions,
-                separation,
-                authorized,
-            });
+            let option = self.assess_investigation_offer(memory, session, c, offer, &version)?;
+            out.criterion_evaluations += option.predictions.len();
+            let authorized = option.authorized;
+            let separation = option.separation;
+            out.options.push(option);
             // Desempate estável por ID de observação, nunca consequência oculta.
             if authorized
                 && separation > 0

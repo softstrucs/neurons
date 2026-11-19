@@ -306,5 +306,39 @@ diagnóstico epistemológico. `NoDisagreement` não comprova verdade: uma hipót
 As sondas são de avaliação; experiências executáveis continuam dependendo dos
 sensores e ofertas do ambiente. O prefixo pode não alcançar padrões úteis dentro
 do teto: o controle de eixos (5,0) suspende a busca em 32 inspeções, sem ação ou
-aprendizagem. Não há nova família H23, formato persistente, autoridade restaurada,
+aprendizagem. Não há nova família H23, alteração de codec científico, autoridade restaurada,
 conhecimento de destinos futuros ou demonstração de contribuição causal neural.
+
+### Viabilidade e continuação explícita da investigação
+
+`ProbeSearch::new` vincula o cursor ao contrato, imagem completa da Session e
+atributos das ofertas excluídos da avaliação. `continue_probe_search` preserva
+padrões examinados, propostas parciais e custos acumulados. O orçamento de cada
+rodada continua limitado a 32 padrões/736 avaliações e à atenção restante no
+Runtime. Não há recarga automática: um Runtime com 32 inspeções consumidas segue
+esgotado, inclusive após restauração. Uma nova instância e seu acesso/orçamento
+precisam ser fornecidos explicitamente pelo chamador.
+
+`investigate_continued_probes` revalida os observáveis das ofertas antes de mover
+o cursor. `ProbeFeasibility` separa informação discriminante, controle habilitado
+no simulador (`realizable`), permissão atual (`authorized`) e execução efetiva
+(relatório da investigação). A habilitação não substitui reservas de execução.
+Correspondência exata de atributos e alternativa com a mesma separação prevista
+são relatadas separadamente; esta última não comprova equivalência física.
+Uma sonda hipotética sem oferta não é fabricada nem executada implicitamente.
+
+Se a identidade, contexto, versão, evidência admitida ou conjunto de atributos
+ofertados mudar, a continuação é recusada sem alterar o cursor. Essa comparação é
+conservadora: qualquer alteração nos bytes da Session exige nova busca.
+`dismiss_batch` retira um lote de propostas, preserva seu histórico e permite
+percorrer o restante; não apaga evidências nem concede autoridade. `Exhausted`
+descreve esgotamento dos candidatos, não conclusão sobre o objetivo.
+
+`ProbeSearch::encode/restore` usa o envelope administrativo local `NRNPRB01`
+(até 41.024 bytes), separado de F1/MP05/NRNPIFI/NRNARC, sem carregar concessões ou
+restaurar Session/World. Verifica vínculo, contabilidade e checksum; este detecta
+corrupção acidental, não autentica arquivos hostis. A validação dos candidatos
+armazenados tem até 64×23 avaliações, reportadas por `integrity_evaluations`,
+separadas dos custos ativos/cumulativos da busca e sem eventos neurais ou ações.
+Os testes exercitam continuação 32+3, resto de atenção preservado, recusa de
+proveniência/versão obsoleta, ofertas negadas/inviáveis, exaustão e novo processo.

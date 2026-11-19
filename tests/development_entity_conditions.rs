@@ -1863,3 +1863,590 @@ fn operational_investigation_cannot_reuse_a_consumed_episode_or_restore_authorit
         .is_err());
     assert_eq!(denied.checkpoint(&restored).unwrap(), bytes);
 }
+
+fn late_offered() -> [Attributes; 2] {
+    [
+        Attributes::new([1; 6]).unwrap(),
+        Attributes::new([1, 1, 0, 1, 0, 0]).unwrap(),
+    ]
+}
+fn paused_late_search(s: &Session) -> ProbeSearch {
+    let c = contract(s, 501, 7);
+    let mut search = ProbeSearch::new(s, c, &late_offered()).unwrap();
+    let mut r = runtime(7, 61);
+    let out = r
+        .continue_probe_search(s, c, &late_offered(), &mut search, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(out.status, ProbeStatus::ResourceLimited);
+    assert_eq!(out.inspected, 32);
+    assert_eq!(out.round_inspected, 32);
+    assert_eq!(r.attention_scans(), 32);
+    let before = search.encode().unwrap();
+    let again = r
+        .continue_probe_search(s, c, &late_offered(), &mut search, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(again.round_inspected, 0);
+    assert_eq!(search.encode().unwrap(), before);
+    search
+}
+fn execute_late_search(
+    memory: &Runtime,
+    s: &mut Session,
+    search: &mut ProbeSearch,
+    actual: i32,
+) -> ContinuedInvestigation {
+    let c = contract(s, 501, 7);
+    let mut r = runtime(7, 61); // nova instância, acesso e orçamento explicitamente fornecidos
+    let mut boring = world(501, 7, 61, 777, 20);
+    let mut useful = world(501, 7, 61, 888, actual);
+    let out = r
+        .investigate_continued_probes(
+            memory,
+            s,
+            c,
+            late_offered()[1],
+            &mut [
+                InvestigationOffer {
+                    world: &mut boring,
+                    attributes: reading(501, 7, [1; 6], 9, 20, 50),
+                    intervention: request(501, 7, 61, 9, 20, 52),
+                },
+                InvestigationOffer {
+                    world: &mut useful,
+                    attributes: reading(501, 7, [1, 1, 0, 1, 0, 0], 9, 21, 50),
+                    intervention: request(501, 7, 61, 9, 21, 52),
+                },
+            ],
+            Some(ProbeTeaching {
+                record: EngramId::new(999).unwrap(),
+                receipt: 1999,
+                permissions: PedagogyPermissions {
+                    evaluation: Some(c.scope),
+                    presentation: Some(c.scope),
+                    admissions: vec![EngramId::new(999).unwrap()],
+                },
+            }),
+            search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(boring.action_count(), 0);
+    assert_eq!(useful.action_count(), 1);
+    assert!(r.attention_scans() <= 32);
+    out
+}
+
+#[test]
+fn resumed_search_reaches_late_patterns_without_repeating_the_prefix() {
+    let (memory, mut s) = contextual_acquisition(5, 0);
+    let c = contract(&s, 501, 7);
+    for _ in 0..2 {
+        let old = runtime(7, 61)
+            .select_discriminating_probes(&s, &late_offered(), ProbeBudget::default())
+            .unwrap();
+        assert_eq!(old.status, ProbeStatus::ResourceLimited);
+        assert_eq!(old.inspected, 32);
+    }
+    let mut search = paused_late_search(&s);
+    let bytes = search.encode().unwrap();
+    search = ProbeSearch::restore(&bytes, &s, c).unwrap();
+    let out = execute_late_search(&memory, &mut s, &mut search, 77);
+    assert_eq!(out.outcome.probes.inspected, 35);
+    assert_eq!(out.outcome.probes.round_inspected, 3);
+    assert_eq!(
+        out.outcome.investigation.unwrap().result,
+        InvestigationResult::Learned
+    );
+    assert_eq!(s.pedagogy_version().unwrap().number, 3);
+    for mask in 0..64 {
+        let bits = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+        assert_eq!(
+            prediction(&s, bits),
+            ConceptDecision::Supported(Label::from_bool(bits[0] == 1 && bits[5] == 1))
+        );
+    }
+    println!("CONTINUATION: two stateless rounds repeat 32+32 and fail; cursor 32+3=35 learns F&A, 64/64 oracle results");
+}
+
+#[test]
+fn continuation_preserves_partial_candidates_and_does_not_skip_unevaluated_patterns() {
+    let (_, s) = contextual_acquisition(5, 0);
+    let c = contract(&s, 501, 7);
+    let mut search = paused_late_search(&s);
+    let mut r = runtime(7, 61);
+    let partial = r
+        .continue_probe_search(
+            &s,
+            c,
+            &late_offered(),
+            &mut search,
+            ProbeBudget {
+                patterns: 2,
+                evaluations: 736,
+            },
+        )
+        .unwrap();
+    assert_eq!(partial.status, ProbeStatus::ResourceLimited);
+    assert_eq!(partial.patterns.len(), 1);
+    assert_eq!(partial.inspected, 34);
+    let before = search.encode().unwrap();
+    let empty = r
+        .continue_probe_search(
+            &s,
+            c,
+            &late_offered(),
+            &mut search,
+            ProbeBudget {
+                patterns: 1,
+                evaluations: 0,
+            },
+        )
+        .unwrap();
+    assert_eq!(empty.round_inspected, 0);
+    assert_eq!(search.encode().unwrap(), before);
+    let ready = r
+        .continue_probe_search(
+            &s,
+            c,
+            &late_offered(),
+            &mut search,
+            ProbeBudget {
+                patterns: 1,
+                evaluations: 2,
+            },
+        )
+        .unwrap();
+    assert_eq!(ready.status, ProbeStatus::Ready);
+    assert_eq!(ready.inspected, 35);
+    assert_eq!(ready.patterns[0], partial.patterns[0]);
+    assert_eq!(ready.round_inspected, 1);
+}
+
+#[test]
+fn continuation_revalidates_full_evidence_identity_context_and_read_permission() {
+    let (_, s) = contextual_acquisition(5, 0);
+    let c = contract(&s, 501, 7);
+    let original = paused_late_search(&s);
+    for field in 0..5 {
+        let mut changed = c;
+        match field {
+            0 => changed.world = 502,
+            1 => changed.revision = 2,
+            2 => changed.source = src(8),
+            3 => changed.action = 9,
+            _ => changed.target = 77,
+        }
+        let mut search = original.clone();
+        let before = search.encode().unwrap();
+        let mut r = runtime(7, 61);
+        assert!(r
+            .continue_probe_search(
+                &s,
+                changed,
+                &late_offered(),
+                &mut search,
+                ProbeBudget::default()
+            )
+            .is_err());
+        assert_eq!(r.attention_scans(), 0);
+        assert_eq!(search.encode().unwrap(), before);
+    }
+    for changed in [contextual_acquisition(5, 0).1, session(62)] {
+        let mut altered = changed;
+        altered.execute("agora 150").unwrap();
+        let mut search = original.clone();
+        assert!(runtime(7, 61)
+            .continue_probe_search(
+                &altered,
+                c,
+                &late_offered(),
+                &mut search,
+                ProbeBudget::default()
+            )
+            .is_err());
+    }
+    let (_, changed, _) = contextual_probe_assessment(5, 0, 77, true, false, true, true);
+    assert!(runtime(7, 61)
+        .continue_probe_search(
+            &changed,
+            c,
+            &late_offered(),
+            &mut original.clone(),
+            ProbeBudget::default()
+        )
+        .is_err());
+    assert!(runtime(7, 61)
+        .continue_probe_search(&s, c, &[], &mut original.clone(), ProbeBudget::default())
+        .is_err());
+    let mut denied = Runtime::new(
+        SynapticEpisode::new(),
+        &[],
+        Access::default(),
+        Limits::default(),
+    )
+    .unwrap();
+    let mut search = original.clone();
+    assert!(denied
+        .continue_probe_search(&s, c, &late_offered(), &mut search, ProbeBudget::default())
+        .is_err());
+    assert_eq!(search.encode().unwrap(), original.encode().unwrap());
+}
+
+#[test]
+fn search_candidates_can_be_dismissed_without_forgetting_coverage_or_learning() {
+    let (_, s) = contextual_acquisition(0, 1);
+    let c = contract(&s, 501, 7);
+    let before = s.encode();
+    let mut search = ProbeSearch::new(&s, c, &[]).unwrap();
+    let mut visited = std::collections::BTreeSet::new();
+    for _ in 0..32 {
+        let previous = search.selection().inspected;
+        let out = runtime(7, 61)
+            .continue_probe_search(
+                &s,
+                c,
+                &[],
+                &mut search,
+                ProbeBudget {
+                    patterns: 8,
+                    evaluations: 184,
+                },
+            )
+            .unwrap();
+        for offset in previous..out.inspected {
+            assert!(visited.insert(63 - offset));
+        }
+        if out.status == ProbeStatus::Ready {
+            search.dismiss_batch().unwrap();
+        } else if out.status == ProbeStatus::Exhausted {
+            break;
+        }
+        let bytes = search.encode().unwrap();
+        search = ProbeSearch::restore(&bytes, &s, c).unwrap();
+    }
+    assert_eq!(visited.len(), 64);
+    assert_eq!(search.selection().status, ProbeStatus::Exhausted);
+    assert!(search.selection().exhaustive);
+    assert_eq!(search.retired().len(), 16);
+    assert_eq!(search.selection().evaluations, 124);
+    let again = runtime(7, 61)
+        .continue_probe_search(&s, c, &[], &mut search, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(again.round_inspected, 0);
+    assert_eq!(s.encode(), before);
+    println!("EXHAUSTION: all 64 patterns visited once, 16 informative proposals retired, 124 criterion evaluations, zero actions");
+}
+
+#[test]
+fn feasibility_separates_unavailable_infeasible_denied_and_executable_offers() {
+    let (memory, mut s) = contextual_acquisition(0, 1);
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let cross = [0, 1, 0, 1, 0, 1];
+    let mut disabled = World::new(501, 1, sensors(7, 61)[0].clone(), 881, &[]).unwrap();
+    let mut denied = world(501, 7, 61, 882, 77);
+    let mut feasible = world(501, 7, 61, 883, 77);
+    let mut boring = world(501, 7, 61, 884, 20);
+    let mut bad_permit = request(501, 7, 61, 9, 22, 52);
+    bad_permit.permit.action = 9;
+    let mut offers = [
+        InvestigationOffer {
+            world: &mut disabled,
+            attributes: reading(501, 7, cross, 9, 21, 50),
+            intervention: request(501, 7, 61, 9, 21, 52),
+        },
+        InvestigationOffer {
+            world: &mut denied,
+            attributes: reading(501, 7, cross, 9, 22, 50),
+            intervention: bad_permit,
+        },
+        InvestigationOffer {
+            world: &mut feasible,
+            attributes: reading(501, 7, cross, 9, 23, 50),
+            intervention: request(501, 7, 61, 9, 23, 52),
+        },
+        InvestigationOffer {
+            world: &mut boring,
+            attributes: reading(501, 7, [1; 6], 9, 24, 50),
+            intervention: request(501, 7, 61, 9, 24, 52),
+        },
+    ];
+    let offered = [
+        Attributes::new(cross).unwrap(),
+        Attributes::new(cross).unwrap(),
+        Attributes::new(cross).unwrap(),
+        Attributes::new([1; 6]).unwrap(),
+    ];
+    let mut search = ProbeSearch::new(&s, c, &offered).unwrap();
+    let out = r
+        .investigate_continued_probes(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(cross).unwrap(),
+            &mut offers,
+            None,
+            &mut search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    let f = out.feasibility.unwrap();
+    assert!(f.complete);
+    assert!(!f.options[0].realizable && !f.options[0].authorized);
+    assert!(f.options[1].realizable && !f.options[1].authorized);
+    assert!(f.options[2].realizable && f.options[2].authorized);
+    assert_eq!(f.options[3].separation, 0);
+    for link in &f.correspondence {
+        assert!(link.exact_offers.is_empty());
+        assert!(link.informational_alternatives.contains(&213));
+    }
+    let execution = out.outcome.investigation.unwrap();
+    assert_eq!(execution.selected, Some(213));
+    assert_eq!(execution.trial.unwrap().id, 23);
+    assert_eq!(
+        disabled.action_count() + denied.action_count() + boring.action_count(),
+        0
+    );
+    assert_eq!(feasible.action_count(), 1);
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+}
+
+#[test]
+fn continuation_does_not_peek_at_outcomes_or_restore_authority_from_a_search_file() {
+    let (memory, s) = contextual_acquisition(5, 0);
+    let paused = paused_late_search(&s);
+    let mut results = vec![];
+    for actual in [20, 77] {
+        let mut knowledge = Session::decode(&s.encode()).unwrap();
+        let mut search = ProbeSearch::restore(
+            &paused.encode().unwrap(),
+            &knowledge,
+            contract(&knowledge, 501, 7),
+        )
+        .unwrap();
+        let out = execute_late_search(&memory, &mut knowledge, &mut search, actual);
+        results.push((out, knowledge));
+    }
+    assert_eq!(results[0].0.outcome.probes, results[1].0.outcome.probes);
+    assert_eq!(results[0].0.feasibility, results[1].0.feasibility);
+    assert_ne!(
+        results[0].1.pedagogy_version().unwrap().criteria,
+        results[1].1.pedagogy_version().unwrap().criteria
+    );
+    let mut corrupted = paused.encode().unwrap();
+    let last = corrupted.len() - 1;
+    corrupted[last] ^= 1;
+    assert!(ProbeSearch::restore(&corrupted, &s, contract(&s, 501, 7)).is_err());
+}
+
+#[test]
+fn probe_search_restores_in_another_process_with_fresh_explicit_budget() {
+    let (memory, s) = contextual_acquisition(5, 0);
+    let search = paused_late_search(&s);
+    let root = std::env::temp_dir().join(format!("neurons-probe-search-{}", std::process::id()));
+    assert!(!root.exists());
+    std::fs::create_dir(&root).unwrap();
+    std::fs::write(root.join("runtime.bin"), memory.checkpoint(&s).unwrap()).unwrap();
+    std::fs::write(root.join("search.bin"), search.encode().unwrap()).unwrap();
+    let mut spent = runtime(7, 61);
+    let mut same_search = ProbeSearch::new(&s, contract(&s, 501, 7), &late_offered()).unwrap();
+    spent
+        .continue_probe_search(
+            &s,
+            contract(&s, 501, 7),
+            &late_offered(),
+            &mut same_search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    let spent_bytes = spent.checkpoint(&s).unwrap();
+    std::fs::write(root.join("spent.bin"), &spent_bytes).unwrap();
+    let out = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "probe_search_restore_worker", "--nocapture"])
+        .env("NEURONS_PROBE_SEARCH_RESTORE", &root)
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(
+        std::fs::read(root.join("runtime.bin")).unwrap(),
+        memory.checkpoint(&s).unwrap()
+    );
+    assert_eq!(
+        std::fs::read(root.join("search.bin")).unwrap(),
+        search.encode().unwrap()
+    );
+    assert_eq!(std::fs::read(root.join("spent.bin")).unwrap(), spent_bytes);
+    for n in ["runtime.bin", "search.bin", "spent.bin"] {
+        std::fs::remove_file(root.join(n)).unwrap();
+    }
+    std::fs::remove_dir(root).unwrap();
+}
+#[test]
+fn probe_search_restore_worker() {
+    let Some(root) = std::env::var_os("NEURONS_PROBE_SEARCH_RESTORE") else {
+        return;
+    };
+    let root = std::path::PathBuf::from(root);
+    let bytes = std::fs::read(root.join("runtime.bin")).unwrap();
+    let cursor = std::fs::read(root.join("search.bin")).unwrap();
+    let (mut denied, mut s) = Runtime::restore(&bytes, &sensors(7, 61), Access::default()).unwrap();
+    let c = contract(&s, 501, 7);
+    let mut search = ProbeSearch::restore(&cursor, &s, c).unwrap();
+    assert!(denied
+        .continue_probe_search(&s, c, &late_offered(), &mut search, ProbeBudget::default())
+        .is_err());
+    assert_eq!(denied.checkpoint(&s).unwrap(), bytes);
+    let spent_bytes = std::fs::read(root.join("spent.bin")).unwrap();
+    let (mut spent, spent_session) =
+        Runtime::restore(&spent_bytes, &sensors(7, 61), rights()).unwrap();
+    let mut spent_search = ProbeSearch::restore(&cursor, &spent_session, c).unwrap();
+    let no_refill = spent
+        .continue_probe_search(
+            &spent_session,
+            c,
+            &late_offered(),
+            &mut spent_search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert_eq!(no_refill.status, ProbeStatus::ResourceLimited);
+    assert_eq!(no_refill.round_inspected, 0);
+    assert_eq!(spent.attention_scans(), 32);
+    assert_eq!(spent.checkpoint(&spent_session).unwrap(), spent_bytes);
+    let out = execute_late_search(&denied, &mut s, &mut search, 77);
+    assert_eq!(out.outcome.probes.round_inspected, 3);
+    assert_eq!(
+        out.outcome.investigation.unwrap().result,
+        InvestigationResult::Learned
+    );
+    assert_eq!(s.pedagogy_version().unwrap().number, 3);
+}
+
+#[test]
+fn changed_offer_provenance_is_rejected_before_the_cursor_moves() {
+    let (memory, mut s) = contextual_acquisition(5, 0);
+    let c = contract(&s, 501, 7);
+    let mut search = paused_late_search(&s);
+    let before = search.encode().unwrap();
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 888, 77);
+    let mut boring = world(501, 7, 61, 777, 20);
+    let mut bad = reading(501, 7, [1, 1, 0, 1, 0, 0], 9, 21, 50);
+    bad.source = src(8);
+    let out = r.investigate_continued_probes(
+        &memory,
+        &mut s,
+        c,
+        late_offered()[1],
+        &mut [
+            InvestigationOffer {
+                world: &mut boring,
+                attributes: reading(501, 7, [1; 6], 9, 20, 50),
+                intervention: request(501, 7, 61, 9, 20, 52),
+            },
+            InvestigationOffer {
+                world: &mut w,
+                attributes: bad,
+                intervention: request(501, 7, 61, 9, 21, 52),
+            },
+        ],
+        None,
+        &mut search,
+        ProbeBudget::default(),
+    );
+    assert!(out.err().unwrap().contains("oferta fora"));
+    assert_eq!(w.action_count(), 0);
+    assert_eq!(search.encode().unwrap(), before);
+}
+
+#[test]
+fn incomplete_feasibility_validation_does_not_advance_or_execute() {
+    let (memory, mut s) = contextual_acquisition(5, 0);
+    let c = contract(&s, 501, 7);
+    let mut search = paused_late_search(&s);
+    let before = search.encode().unwrap();
+    let mut limits = Limits::default();
+    limits.attention_scans = 1;
+    let mut r = Runtime::new(SynapticEpisode::new(), &sensors(7, 61), rights(), limits).unwrap();
+    let mut a = world(501, 7, 61, 777, 20);
+    let mut b = world(501, 7, 61, 888, 77);
+    let out = r
+        .investigate_continued_probes(
+            &memory,
+            &mut s,
+            c,
+            late_offered()[1],
+            &mut [
+                InvestigationOffer {
+                    world: &mut a,
+                    attributes: reading(501, 7, [1; 6], 9, 20, 50),
+                    intervention: request(501, 7, 61, 9, 20, 52),
+                },
+                InvestigationOffer {
+                    world: &mut b,
+                    attributes: reading(501, 7, [1, 1, 0, 1, 0, 0], 9, 21, 50),
+                    intervention: request(501, 7, 61, 9, 21, 52),
+                },
+            ],
+            None,
+            &mut search,
+            ProbeBudget::default(),
+        )
+        .unwrap();
+    assert!(!out.feasibility.unwrap().complete);
+    assert_eq!(out.outcome.probes.status, ProbeStatus::ResourceLimited);
+    assert!(out.outcome.investigation.is_none());
+    assert_eq!(a.action_count() + b.action_count(), 0);
+    assert_eq!(search.encode().unwrap(), before);
+}
+
+#[test]
+fn resumed_proposal_cannot_replace_fresh_operational_permission() {
+    let (memory, mut s) = contextual_acquisition(5, 0);
+    let c = contract(&s, 501, 7);
+    let mut search = paused_late_search(&s);
+    let before = s.encode();
+    let access = Access {
+        read_knowledge: true,
+        ..Default::default()
+    };
+    let mut r = Runtime::new(
+        SynapticEpisode::new(),
+        &sensors(7, 61),
+        access,
+        Limits::default(),
+    )
+    .unwrap();
+    let mut a = world(501, 7, 61, 777, 20);
+    let mut b = world(501, 7, 61, 888, 77);
+    let out = r.investigate_continued_probes(
+        &memory,
+        &mut s,
+        c,
+        late_offered()[1],
+        &mut [
+            InvestigationOffer {
+                world: &mut a,
+                attributes: reading(501, 7, [1; 6], 9, 20, 50),
+                intervention: request(501, 7, 61, 9, 20, 52),
+            },
+            InvestigationOffer {
+                world: &mut b,
+                attributes: reading(501, 7, [1, 1, 0, 1, 0, 0], 9, 21, 50),
+                intervention: request(501, 7, 61, 9, 21, 52),
+            },
+        ],
+        None,
+        &mut search,
+        ProbeBudget::default(),
+    );
+    assert!(out.is_err());
+    assert_eq!(search.selection().status, ProbeStatus::Ready);
+    assert_eq!(s.encode(), before);
+    assert_eq!(a.action_count() + b.action_count(), 0);
+}

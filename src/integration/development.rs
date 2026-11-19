@@ -31,8 +31,9 @@ mod consequences;
 mod discrimination;
 mod epistemic;
 pub use discrimination::{
-    DiscriminatingInvestigation, DiscriminatingOption, InvestigationOffer, InvestigationResult,
-    OperationalInvestigation, ProbeBudget, ProbeSelection, ProbeStatus, ProbeTeaching,
+    ContinuedInvestigation, DiscriminatingInvestigation, DiscriminatingOption, InvestigationOffer,
+    InvestigationResult, OperationalInvestigation, ProbeBudget, ProbeCorrespondence,
+    ProbeFeasibility, ProbeSearch, ProbeSelection, ProbeStatus, ProbeTeaching,
 };
 mod predictive;
 pub use actions::{
