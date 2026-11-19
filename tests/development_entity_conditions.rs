@@ -1029,3 +1029,410 @@ fn finite_family_can_select_a_spurious_rule_and_must_preserve_its_counterexample
     assert_eq!(s.pedagogy_version().unwrap().number, 2);
     println!("COUNTEREXAMPLE: H23 learned A, external XOR oracle refutes novel A=B=1; observation retained, no invented family");
 }
+
+// Distinções contextuais observáveis: nenhuma partição/novo Scope é entrada do
+// candidato. Eixos e função-alvo existem somente no gerador/oráculo do harness.
+fn contextual_acquisition(a: usize, b: usize) -> (Runtime, Session) {
+    let mut both = [0; 6];
+    both[a] = 1;
+    both[b] = 1;
+    let mut only_a = [0; 6];
+    only_a[a] = 1;
+    acquired(501, 61, 7, 1, &[(both, 20), (only_a, 77)])
+}
+fn contextual_probe(
+    a: usize,
+    b: usize,
+    actual: i32,
+    teach: bool,
+    reverse: bool,
+    include_discriminant: bool,
+) -> (Runtime, Session, DiscriminatingInvestigation) {
+    contextual_probe_assessment(a, b, actual, teach, reverse, include_discriminant, false)
+}
+fn contextual_probe_assessment(
+    a: usize,
+    b: usize,
+    actual: i32,
+    teach: bool,
+    reverse: bool,
+    include_discriminant: bool,
+    cover_disagreement: bool,
+) -> (Runtime, Session, DiscriminatingInvestigation) {
+    let (memory, mut s) = contextual_acquisition(a, b);
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let mut boring = world(501, 7, 61, 777, 20);
+    let mut useful = world(501, 7, 61, 888, actual);
+    let mut redundant = [1; 6];
+    redundant[a] = 1;
+    redundant[b] = 1;
+    let mut cross = std::array::from_fn(|i| (i % 2) as u8);
+    cross[a] = 0;
+    cross[b] = 1;
+    // Explicit experimental arm in the HARNESS: unlabeled probes selected
+    // from CURRENT disagreement, without axis IDs or future effects as inputs.
+    // This is not an automatic production capability or extra runtime budget.
+    let assessment = if cover_disagreement {
+        let version = s.pedagogy_version().unwrap();
+        let known = s.pedagogy_existing().unwrap();
+        let probes: Vec<_> = (0..64)
+            .map(|mask| Attributes::new(std::array::from_fn(|i| ((mask >> i) & 1) as u8)).unwrap())
+            .filter(|x| {
+                !known.contains(x)
+                    && *x != Attributes::new(cross).unwrap()
+                    && version
+                        .criteria
+                        .iter()
+                        .any(|h| h.evaluate(*x) == Label::Positive)
+                    && version
+                        .criteria
+                        .iter()
+                        .any(|h| h.evaluate(*x) == Label::Negative)
+            })
+            .take(2)
+            .collect();
+        assert_eq!(probes.len(), 2);
+        PedagogyAssessment::new(&[probes[0].into()], &[probes[1].into()]).unwrap()
+    } else {
+        PedagogyAssessment::new(
+            &[Attributes::new([0, 1, 1, 0, 0, 1]).unwrap().into()],
+            &[Attributes::new([1, 0, 1, 1, 0, 0]).unwrap().into()],
+        )
+        .unwrap()
+    };
+    let grant = teach.then(|| PredictiveRevision {
+        record: EngramId::new(999).unwrap(),
+        receipt: 1999,
+        assessment,
+        permissions: PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(999).unwrap()],
+        },
+    });
+    let mut offers = vec![InvestigationOffer {
+        world: &mut boring,
+        attributes: reading(501, 7, redundant, 9, 20, 50),
+        intervention: request(501, 7, 61, 9, 20, 52),
+    }];
+    if include_discriminant {
+        offers.push(InvestigationOffer {
+            world: &mut useful,
+            attributes: reading(501, 7, cross, 9, 21, 50),
+            intervention: request(501, 7, 61, 9, 21, 52),
+        });
+    }
+    if reverse {
+        offers.reverse();
+    }
+    let report = r
+        .investigate_disagreement(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(cross).unwrap(),
+            &mut offers,
+            grant,
+        )
+        .unwrap();
+    assert_eq!(boring.action_count(), 0);
+    assert_eq!(useful.action_count(), usize::from(include_discriminant));
+    assert!(r.attention_scans() <= 32);
+    assert!(report.criterion_evaluations <= 4 * 23);
+    assert!(r.cognitive_resources().conceptual_queries <= 7);
+    (r, s, report)
+}
+
+#[test]
+fn contextual_explanations_remain_equivalent_until_a_crossed_observation() {
+    use neurons::cognition::concepts::{Attribute, Criterion};
+    let (_, s) = contextual_acquisition(0, 1);
+    assert_eq!(
+        s.pedagogy_version().unwrap().criteria,
+        vec![
+            Criterion::attribute(Attribute::B),
+            Criterion::conjunction(Attribute::A, Attribute::B).unwrap(),
+        ]
+    );
+    assert_eq!(
+        s.pedagogy_identity().unwrap(),
+        session(61).pedagogy_identity().unwrap()
+    );
+    assert!(matches!(
+        prediction(&s, [0, 1, 1, 0, 0, 1]),
+        ConceptDecision::Abstain(_)
+    ));
+    // Mesmo A=1, efeitos diferentes; toda informação contextual é atributo.
+    assert_eq!(
+        prediction(&s, [1, 1, 0, 0, 0, 0]),
+        ConceptDecision::Supported(Label::Positive)
+    );
+    assert_eq!(
+        prediction(&s, [1, 0, 0, 0, 0, 0]),
+        ConceptDecision::Supported(Label::Negative)
+    );
+}
+
+#[test]
+fn fixed_assessment_can_miss_a_real_contextual_learning_gap() {
+    let mut learned = 0;
+    let mut missed = vec![];
+    for a in 0..6 {
+        for b in a + 1..6 {
+            let (_, initial) = contextual_acquisition(a, b);
+            let (_, final_session, report) = contextual_probe(a, b, 77, true, false, true);
+            assert_eq!(report.retained.len(), 1);
+            assert_eq!(report.selected, Some(211));
+            let pedagogy = &report.teaching.as_ref().unwrap().pedagogy;
+            if report.result == InvestigationResult::Learned {
+                learned += 1;
+                assert_eq!(pedagogy.final_version.number, 3);
+            } else {
+                missed.push((a, b));
+                // Preserve the original negative outcome, not treat Observed
+                // as learning or force admission when the public gate refuses.
+                assert_eq!(report.result, InvestigationResult::Observed);
+                assert_eq!(initial.encode(), final_session.encode());
+                assert!(pedagogy.lessons.is_empty());
+                assert!(
+                    pedagogy.leak_detected
+                        || pedagogy
+                            .initial
+                            .iter()
+                            .all(|q| matches!(q.decision, ConceptDecision::Supported(_)))
+                );
+            }
+        }
+    }
+    assert!(learned > 0 && !missed.is_empty());
+    assert_eq!(learned + missed.len(), 15);
+    println!("FIXED-ASSESSMENT NEGATIVE: learned {learned}/15, missed pairs {missed:?}; no production fix or forced admission");
+}
+
+#[test]
+fn contextual_conjunctions_are_discovered_across_all_pairs_without_partition_labels() {
+    use neurons::cognition::concepts::{Attribute, Criterion};
+    let mut outside_acquisition = 0;
+    for a in 0..6 {
+        for b in a + 1..6 {
+            let (_, s, out) = contextual_probe_assessment(a, b, 77, true, false, true, true);
+            assert_eq!(out.origin.state, EpistemicDiagnosis::InsufficientEvidence);
+            assert_eq!(out.selected, Some(211));
+            assert_eq!(
+                out.result,
+                InvestigationResult::Learned,
+                "pair=({a},{b}), report={:?}",
+                out.teaching
+            );
+            assert_eq!(out.options[0].separation, 0);
+            assert_eq!(out.options[1].separation, 1);
+            assert_eq!(
+                s.pedagogy_version().unwrap().criteria,
+                vec![Criterion::conjunction(Attribute::ALL[a], Attribute::ALL[b]).unwrap()]
+            );
+            let acquired_bits = [
+                (1 << a) | (1 << b),
+                1 << a,
+                (0..6).fold(0, |m, i| {
+                    m | (if i == a {
+                        0
+                    } else if i == b {
+                        1
+                    } else {
+                        i % 2
+                    } << i)
+                }),
+            ];
+            for mask in 0..64 {
+                let bits = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+                assert_eq!(
+                    prediction(&s, bits),
+                    ConceptDecision::Supported(Label::from_bool(bits[a] == 1 && bits[b] == 1))
+                );
+                if !acquired_bits.contains(&mask) {
+                    outside_acquisition += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(outside_acquisition, 915);
+    println!("CONTEXT: 15 conjunctions, 960/960 results, 915 outside acquisition; unchanged Scope, no partition labels");
+}
+
+#[test]
+fn contextual_revision_follows_hidden_consequence_not_offer_order() {
+    use neurons::cognition::concepts::{Attribute, Criterion};
+    let (_, gated, negative) = contextual_probe(0, 1, 77, true, false, true);
+    let (_, single, positive) = contextual_probe(0, 1, 20, true, false, true);
+    let (_, reordered, permuted) = contextual_probe(0, 1, 77, true, true, true);
+    assert_eq!(negative.selected, positive.selected);
+    assert_eq!(negative.options, positive.options);
+    assert_eq!(negative.selected, permuted.selected);
+    assert_eq!(gated.encode(), reordered.encode());
+    assert_ne!(
+        gated.pedagogy_version().unwrap().criteria,
+        single.pedagogy_version().unwrap().criteria
+    );
+    assert_eq!(
+        single.pedagogy_version().unwrap().criteria,
+        vec![Criterion::attribute(Attribute::B)]
+    );
+    println!("INTERVENTION: same offers select same experiment; 77 retains A&B, 20 retains B, order irrelevant");
+}
+
+#[test]
+fn contextual_distinction_is_not_admitted_without_experience_and_new_authority() {
+    let (_, initial) = contextual_acquisition(0, 1);
+    let (_, observed, out) = contextual_probe(0, 1, 77, false, false, true);
+    assert_eq!(out.result, InvestigationResult::Observed);
+    assert_eq!(out.retained.len(), 1);
+    assert!(out.teaching.is_none());
+    assert_eq!(initial.encode(), observed.encode());
+    let (r, untouched, no_probe) = contextual_probe(0, 1, 77, true, false, false);
+    assert_eq!(no_probe.result, InvestigationResult::NoDiscriminatingOffer);
+    assert!(no_probe.selected.is_none());
+    assert!(r.experiences().is_empty());
+    assert_eq!(initial.encode(), untouched.encode());
+    assert!(matches!(
+        prediction(&untouched, [0, 1, 1, 0, 0, 1]),
+        ConceptDecision::Abstain(_)
+    ));
+}
+
+#[test]
+fn contextual_missing_condition_uses_completion_and_does_not_guess() {
+    use neurons::cognition::concepts::Observation;
+    let (_, s, _) = contextual_probe(0, 1, 77, true, false, true);
+    for task_present in [0, 1] {
+        let q = Observation::new([Some(task_present), None, Some(1), Some(0), Some(1), Some(0)])
+            .unwrap();
+        let out = s.pedagogy_query(eid(83), q).unwrap();
+        if task_present == 0 {
+            assert_eq!(out.decision, ConceptDecision::Supported(Label::Negative));
+        } else {
+            assert!(matches!(out.decision, ConceptDecision::Abstain(_)));
+        }
+    }
+}
+
+#[test]
+fn learned_contextual_gate_guides_existing_planner_in_unseen_states() {
+    let (memory, s, _) = contextual_probe(0, 1, 77, true, false, true);
+    for (bits, expected_actions) in [([1, 1, 0, 1, 0, 1], 1), ([0, 1, 1, 0, 1, 0], 0)] {
+        let mut r = runtime(7, 61);
+        // Oracle stays in the harness/World, not in the planner's inputs.
+        let actual = if bits[0] == 1 && bits[1] == 1 { 20 } else { 77 };
+        let mut w = world(501, 7, 61, 1234, actual);
+        let mut goal = task(501, 61, 7);
+        goal.from = 1234;
+        let out = r
+            .pursue_with_consequences(
+                &memory,
+                &s,
+                &mut w,
+                PursuitGoal {
+                    objective: eid(90),
+                    task: goal,
+                    max_actions: 1,
+                },
+                contract(&s, 501, 7),
+                reading(501, 7, bits, 8, 1, 70),
+                &[request(501, 7, 61, 8, 10, 72)],
+            )
+            .unwrap();
+        assert_eq!(w.action_count(), expected_actions);
+        if expected_actions == 1 {
+            assert_eq!(out.reason, PredictiveReason::Reached);
+            assert_eq!(out.review.unwrap().agreement, Some(true));
+        } else {
+            assert_ne!(out.reason, PredictiveReason::Reached);
+        }
+        assert!(r.attention_scans() <= 32);
+    }
+}
+
+#[test]
+fn projecting_away_observable_context_preserves_conflict_instead_of_splitting_by_label() {
+    // Projection is an explicit harness intervention, not silent data rewriting:
+    // full [1,1,..]+ and [1,0,..]- become identical after removing coordinate B.
+    let projected = [1, 0, 0, 0, 0, 0];
+    let (history, s) = acquired(501, 61, 7, 1, &[(projected, 20)]);
+    let mut r = runtime(7, 61);
+    r.inherit_consequence_contract(&history).unwrap();
+    let mut w = world(501, 7, 61, 999, 77);
+    r.observe_attributes(&w, 7, reading(501, 7, projected, 8, 1, 50))
+        .unwrap();
+    r.intervene(&mut w, &request(501, 7, 61, 8, 10, 52))
+        .unwrap();
+    let before = s.encode();
+    let out = r
+        .assess_epistemic(
+            &history,
+            &s,
+            contract(&s, 501, 7),
+            Attributes::new(projected).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(out.state, EpistemicDiagnosis::ObservationConflict);
+    assert!(out.blocks_application());
+    assert_eq!(out.question, Some(EpistemicQuestion::CheckSourceAndContext));
+    assert_eq!(out.evidence.len(), 2);
+    assert_eq!(s.encode(), before);
+}
+
+#[test]
+fn a_context_switch_between_rules_exceeds_h23_despite_successful_conjunctive_gating() {
+    let (_, s, _) = contextual_probe(0, 2, 77, true, false, true);
+    // Independent oracle: when C=1 use A, otherwise B. Acquisition observations
+    // above also fit A&C. The held-out case has A=0,B=1,C=0: positive in oracle.
+    let bits = [0, 1, 0, 1, 0, 1];
+    let actual = if (if bits[2] == 1 { bits[0] } else { bits[1] }) == 1 {
+        20
+    } else {
+        77
+    };
+    assert_eq!(
+        prediction(&s, bits),
+        ConceptDecision::Supported(Label::Negative)
+    );
+    assert_eq!(actual, 20);
+    // Confirm the oracle is outside the frozen family by all eight assignments,
+    // not by merely trusting the candidate's diagnosis or one counterexample.
+    assert!(!neurons::cognition::concepts::family().iter().any(|h| {
+        (0..8).all(|mask| {
+            let v = [
+                (mask & 1) as u8,
+                ((mask >> 1) & 1) as u8,
+                ((mask >> 2) & 1) as u8,
+                0,
+                0,
+                0,
+            ];
+            h.evaluate(Attributes::new(v).unwrap())
+                == Label::from_bool((if v[2] == 1 { v[0] } else { v[1] }) == 1)
+        })
+    }));
+    let mut r = runtime(7, 61);
+    let mut w = world(501, 7, 61, 999, actual);
+    r.observe_attributes(&w, 7, reading(501, 7, bits, 8, 1, 70))
+        .unwrap();
+    r.intervene(&mut w, &request(501, 7, 61, 8, 10, 72))
+        .unwrap();
+    r.inherit_consequence_contract(&contextual_acquisition(0, 2).0)
+        .unwrap();
+    let empty = runtime(7, 61);
+    let out = r
+        .assess_epistemic(
+            &empty,
+            &s,
+            contract(&s, 501, 7),
+            Attributes::new(bits).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(out.state, EpistemicDiagnosis::ModelExpressiveness);
+    assert!(out.blocks_application());
+    assert_eq!(out.evidence.len(), 1);
+    assert_eq!(out.evidence[0].trial.to, 20);
+    println!("NEGATIVE: contextual multiplexer outside all 23 criteria; novel result contradicts A&C, observation retained");
+}
