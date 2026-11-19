@@ -697,3 +697,281 @@ impl Runtime {
         self.resume_selection(session, search, budget)
     }
 }
+
+/// A entidade observada é distinta do informante, mesmo com números iguais.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct EntityCondition {
+    pub observed_entity: Option<NodeId>,
+    pub concept: NodeId,
+    pub scope: crate::cognitive_contracts::Scope,
+    pub revision: u32,
+    pub informant: SourceId,
+    pub action: u32,
+    pub target: i32,
+}
+impl From<ConsequenceContract> for EntityCondition {
+    fn from(c: ConsequenceContract) -> Self {
+        Self {
+            observed_entity: NodeId::new(c.world).ok(),
+            concept: c.concept,
+            scope: c.scope,
+            revision: c.revision,
+            informant: c.source,
+            action: c.action,
+            target: c.target,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConditionStatus {
+    Ready,
+    MissingIdentity,
+    UnknownCondition,
+    ConflictingModels,
+    ContraryEvidence,
+    UnprovenBinding,
+    ResourceLimited,
+}
+/// Apenas estado conhecido e procedência. Não restaura Access ou supervisores.
+/// A sessão é emprestada imutavelmente do par Runtime/Session arquivado.
+pub struct ConditionedKnowledge<'a> {
+    pub condition: EntityCondition,
+    pub status: ConditionStatus,
+    pub origins: Vec<EpisodeId>,
+    pub scans: usize,
+    pub as_of: Option<u64>,
+    pub checked_samples: usize,
+    pub criterion_evaluations: usize,
+    pub anchor_comparisons: usize,
+    /// Testemunhas conjuntas de incompatibilidade, não acusação de cada fonte.
+    pub counterevidence: Vec<ConsequenceSample>,
+    session: Option<&'a Session>,
+}
+impl<'a> ConditionedKnowledge<'a> {
+    pub fn session(&self) -> Option<&'a Session> {
+        self.session
+    }
+}
+impl Runtime {
+    /// Recupera o modelo por condição explicitamente fornecida, sem inferir a
+    /// entidade do SourceId nem criar um predicado de identidade em H23.
+    /// Usa a prova de linhagem existente, não o maior número de versão.
+    pub fn recover_conditioned_knowledge<'a>(
+        &mut self,
+        catalog: &'a EpisodeCatalog,
+        condition: EntityCondition,
+        budget: RetrievalBudget,
+    ) -> Result<ConditionedKnowledge<'a>, String> {
+        if !self.access.read_knowledge
+            || budget.scans > 32
+            || budget.entries > 8
+            || condition.revision == 0
+            || condition.action == 0
+        {
+            return Err("recuperação condicionada não autorizada/inválida".into());
+        }
+        let mut out = ConditionedKnowledge {
+            condition,
+            status: ConditionStatus::UnknownCondition,
+            origins: vec![],
+            scans: 0,
+            as_of: None,
+            checked_samples: 0,
+            criterion_evaluations: 0,
+            anchor_comparisons: 0,
+            counterevidence: vec![],
+            session: None,
+        };
+        let Some(entity) = condition.observed_entity else {
+            out.status = ConditionStatus::MissingIdentity;
+            return Ok(out);
+        };
+        let charge = |r: &mut Runtime, o: &mut ConditionedKnowledge<'a>| -> bool {
+            if o.scans >= budget.scans || r.attention_scans >= r.limits.attention_scans {
+                o.status = ConditionStatus::ResourceLimited;
+                return false;
+            }
+            o.scans += 1;
+            r.attention_scans += 1;
+            true
+        };
+        if !charge(self, &mut out) {
+            return Ok(out);
+        }
+        let mut candidates = vec![];
+        if let Some(groups) = catalog.models.get(&(
+            entity.get(),
+            condition.revision,
+            condition.scope.context.get(),
+            condition.informant.get(),
+        )) {
+            for group in groups {
+                if !charge(self, &mut out) {
+                    return Ok(out);
+                }
+                let c = group.key.contract;
+                if c.concept != condition.concept
+                    || c.scope != condition.scope
+                    || c.action != condition.action
+                    || c.target != condition.target
+                {
+                    continue;
+                }
+                if candidates.len() >= MAX_EPISODES || candidates.len() >= budget.entries {
+                    out.status = ConditionStatus::ResourceLimited;
+                    return Ok(out);
+                }
+                for origin in &group.origins {
+                    out.origins.push(catalog.episode(*origin).id);
+                }
+                candidates.push(catalog.episode(group.origins[0]));
+            }
+        }
+        out.origins.sort_by_key(|i| i.get());
+        out.origins.dedup();
+        if candidates.is_empty() {
+            return Ok(out);
+        }
+        for (i, candidate) in candidates.iter().enumerate() {
+            if !condition
+                .scope
+                .validity
+                .contains(candidate.session.logical_time())
+            {
+                continue;
+            }
+            let mut compatible = true;
+            for (j, old) in candidates.iter().enumerate() {
+                if i == j {
+                    continue;
+                }
+                if !charge(self, &mut out) {
+                    return Ok(out);
+                }
+                let (_, relation) = model_relation(old, &candidate.session)?;
+                if relation == VersionRelation::Incompatible {
+                    compatible = false;
+                    break;
+                }
+            }
+            if compatible {
+                let expected = ConsequenceContract {
+                    concept: condition.concept,
+                    scope: condition.scope,
+                    world: entity.get(),
+                    revision: condition.revision,
+                    source: condition.informant,
+                    action: condition.action,
+                    target: condition.target,
+                };
+                let mut evidence = vec![];
+                for sample in catalog.samples.iter().filter(|s| {
+                    // O informante limita a interface autorizada, não a lei do
+                    // objeto: oposição de outro informante não pode sumir.
+                    let mut observed = s.contract;
+                    observed.source = expected.source;
+                    observed == expected
+                }) {
+                    if !charge(self, &mut out) {
+                        return Ok(out);
+                    }
+                    if out.checked_samples >= budget.entries || out.checked_samples >= 8 {
+                        out.status = ConditionStatus::ResourceLimited;
+                        return Ok(out);
+                    }
+                    out.checked_samples += 1;
+                    if sample.after.event.logical_time() > candidate.session.logical_time()
+                        || !condition
+                            .scope
+                            .validity
+                            .contains(sample.attributes.event.logical_time())
+                        || !condition
+                            .scope
+                            .validity
+                            .contains(sample.after.event.logical_time())
+                    {
+                        continue;
+                    }
+                    out.origins.extend(&sample.origins);
+                    evidence.push(sample);
+                }
+                out.origins.sort_by_key(|i| i.get());
+                out.origins.dedup();
+                let version = candidate.session.pedagogy_version()?;
+                // Prova diagnóstica de compatibilidade, sem nova revisão/estado:
+                // não basta arquivar uma Session estranha junto ao Runtime.
+                let mut fits = false;
+                for h in &version.criteria {
+                    let mut all = true;
+                    for sample in &evidence {
+                        out.criterion_evaluations += 1;
+                        let attributes = crate::cognition::concepts::Attributes::decode(
+                            sample.attributes.event.payload(),
+                        )
+                        .map_err(|e| format!("{e:?}"))?;
+                        if h.evaluate(attributes)
+                            != crate::cognition::concepts::Label::from_bool(
+                                sample.trial.to == condition.target,
+                            )
+                        {
+                            all = false;
+                            break;
+                        }
+                    }
+                    if all {
+                        fits = true;
+                        break;
+                    }
+                }
+                if !fits {
+                    out.status = ConditionStatus::ContraryEvidence;
+                    out.counterevidence = evidence.into_iter().cloned().collect();
+                    return Ok(out);
+                }
+                let examples = candidate
+                    .session
+                    .concepts()
+                    .ok_or("conceito ausente")?
+                    .examples()
+                    .map_err(|e| format!("{e:?}"))?;
+                let mut anchored = !version.support.is_empty();
+                for support in &version.support {
+                    let example = examples.iter().find(|e| {
+                        e.metadata.id == support.record
+                            && e.metadata.evidence == support.evidence
+                            && e.metadata.scope == condition.scope
+                    });
+                    let found = example.is_some_and(|e| {
+                        evidence.iter().any(|sample| {
+                            out.anchor_comparisons += 1;
+                            sample.after.evidence == e.metadata.evidence
+                                && sample.trial.source == e.metadata.source
+                                && crate::cognition::concepts::Attributes::decode(
+                                    sample.attributes.event.payload(),
+                                )
+                                .ok()
+                                    == Some(e.example.attributes)
+                                && crate::cognition::concepts::Label::from_bool(
+                                    sample.trial.to == condition.target,
+                                ) == e.example.label
+                        })
+                    });
+                    if !found {
+                        anchored = false;
+                        break;
+                    }
+                }
+                if !anchored {
+                    out.status = ConditionStatus::UnprovenBinding;
+                    return Ok(out);
+                }
+                out.status = ConditionStatus::Ready;
+                out.as_of = Some(candidate.session.logical_time());
+                out.session = Some(&candidate.session);
+                return Ok(out);
+            }
+        }
+        out.status = ConditionStatus::ConflictingModels;
+        Ok(out)
+    }
+}

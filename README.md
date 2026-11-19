@@ -256,3 +256,27 @@ e validade antes de herdar o contrato ou registrar atributos. O defeito anterior
 já impedia a ação, mas deixava uma observação e um vínculo incompatível na instância
 receptora. A correção evita essa mutação parcial, sem alterar critérios H23,
 consulta científica ou formatos de checkpoint.
+
+Quando uma “fonte” é o objeto cujo comportamento se observa, a condição usa
+`World.id`/`Reading.item` (entidade), separadamente de `Reading.source` (informante).
+`EntityCondition` explicita essa entidade opcional, Scope, revisão, ação/destino e
+informante declarado. `recover_conditioned_knowledge` recupera a Session pareada
+com o Runtime arquivado e compartilha a prova de ancestralidade da recuperação
+anterior. Não deduz entidade de SourceId nem classifica confiabilidade por ID.
+
+Identidade ausente/desconhecida, ramos incompatíveis, evidências contrárias ou
+busca incompleta não liberam Session. Compatibilidade sem suportes ancorados
+retorna UnprovenBinding. Evidências contrárias de outros informantes sobre a mesma
+entidade/condição também são preservadas. A compatibilidade usa experiências já
+registradas e Criterion::evaluate; não revisa H23 nem cria outra família. A sessão
+retornada é imutável e histórica (`as_of`), com origens e suportes ligados às
+observações; requer permissão de leitura, sem conceder autoridade de ação. Tetos: quatro candidatos,
+oito registros e 32 inspeções de atenção compartilhada; nenhuma autoridade ativa
+é restaurada. Ready significa estado pareado recuperado, não verdade universal.
+
+A interface bruta que recebe Runtime e Session separadamente continua exigindo
+pareamento correto pelo chamador. Sua limitação fica como controle negativo nos
+testes: sessão alheia pode motivar uma ação refutada depois; o caminho condicionado
+recupera o modelo correto e evita essa ação no cenário avaliado. Não há prova de
+autenticidade da identidade física nem descoberta autônoma de condições por entidade.
+Teste público: `python3 scripts/test_public.py --target development_entity_conditions`.

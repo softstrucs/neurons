@@ -6,8 +6,8 @@ use crate::learning::concepts::HypothesisVersion;
 
 mod selective;
 pub use selective::{
-    CatalogCost, EpisodeCatalog, SearchCoverage, SearchLimit, SelectiveQuery, SelectiveSearch,
-    SnapshotStorage,
+    CatalogCost, ConditionStatus, ConditionedKnowledge, EntityCondition, EpisodeCatalog,
+    SearchCoverage, SearchLimit, SelectiveQuery, SelectiveSearch, SnapshotStorage,
 };
 
 const MAX_EPISODES: usize = 4;
@@ -319,6 +319,50 @@ pub struct RetrievedMemory {
     rejected: Option<RecoveredTransition>,
     samples: Vec<ConsequenceSample>,
 }
+
+fn model_relation(
+    e: &ArchivedEpisode,
+    session: &Session,
+) -> Result<(HypothesisVersion, VersionRelation), String> {
+    let c = e
+        .runtime
+        .consequence_contract
+        .ok_or("contrato de origem ausente")?;
+    let version = e.session.pedagogy_version()?;
+    let active = session.pedagogy_version()?;
+    let old_examples = e
+        .session
+        .concepts()
+        .ok_or("conceito de origem ausente")?
+        .examples()
+        .map_err(|e| format!("{e:?}"))?;
+    let active_examples = session
+        .concepts()
+        .ok_or("conceito atual ausente")?
+        .examples()
+        .map_err(|e| format!("{e:?}"))?;
+    // IDs/contadores iguais não bastam para provar ancestralidade:
+    // conteúdo, procedência e histórico da versão precisam coincidir.
+    let lineage = old_examples.iter().all(|old| active_examples.contains(old))
+        && session
+            .concepts()
+            .unwrap()
+            .models()
+            .iter()
+            .any(|m| m.scope() == c.scope && m.versions().contains(&version));
+    let relation = if lineage && version == active {
+        VersionRelation::Current
+    } else if lineage
+        && version.number < active.number
+        && version.support.iter().all(|x| active.support.contains(x))
+        && active.criteria.iter().all(|x| version.criteria.contains(x))
+    {
+        VersionRelation::Ancestor
+    } else {
+        VersionRelation::Incompatible
+    };
+    Ok((version, relation))
+}
 impl RetrievedMemory {
     pub fn evidence_profile(&self) -> EvidenceProfile {
         use std::collections::BTreeSet;
@@ -362,39 +406,7 @@ impl RetrievedMemory {
             return Ok(());
         }
         if let Some(c) = e.runtime.consequence_contract {
-            let version = e.session.pedagogy_version()?;
-            let active = session.pedagogy_version()?;
-            let old_examples = e
-                .session
-                .concepts()
-                .ok_or("conceito de origem ausente")?
-                .examples()
-                .map_err(|e| format!("{e:?}"))?;
-            let active_examples = session
-                .concepts()
-                .ok_or("conceito atual ausente")?
-                .examples()
-                .map_err(|e| format!("{e:?}"))?;
-            // IDs/contadores iguais não bastam para provar ancestralidade:
-            // conteúdo, procedência e histórico da versão precisam coincidir.
-            let lineage = old_examples.iter().all(|old| active_examples.contains(old))
-                && session
-                    .concepts()
-                    .unwrap()
-                    .models()
-                    .iter()
-                    .any(|m| m.scope() == c.scope && m.versions().contains(&version));
-            let relation = if lineage && version == active {
-                VersionRelation::Current
-            } else if lineage
-                && version.number < active.number
-                && version.support.iter().all(|x| active.support.contains(x))
-                && active.criteria.iter().all(|x| version.criteria.contains(x))
-            {
-                VersionRelation::Ancestor
-            } else {
-                VersionRelation::Incompatible
-            };
+            let (version, relation) = model_relation(e, session)?;
             if relation == VersionRelation::Incompatible
                 || session.pedagogy_identity()? != (c.concept, c.scope)
                 || self.contract.is_some_and(|old| old != c)

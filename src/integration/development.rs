@@ -21,9 +21,10 @@ use crate::synapse::SynapseId;
 mod actions;
 mod archive;
 pub use archive::{
-    CatalogCost, EpisodeArchive, EpisodeCatalog, EpisodeMemory, EvidenceProfile,
-    RecoveredTransition, RecoveredVersion, RetrievalBudget, RetrievalStatus, RetrievedMemory,
-    SearchCoverage, SearchLimit, SelectiveQuery, SelectiveSearch, SnapshotStorage, VersionRelation,
+    CatalogCost, ConditionStatus, ConditionedKnowledge, EntityCondition, EpisodeArchive,
+    EpisodeCatalog, EpisodeMemory, EvidenceProfile, RecoveredTransition, RecoveredVersion,
+    RetrievalBudget, RetrievalStatus, RetrievedMemory, SearchCoverage, SearchLimit, SelectiveQuery,
+    SelectiveSearch, SnapshotStorage, VersionRelation,
 };
 mod checkpoint;
 mod consequences;
