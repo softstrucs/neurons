@@ -415,3 +415,110 @@ causal, causas físicas, novas famílias, generalização ampla e linguagem aber
 continuam questões científicas. A causalidade neural seria também bloqueadora de
 qualquer MVP que a alegasse. E02–E06 permanecem parciais. Nenhuma integração CLI
 nova foi implementada nesta investigação.
+
+
+### Sessão operacional local: `neurons session-runtime`
+
+O adaptador em `src/session/runtime.rs` usa o Runtime existente, H23/MP09,
+recuperação episódica, investigação discriminante e planejamento. Funciona por
+stdin/stdout, sem HTTP, domínio ou serviço externo. Não é um daemon e não instala
+componentes. `ajuda` apresenta a gramática restrita. Exemplos e resultados são
+limitados a ambientes sintéticos supervisionados, sem compreensão aberta ou
+contribuição causal neural demonstrada.
+
+Primeiro execute `armazenamento CAMINHO` com um diretório exclusivo, fora do Git,
+cujo pai exista. Uma criação nova usa permissões locais restritivas no Unix.
+`configurar ENTIDADE REVISAO CONTEXTO FONTE ACAO ALVO CONCEITO OBS EVENTOS ATENCAO`
+identifica o domínio e os tetos (máximos 8/128/32 para os três últimos campos).
+Os 32 registros e demais reservas internas não são ampliados. O circuito sensorial
+mínimo inicial é configuração operacional, não conhecimento adquirido.
+
+Antes de `fixar`, declare `ambiente INICIAL`, até oito `transicao DE ACAO PARA` e
+até oito `atributos ESTADO BITS` (seis bits). Essa tabela pertence ao hospedeiro do
+simulador: o seletor e o planejador recebem atributos/controles e evidências,
+nunca destinos futuros. O contrato conceitual associa a ação ao destino ALVO;
+essa semântica é explicitamente configurada, não uma relação descoberta.
+
+- `autorizar observar`, `autorizar consultar` e `autorizar agir` habilitam portas
+  distintas do Runtime. A leitura de atributos requer a porta de exploração;
+  `agir` ainda exige `autorizar acao ID` independente e descartável.
+- `objetivo ID DESTINO` fixa a meta do episódio; DESTINO deve ser o ALVO configurado.
+- `observar` registra atributos atuais; `agir` registra a consequência real.
+  Até duas experiências podem alimentar `ensinar PRE_BITS POS_BITS`. Esses dois
+  padrões de avaliação não recebem rótulos; os rótulos das lições vêm das ações.
+- Ensino exige separadamente `autorizar avaliar`, `autorizar apresentar` e
+  `autorizar admitir`. Observar não admite conhecimento automaticamente.
+- `oferta ESTADO` prepara até quatro experiências sem rótulo. Com concessões
+  individuais de ação e `autorizar investigar`, `investigar` escolhe sondas e uma
+  oferta pelas APIs existentes. Sem concessões pedagógicas completas, só produz
+  revisão provisória. Ausência de discriminação ou recursos mantém ambiguidade.
+- `planejar PASSOS` expõe o planejador de caminhos observados. `executar PASSOS`
+  delega a comparação entre rota observada e prefixo conceitual ao coordenador
+  preexistente, com até quatro passos e concessões suficientes. Exibe escolha,
+  justificativa, conferência e cobertura; não transforma seleção em autoridade.
+- `estado`, `recursos` e `inspecionar` permitem diagnóstico; a última operação
+  exige autorização e consome a reserva de descoberta existente.
+
+`episodio NOVO_ID INICIAL` arquiva imutavelmente o anterior, retém a Session e o
+vínculo conceitual e inicia explicitamente outro episódio sensorial limitado.
+O ID deve crescer. O circuito sensorial volta à configuração inicial; não há
+porta de adaptação neural nesta CLI nem alegação de transferência de plasticidade
+entre episódios. Os snapshots anteriores preservam seus estados/consumos. Há até
+quatro episódios arquivados, oito ações ambientais agregadas e 256 identidades de
+concessão emitidas por armazenamento. Nenhum desses limites é reaberto por restore.
+A emissão de uma concessão já impede reutilizar seu ID, mesmo se não executada.
+
+#### Persistência administrativa e falhas
+
+Cada comando mutável grava uma geração exclusiva, inclusive após uma recusa que
+possa ter consumido reservas. São até 256 arquivos `geracao-NNNNNNNN.bin`, cada um
+com até 1 MiB: sem coleta automática ou sobrescrita. O envelope administrativo
+`NRNGEN01` associa número/encadeamento e pacote `NRNCLI01`; este reúne configuração,
+objetivo, estado ambiental/contador agregado, IDs emitidos, Runtime/Session,
+arquivo episódico e cursor quando ainda válido. Os codecs F1/MP05/PIFI/archive e
+probe existentes não são modificados. Checksums detectam corrupção acidental;
+não são assinaturas nem proteção contra adulteração por operador hostil.
+
+Na abertura, todas as gerações são conferidas em sequência. `restaurar` aceita
+somente a última geração coerente, sem fallback silencioso. Não restaura Access,
+concessões, preparações de ensino ou planos transitórios. Observações e tentativas
+persistem, mas uma preparação incompleta não é repetida/reconstituída como ação.
+Autorizações novas não reabrem fases consumidas. Uma revisão invalida o cursor;
+a recuperação é refeita antes de cada operação dependente de memória.
+
+Antes de uma mutação, um marcador `pendente` é sincronizado. Só é retirado após a
+geração completa e a sincronização do diretório. Falha de gravação é fatal;
+marcador pendente ou lock preexistente bloqueiam a retomada. Não são removidos
+automaticamente: preservar o diretório e solicitar análise do estado incerto.
+Não há promessa de execução exatamente uma vez sob falha abrupta ou de recuperação
+automática após queda de energia. O lock coordena processos cooperantes; não
+substitui autenticação, proteção contra corridas hostis no filesystem ou backup.
+
+#### Aceitação e alcance
+
+`tests/runtime_cli.rs` executa o binário real em processos distintos: aquisição
+ambígua → investigação discriminante → revisão → caso inédito, além de controle
+sem experiência/investigação, permissões negadas, contradição, plano de dois
+passos, persistência de reservas, ação incerta, escrita falha e gerações trocadas.
+O runner público inclui esse alvo explicitamente e mantém os dois probes
+reservados excluídos. Use `python3 scripts/test_public.py --build` para regressão
+pública offline/locked. CPU/RAM são medições externas, não garantias fornecidas
+pelos contadores lógicos. E02–E06 e as questões científicas abertas permanecem
+parciais; esta sessão não constitui aceite de produção ou conclusão do PIFI.
+
+
+Para iniciar a partir das fontes, sem instalação:
+
+```bash
+CARGO_TARGET_DIR=/tmp/neurons-pifi-target cargo run --offline --locked --bin neurons -- session-runtime
+```
+
+A validação deste marco aprovou 597 testes públicos (30 novos de CLI), sem
+falhas/ignorados e com dois probes reservados excluídos. Em cinco fluxos, cada um
+com dois processos reais (aquisição/investigação e restauração/aplicação), a
+mediana foi 0.222 s de parede e 0.131 s de CPU
+usuário+sistema. O maior RSS individual entre os dez processos foi
+12216 KiB; cada fluxo reteve 47 gerações/102282 bytes.
+Medição por perf_counter/getrusage no Linux x86_64, Rust/Cargo 1.88.0, executável
+debug, sem compilação no intervalo. São amostras pequenas no mesmo ambiente,
+sem garantia de portabilidade, desempenho sob carga ou memória simultânea total.

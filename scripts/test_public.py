@@ -11,7 +11,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = (
-    "cli", "engine", "interactions", "learning", "memory", "persistence",
+    "cli", "runtime_cli", "engine", "interactions", "learning", "memory", "persistence",
     "personality", "f1_session", "mp05_synaptic", "mp06_paths",
     "mp07_investigation", "mp08_regulation", "mp09_pedagogy",
     "concept_goal_supervision", "composed_query", "tcr01_transfer",

@@ -101,3 +101,6 @@ pub mod f1;
 
 /// MP05: sessão sináptica assistida sobre o mesmo núcleo, sem alterar a sessão F1.
 pub mod synaptic;
+
+/// Sessão operacional local do Runtime PIFI.
+pub mod runtime;
