@@ -2967,3 +2967,587 @@ fn empirical_equivalence_restore_worker() {
     assert_eq!(cursor.encode().unwrap(), before);
     assert!(out.feasibility.unwrap().correspondence.is_empty());
 }
+
+fn explanatory_history() -> (EpisodeArchive, Session) {
+    let (base, s) = acquired(501, 61, 7, 1, &[([1, 1, 1, 0, 0, 0], 20), ([0; 6], 77)]);
+    let mut counter = runtime(7, 61);
+    counter.inherit_consequence_contract(&base).unwrap();
+    let mut w = world(501, 7, 61, 5101, 77);
+    counter
+        .observe_attributes(&w, 7, reading(501, 7, [1, 1, 0, 1, 0, 1], 40, 3, 40))
+        .unwrap();
+    counter
+        .intervene(&mut w, &request(501, 7, 61, 40, 3, 42))
+        .unwrap();
+    let mut archive = EpisodeArchive::new();
+    archive.insert(eid(81), &base, &s).unwrap();
+    archive.insert(eid(82), &counter, &s).unwrap();
+    (archive, s)
+}
+fn recover_explanatory(archive: &EpisodeArchive, s: &Session) -> RetrievedMemory {
+    let memory = runtime(7, 61)
+        .retrieve_context(archive, s, task(501, 61, 7), RetrievalBudget::default())
+        .unwrap();
+    assert_eq!(memory.status(), RetrievalStatus::Complete);
+    memory
+}
+fn incorporate_explanatory_counterexample(archive: &EpisodeArchive, s: &mut Session) {
+    let memory = recover_explanatory(archive, s);
+    let mut r = runtime(7, 61);
+    let attributes = Attributes::new([1, 1, 0, 1, 0, 1]).unwrap();
+    let probes = r
+        .select_discriminating_probes(s, &[attributes], ProbeBudget::default())
+        .unwrap();
+    assert_eq!(probes.status, ProbeStatus::Ready);
+    let c = contract(s, 501, 7);
+    let out = r
+        .revise_recovered_counterexample(
+            &memory,
+            s,
+            c,
+            attributes,
+            PredictiveRevision {
+                record: EngramId::new(999).unwrap(),
+                receipt: 1999,
+                assessment: PedagogyAssessment::new(
+                    &[probes.patterns[0].into()],
+                    &[probes.patterns[1].into()],
+                )
+                .unwrap(),
+                permissions: PedagogyPermissions {
+                    evaluation: Some(c.scope),
+                    presentation: Some(c.scope),
+                    admissions: vec![EngramId::new(999).unwrap()],
+                },
+            },
+        )
+        .unwrap();
+    assert_eq!(out.diagnosis.state, EpistemicDiagnosis::HypothesisRefuted);
+    assert!(out
+        .teaching
+        .unwrap()
+        .pedagogy
+        .lessons
+        .iter()
+        .any(|l| l.admitted));
+    assert_eq!(s.pedagogy_version().unwrap().number, 3);
+    assert_eq!(r.action_attempts(), 0); // utiliza a evidência recuperada, sem repetir a ação
+    assert!(memory.memory_samples(s).is_err()); // vista antiga não acompanha a revisão silenciosamente
+    assert!(r.attention_scans() <= 32);
+}
+fn explanatory_round(
+    memory: &impl EpisodeMemory,
+    s: &mut Session,
+    bits: [u8; 6],
+    actual: i32,
+    serial: u32,
+    trial: u32,
+    record: u32,
+    teach: bool,
+) -> (Runtime, ContinuedInvestigation) {
+    let c = contract(s, 501, 7);
+    let mut r = runtime(7, 61);
+    let offered = [
+        Attributes::new([1; 6]).unwrap(),
+        Attributes::new(bits).unwrap(),
+    ];
+    let mut search = ProbeSearch::new(s, c, &offered).unwrap();
+    let selected = r
+        .continue_probe_search(s, c, &offered, &mut search, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(selected.status, ProbeStatus::Ready);
+    // A pergunta vem da primeira sonda escolhida pelo Runtime, sem fornecer o
+    // atributo explicativo correto ou olhar a consequência privada dos Worlds.
+    let question = selected.patterns[0];
+    let mut boring = world(501, 7, 61, 6000 + trial as i32, 20);
+    let mut useful = world(501, 7, 61, 5100 + trial as i32, actual);
+    let grant = teach.then(|| ProbeTeaching {
+        record: EngramId::new(record).unwrap(),
+        receipt: record + 1000,
+        permissions: PedagogyPermissions {
+            evaluation: Some(c.scope),
+            presentation: Some(c.scope),
+            admissions: vec![EngramId::new(record).unwrap()],
+        },
+    });
+    let out = r
+        .investigate_continued_probes(
+            memory,
+            s,
+            c,
+            question,
+            &mut [
+                InvestigationOffer {
+                    world: &mut boring,
+                    attributes: reading(501, 7, [1; 6], serial, trial - 1, 60),
+                    intervention: request(501, 7, 61, serial, trial - 1, 62),
+                },
+                InvestigationOffer {
+                    world: &mut useful,
+                    attributes: reading(501, 7, bits, serial, trial, 60),
+                    intervention: request(501, 7, 61, serial, trial, 62),
+                },
+            ],
+            grant,
+            &mut search,
+            ProbeBudget {
+                patterns: 0,
+                evaluations: 0,
+            },
+        )
+        .unwrap();
+    assert_eq!(boring.action_count(), 0);
+    assert_eq!(useful.action_count(), 1);
+    assert_eq!(out.outcome.probes.round_inspected, 0); // lote pronto não reexamina prefixo
+    assert!(r.attention_scans() <= 32);
+    assert!(r.cognitive_resources().conceptual_queries <= 7);
+    (r, out)
+}
+fn explanatory_chain() -> (EpisodeArchive, Session) {
+    use neurons::cognition::concepts::{Attribute, Criterion};
+    let (mut archive, mut s) = explanatory_history();
+    let historical = archive.encode();
+    assert_eq!(
+        s.pedagogy_version().unwrap().candidate,
+        Some(Criterion::attribute(Attribute::A))
+    );
+    assert_eq!(s.pedagogy_version().unwrap().criteria.len(), 6);
+    incorporate_explanatory_counterexample(&archive, &mut s);
+    assert_eq!(archive.encode(), historical);
+    assert_eq!(
+        s.pedagogy_version().unwrap().criteria,
+        vec![
+            Criterion::attribute(Attribute::C),
+            Criterion::conjunction(Attribute::A, Attribute::C).unwrap(),
+            Criterion::conjunction(Attribute::B, Attribute::C).unwrap(),
+        ]
+    );
+    assert!(matches!(
+        prediction(&s, [1, 0, 1, 0, 0, 1]),
+        ConceptDecision::Abstain(_)
+    ));
+    let memory = recover_explanatory(&archive, &s);
+    let (first, first_report) =
+        explanatory_round(&memory, &mut s, [0, 0, 1, 0, 1, 0], 77, 60, 21, 1000, true);
+    assert_eq!(
+        first_report.outcome.investigation.unwrap().result,
+        InvestigationResult::Learned
+    );
+    assert_eq!(s.pedagogy_version().unwrap().number, 4);
+    assert_eq!(s.pedagogy_version().unwrap().criteria.len(), 2);
+    assert!(matches!(
+        prediction(&s, [1, 0, 1, 0, 0, 1]),
+        ConceptDecision::Abstain(_)
+    ));
+    archive.insert(eid(83), &first, &s).unwrap();
+    let memory = recover_explanatory(&archive, &s);
+    let (second, second_report) =
+        explanatory_round(&memory, &mut s, [1, 0, 1, 1, 0, 0], 20, 70, 31, 1001, true);
+    assert_eq!(
+        second_report.outcome.investigation.unwrap().result,
+        InvestigationResult::Learned
+    );
+    assert_eq!(s.pedagogy_version().unwrap().number, 5);
+    assert_eq!(
+        s.pedagogy_version().unwrap().criteria,
+        vec![Criterion::conjunction(Attribute::A, Attribute::C).unwrap()]
+    );
+    archive.insert(eid(84), &second, &s).unwrap();
+    assert_eq!(archive.len(), 4);
+    assert!(s.metadata().is_empty()); // sem promoção a relações factuais
+    (archive, s)
+}
+
+#[test]
+fn observable_condition_unused_by_original_candidate_can_explain_divergence_incrementally() {
+    let (archive, s) = explanatory_chain();
+    assert_eq!(s.concepts().unwrap().models()[0].versions().len(), 6);
+    let memory = recover_explanatory(&archive, &s);
+    let observations = memory.memory_samples(&s).unwrap();
+    assert_eq!(observations.len(), 5);
+    assert!(observations
+        .iter()
+        .any(|x| x.origins == vec![eid(82)] && x.trial.to == 77 && x.recorded_version.number == 2));
+    let known = s.pedagogy_existing().unwrap();
+    assert_eq!(known.len(), 5);
+    let mut unseen = 0;
+    for mask in 0..64 {
+        let v = std::array::from_fn(|i| ((mask >> i) & 1) as u8);
+        if !known.contains(&Attributes::new(v).unwrap()) {
+            unseen += 1;
+        }
+        assert_eq!(
+            prediction(&s, v),
+            ConceptDecision::Supported(Label::from_bool(v[0] == 1 && v[2] == 1))
+        );
+    }
+    assert_eq!(unseen, 59);
+    println!("EXPLANATION: six eligible hypotheses -> C/AC/BC -> AC/BC -> AC; original candidate A never used C; 64/64 patterns, 59 outside acquisition after authorized experience");
+}
+
+#[test]
+fn explanatory_learning_enables_existing_planner_in_a_novel_state() {
+    let (archive, s) = explanatory_chain();
+    let memory = recover_explanatory(&archive, &s);
+    let mut goal = task(501, 61, 7);
+    goal.from = 7777;
+    let mut w = world(501, 7, 61, 7777, 20);
+    let out = runtime(7, 61)
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, [1, 0, 1, 0, 0, 1], 80, 1, 80),
+            &[request(501, 7, 61, 80, 40, 82)],
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(w.action_count(), 1);
+    assert_eq!(out.review.unwrap().agreement, Some(true));
+}
+
+#[test]
+fn removing_explanatory_experience_keeps_the_novel_goal_unresolved() {
+    let (archive, s) = explanatory_history();
+    let memory = recover_explanatory(&archive, &s);
+    let mut goal = task(501, 61, 7);
+    goal.from = 7777;
+    let mut w = world(501, 7, 61, 7777, 20);
+    let out = runtime(7, 61)
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, [1, 0, 1, 0, 0, 1], 80, 1, 80),
+            &[request(501, 7, 61, 80, 40, 82)],
+        )
+        .unwrap();
+    assert_ne!(out.reason, PredictiveReason::Reached);
+    assert_eq!(w.action_count(), 0);
+    assert_eq!(s.pedagogy_version().unwrap().number, 2);
+}
+
+#[test]
+fn spurious_correlations_leave_competing_explanations_until_a_real_discriminant_exists() {
+    let (archive, mut s) = explanatory_history();
+    incorporate_explanatory_counterexample(&archive, &mut s);
+    let memory = recover_explanatory(&archive, &s);
+    let before = s.encode();
+    let c = contract(&s, 501, 7);
+    let mut r = runtime(7, 61);
+    let offered = [
+        Attributes::new([1; 6]).unwrap(),
+        Attributes::new([1, 1, 0, 1, 0, 1]).unwrap(),
+    ];
+    let mut search = ProbeSearch::new(&s, c, &offered).unwrap();
+    let probes = r
+        .continue_probe_search(&s, c, &offered, &mut search, ProbeBudget::default())
+        .unwrap();
+    assert_eq!(probes.status, ProbeStatus::Ready);
+    let mut a = world(501, 7, 61, 6201, 20);
+    let mut b = world(501, 7, 61, 6202, 77);
+    let out = r
+        .investigate_continued_probes(
+            &memory,
+            &mut s,
+            c,
+            probes.patterns[0],
+            &mut [
+                InvestigationOffer {
+                    world: &mut a,
+                    attributes: reading(501, 7, [1; 6], 60, 20, 60),
+                    intervention: request(501, 7, 61, 60, 20, 62),
+                },
+                InvestigationOffer {
+                    world: &mut b,
+                    attributes: reading(501, 7, [1, 1, 0, 1, 0, 1], 60, 21, 60),
+                    intervention: request(501, 7, 61, 60, 21, 62),
+                },
+            ],
+            None,
+            &mut search,
+            ProbeBudget {
+                patterns: 0,
+                evaluations: 0,
+            },
+        )
+        .unwrap();
+    let report = out.outcome.investigation.unwrap();
+    assert_eq!(report.result, InvestigationResult::NoDiscriminatingOffer);
+    assert!(report.options.iter().all(|o| o.separation == 0));
+    assert_eq!(a.action_count() + b.action_count(), 0);
+    assert_eq!(s.encode(), before);
+    assert!(matches!(
+        prediction(&s, [1, 0, 1, 0, 0, 1]),
+        ConceptDecision::Abstain(_)
+    ));
+}
+
+#[test]
+fn acquired_explanatory_hypotheses_change_selection_with_the_same_experiments_and_outcomes() {
+    let (archive, mut initial) = explanatory_history();
+    incorporate_explanatory_counterexample(&archive, &mut initial);
+    let mut refined = Session::decode(&initial.encode()).unwrap();
+    let memory = recover_explanatory(&archive, &refined);
+    explanatory_round(
+        &memory,
+        &mut refined,
+        [0, 0, 1, 0, 1, 0],
+        77,
+        60,
+        21,
+        1000,
+        true,
+    );
+    let mut selected = vec![];
+    for mut s in [initial, refined] {
+        // Mesmos arquivos de evidências recuperados, sem adicionar a ação nova
+        // ao controle. Mudam hipóteses por incorporação anterior autorizada.
+        let memory = recover_explanatory(&archive, &s);
+        let c = contract(&s, 501, 7);
+        let mut r = runtime(7, 61);
+        let bits = [[0, 0, 1, 0, 1, 0], [1, 0, 1, 1, 0, 0]];
+        let offered = bits.map(|b| Attributes::new(b).unwrap());
+        let mut search = ProbeSearch::new(&s, c, &offered).unwrap();
+        let probes = r
+            .continue_probe_search(&s, c, &offered, &mut search, ProbeBudget::default())
+            .unwrap();
+        assert_eq!(probes.status, ProbeStatus::Ready);
+        let mut a = world(501, 7, 61, 6301, 77);
+        let mut b = world(501, 7, 61, 6302, 20);
+        let out = r
+            .investigate_continued_probes(
+                &memory,
+                &mut s,
+                c,
+                probes.patterns[0],
+                &mut [
+                    InvestigationOffer {
+                        world: &mut a,
+                        attributes: reading(501, 7, bits[0], 55, 91, 60),
+                        intervention: request(501, 7, 61, 55, 91, 62),
+                    },
+                    InvestigationOffer {
+                        world: &mut b,
+                        attributes: reading(501, 7, bits[1], 55, 92, 60),
+                        intervention: request(501, 7, 61, 55, 92, 62),
+                    },
+                ],
+                None,
+                &mut search,
+                ProbeBudget {
+                    patterns: 0,
+                    evaluations: 0,
+                },
+            )
+            .unwrap();
+        let report = out.outcome.investigation.unwrap();
+        assert!(report.options.iter().all(|o| o.authorized));
+        assert_eq!(a.action_count() + b.action_count(), 1);
+        selected.push(report.selected.unwrap());
+    }
+    assert_eq!(selected, vec![741, 742]);
+    println!("HYPOTHESIS INTERVENTION: same offers, permissions and hidden outcomes; learning changes chosen observation 741 -> 742");
+}
+
+#[test]
+fn explanatory_observation_without_admission_remains_provisional() {
+    let (archive, mut s) = explanatory_history();
+    incorporate_explanatory_counterexample(&archive, &mut s);
+    let memory = recover_explanatory(&archive, &s);
+    let before = s.encode();
+    let (_, out) = explanatory_round(&memory, &mut s, [0, 0, 1, 0, 1, 0], 77, 60, 21, 1000, false);
+    let report = out.outcome.investigation.unwrap();
+    assert_eq!(report.result, InvestigationResult::Observed);
+    assert_eq!(report.retained.len(), 2);
+    assert!(report.teaching.is_none());
+    assert_eq!(s.encode(), before);
+    assert_eq!(s.pedagogy_version().unwrap().criteria.len(), 3);
+}
+
+#[test]
+fn missing_observable_condition_does_not_become_an_assumed_explanation() {
+    use neurons::cognition::concepts::Observation;
+    let (_, s) = explanatory_chain();
+    let out = s
+        .pedagogy_query(
+            eid(99),
+            Observation::new([Some(1), Some(0), None, Some(0), Some(0), Some(1)]).unwrap(),
+        )
+        .unwrap();
+    assert!(matches!(out.decision, ConceptDecision::Abstain(_)));
+}
+
+#[test]
+fn eliminated_conditions_are_not_reintroduced_to_fit_a_later_counterexample() {
+    use neurons::cognition::concepts::{Attribute, Criterion};
+    let (base, mut s) = learned(501, 61, 7, 0, 1);
+    let mut memory = runtime(7, 61);
+    memory.inherit_consequence_contract(&base).unwrap();
+    let bits = [1, 1, 0, 1, 0, 1];
+    let mut bad = world(501, 7, 61, 5101, 77);
+    memory
+        .observe_attributes(&bad, 7, reading(501, 7, bits, 40, 3, 40))
+        .unwrap();
+    memory
+        .intervene(&mut bad, &request(501, 7, 61, 40, 3, 42))
+        .unwrap();
+    let before = s.encode();
+    let c = contract(&s, 501, 7);
+    let mut available = world(501, 7, 61, 5102, 20);
+    let out = runtime(7, 61)
+        .investigate_disagreement(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(bits).unwrap(),
+            &mut [InvestigationOffer {
+                world: &mut available,
+                attributes: reading(501, 7, [1, 0, 1, 0, 0, 1], 60, 21, 60),
+                intervention: request(501, 7, 61, 60, 21, 62),
+            }],
+            None,
+        )
+        .unwrap();
+    assert_eq!(out.result, InvestigationResult::RepresentationLimited);
+    assert_eq!(
+        out.origin.question,
+        Some(EpistemicQuestion::ReviewAuthorizedRepresentation)
+    );
+    assert_eq!(available.action_count(), 0);
+    assert_eq!(s.encode(), before);
+    assert!(!s
+        .pedagogy_version()
+        .unwrap()
+        .criteria
+        .contains(&Criterion::conjunction(Attribute::A, Attribute::C).unwrap()));
+}
+
+#[test]
+fn an_unobservable_condition_is_recorded_as_conflict_not_fabricated_as_a_cause() {
+    let (base, mut s) = acquired(501, 61, 7, 1, &[([1, 1, 1, 0, 0, 0], 20), ([0; 6], 77)]);
+    let c = contract(&s, 501, 7);
+    let mut memory = runtime(7, 61);
+    memory.inherit_consequence_contract(&base).unwrap();
+    let bits = [1, 1, 1, 0, 0, 0];
+    let mut hidden = world(501, 7, 61, 5101, 77);
+    memory
+        .observe_attributes(&hidden, 7, reading(501, 7, bits, 40, 3, 40))
+        .unwrap();
+    memory
+        .intervene(&mut hidden, &request(501, 7, 61, 40, 3, 42))
+        .unwrap();
+    let before = s.encode();
+    let out = runtime(7, 61)
+        .investigate_disagreement(
+            &memory,
+            &mut s,
+            c,
+            Attributes::new(bits).unwrap(),
+            &mut [],
+            None,
+        )
+        .unwrap();
+    assert_eq!(out.origin.state, EpistemicDiagnosis::ObservationConflict);
+    assert_eq!(
+        out.origin.question,
+        Some(EpistemicQuestion::CheckSourceAndContext)
+    );
+    assert!(out.origin.blocks_application());
+    assert_eq!(out.result, InvestigationResult::NoDiscriminatingOffer);
+    assert_eq!(s.encode(), before);
+}
+
+#[test]
+fn explanatory_knowledge_and_counterexamples_survive_a_new_process() {
+    let (archive, s) = explanatory_chain();
+    let root = std::env::temp_dir().join(format!("neurons-explanatory-{}", std::process::id()));
+    assert!(!root.exists());
+    std::fs::create_dir(&root).unwrap();
+    archive.save(&root.join("archive.bin")).unwrap();
+    std::fs::write(root.join("knowledge.bin"), s.encode()).unwrap();
+    let originals = [std::fs::read(root.join("archive.bin")).unwrap(), s.encode()];
+    let result = std::process::Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "explanation_restore_worker", "--nocapture"])
+        .env("NEURONS_EXPLANATION_RESTORE", &root)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&result.stdout),
+        String::from_utf8_lossy(&result.stderr)
+    );
+    for (i, n) in ["archive.bin", "knowledge.bin"].iter().enumerate() {
+        assert_eq!(std::fs::read(root.join(n)).unwrap(), originals[i]);
+        std::fs::remove_file(root.join(n)).unwrap();
+    }
+    std::fs::remove_dir(root).unwrap();
+}
+#[test]
+fn explanation_restore_worker() {
+    let Some(root) = std::env::var_os("NEURONS_EXPLANATION_RESTORE") else {
+        return;
+    };
+    let root = std::path::PathBuf::from(root);
+    let s = Session::decode(&std::fs::read(root.join("knowledge.bin")).unwrap()).unwrap();
+    let archive = EpisodeArchive::load(
+        &root.join("archive.bin"),
+        &[
+            (eid(81), sensors(7, 61)),
+            (eid(82), sensors(7, 61)),
+            (eid(83), sensors(7, 61)),
+            (eid(84), sensors(7, 61)),
+        ],
+    )
+    .unwrap();
+    let mut denied = Runtime::new(
+        SynapticEpisode::new(),
+        &[],
+        Access::default(),
+        Limits::default(),
+    )
+    .unwrap();
+    assert!(denied
+        .retrieve_context(&archive, &s, task(501, 61, 7), RetrievalBudget::default())
+        .is_err());
+    let memory = recover_explanatory(&archive, &s);
+    assert_eq!(s.pedagogy_version().unwrap().number, 5);
+    assert!(memory
+        .memory_samples(&s)
+        .unwrap()
+        .iter()
+        .any(|e| e.origins == vec![eid(82)] && e.recorded_version.number == 2 && e.trial.to == 77));
+    let mut w = world(501, 7, 61, 7777, 20);
+    let mut goal = task(501, 61, 7);
+    goal.from = 7777;
+    let out = runtime(7, 61)
+        .pursue_with_consequences(
+            &memory,
+            &s,
+            &mut w,
+            PursuitGoal {
+                objective: eid(90),
+                task: goal,
+                max_actions: 1,
+            },
+            contract(&s, 501, 7),
+            reading(501, 7, [1, 0, 1, 0, 0, 1], 80, 1, 80),
+            &[request(501, 7, 61, 80, 40, 82)],
+        )
+        .unwrap();
+    assert_eq!(out.reason, PredictiveReason::Reached);
+    assert_eq!(w.action_count(), 1);
+}

@@ -371,3 +371,47 @@ neural ou permissão é ampliada. Insuficiência/cobertura incompleta mantém
 abstenção ou investigação explicitamente autorizada, não certificação física.
 Os controles incluem consistência, divergência, ablação das evidências com a
 mesma representação de memória, revisão autorizada, cursor obsoleto e novo processo.
+
+
+### Investigação explicativa e preparação do MVP local
+
+Os controles públicos compõem as APIs existentes de recuperação, H23/MP09,
+seleção de sondas, investigação e planejamento, sem alterar o núcleo científico.
+Uma condição já observável, mas ausente do candidato original, explica a
+divergência no recorte sintético: seis critérios passam a três, dois e finalmente
+`A∧C`, mediante experiências e concessões explícitas. Cinco exemplos de aquisição
+são separados de 59 padrões adicionais verificados por referência independente.
+O aprendizado permite atingir uma meta em estado inédito e é recuperado em outro
+processo; o contraexemplo original mantém procedência e versão histórica.
+
+Sem experiência explicativa, a meta permanece insuficientemente sustentada.
+Ofertas com correlação espúria não resolvem a ambiguidade; condição ausente,
+variável não observável ou critério já eliminado preservam abstenção, conflito ou
+limitação expressiva. Trocar as hipóteses adquiridas, mantendo ofertas e destinos
+privados iguais, muda a seleção de 741 para 742. Isso demonstra dependência
+funcional computacional no controle, não causalidade física ou neural.
+
+| Capacidade e componentes | Integração demonstrada e limite |
+|---|---|
+| EDA, Circuit e Runtime | Observação/atenção/ações sintéticas; não percepção aberta de sensores reais. |
+| Engramas, Session, archive/selective | Proveniência, versões, recuperação e restauração; ciclo de vida ainda coordenado pelo hospedeiro. |
+| H23, MP09 e consequences | Aprendizagem/revisão conceitual supervisionada; família fixa, sem descoberta de novas variáveis. |
+| query, investigation, composed/composed_two | Inferência verificada e composição delimitada; não investigação multidomínio autônoma. |
+| discrimination/search, epistemic | Perguntas, sondas sem rótulo, continuação e abstenção; ofertas estruturadas fornecidas pelo ambiente. |
+| actions e predictive | Previsão e planejamento limitado com autorização; testados em mundos sintéticos. |
+| learning e synaptic/MP05 | Plasticidade e transmissão testadas isoladamente; contribuição causal ao ciclo decisório integrado não demonstrada. |
+| languages, session e main | Léxico e CLI restrita; sem compreensão linguística aberta nem entrada operacional do Runtime/PIFI. |
+
+Para um MVP **local, supervisionado e sintético**, a próxima dependência é um
+adaptador mínimo do Runtime à CLI existente, reutilizando o coordenador. Deve
+explicitar objetivo, episódios, orçamento, concessões novas e atualização das
+vistas após revisão. A recuperação deve coordenar Session, Runtime, arquivo e
+cursor, além de revalidar o estado ambiental fornecido pelo hospedeiro, sem
+restaurar autoridade. Falta demonstrar esse fluxo pelo binário real, incluindo
+interrupção, novo processo, controles negativos e medições de CPU/RAM.
+
+Esses são bloqueadores operacionais desse MVP delimitado. Contribuição neural
+causal, causas físicas, novas famílias, generalização ampla e linguagem aberta
+continuam questões científicas. A causalidade neural seria também bloqueadora de
+qualquer MVP que a alegasse. E02–E06 permanecem parciais. Nenhuma integração CLI
+nova foi implementada nesta investigação.
