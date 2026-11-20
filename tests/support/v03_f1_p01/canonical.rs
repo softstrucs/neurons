@@ -126,6 +126,15 @@ fn circuit(f: &mut Fields, p: &str, e: CircuitError) {
             put(f, p, "UnknownSynapse");
             put(f, &path(p, "id"), x.get());
         }
+        CircuitError::Dendrite(x) => {
+            put(f, p, "Dendrite");
+            put(f, &path(p, "value"), format!("{x:?}"));
+        }
+        CircuitError::UnknownDendrite(x) => {
+            put(f, p, "UnknownDendrite");
+            put(f, &path(p, "neuron"), x.neuron.get());
+            put(f, &path(p, "dendrite"), x.dendrite.get());
+        }
     }
 }
 fn cognition(f: &mut Fields, p: &str, e: CognitionError) {

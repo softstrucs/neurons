@@ -114,6 +114,12 @@ pub struct NeuronSnapshot {
     pub state_limit: i32,
     pub state: NeuronState,
 }
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NeuronRestoreError {
+    Configuration(NeuronError),
+    InvalidState,
+}
+
 impl Neuron {
     pub fn snapshot(&self) -> NeuronSnapshot {
         NeuronSnapshot {
@@ -122,5 +128,23 @@ impl Neuron {
             state_limit: self.state_limit,
             state: self.state,
         }
+    }
+    pub fn from_snapshot(snapshot: NeuronSnapshot) -> Result<Self, NeuronRestoreError> {
+        let mut neuron = Self::new(snapshot.id, snapshot.threshold, snapshot.state_limit)
+            .map_err(NeuronRestoreError::Configuration)?;
+
+        let state = snapshot.state;
+        let limit = i64::from(snapshot.state_limit);
+        let potential = i64::from(state.potential);
+
+        if potential < -limit
+            || potential >= i64::from(snapshot.threshold)
+            || state.activations > state.received
+        {
+            return Err(NeuronRestoreError::InvalidState);
+        }
+
+        neuron.state = state;
+        Ok(neuron)
     }
 }

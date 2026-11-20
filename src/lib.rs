@@ -4,6 +4,7 @@ pub mod circuit;
 pub mod cognition;
 pub mod cognitive_contracts;
 pub mod curriculum;
+pub mod dendrite;
 pub mod engine;
 pub mod engram;
 pub mod event;
@@ -18,3 +19,5 @@ pub mod session;
 pub mod synapse;
 pub use engine::persistence;
 pub mod integration;
+
+pub mod circuit_persistence;

@@ -18,6 +18,7 @@ const HEADER: usize = 24;
 
 #[derive(Debug)]
 pub enum PersistenceError {
+    DendriticSnapshotUnsupported,
     Io(io::Error),
     LimitExceeded,
     UnsupportedVersion,
