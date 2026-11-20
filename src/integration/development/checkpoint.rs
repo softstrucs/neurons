@@ -465,12 +465,12 @@ fn decode_base(
             return Err("proveniência operacional divergente".into());
         }
         let after = neural.after.as_ref().ok_or("experiência incompleta")?;
-        let before = crate::persistence::decode(&neural.before.engine)
+        let before = crate::persistence::decode(&neural.before.engine())
             .map_err(|e| format!("{e:?}"))?
             .0
             .metrics()
             .dispatched;
-        let after = crate::persistence::decode(&after.engine)
+        let after = crate::persistence::decode(&after.engine())
             .map_err(|e| format!("{e:?}"))?
             .0
             .metrics()

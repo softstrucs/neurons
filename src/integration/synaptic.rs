@@ -1,6 +1,7 @@
 //! MP05: replay validado de atos explícitos sobre o Circuit existente.
 //! Formato próprio; F1 e o codec Engine+EngramStore não são alterados.
-use crate::circuit::{Circuit, CircuitSnapshot};
+use crate::circuit::{Circuit, CircuitSnapshot, CircuitSnapshotV2};
+use crate::dendrite::{Dendrite, DendriteAddress, DendriteId};
 use crate::event::NodeId;
 use crate::learning::{Feedback, PlasticityRule, WeightUpdate};
 use crate::neuron::Neuron;
@@ -46,6 +47,45 @@ pub struct Config {
     pub queue: usize,
     pub cycle: usize,
 }
+#[derive(Clone, Eq, PartialEq)]
+pub enum ExperienceSnapshot {
+    V1(CircuitSnapshot),
+    V2(CircuitSnapshotV2),
+}
+
+impl std::fmt::Debug for ExperienceSnapshot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::V1(snapshot) => std::fmt::Debug::fmt(snapshot, f),
+            Self::V2(snapshot) => f.debug_tuple("V2").field(snapshot).finish(),
+        }
+    }
+}
+
+impl ExperienceSnapshot {
+    pub fn engine(&self) -> &[u8] {
+        match self {
+            Self::V1(snapshot) => &snapshot.engine,
+            Self::V2(snapshot) => &snapshot.engine,
+        }
+    }
+
+    pub fn neurons(&self) -> &[crate::neuron::NeuronSnapshot] {
+        match self {
+            Self::V1(snapshot) => &snapshot.neurons,
+            Self::V2(snapshot) => &snapshot.neurons,
+        }
+    }
+}
+
+fn experience_snapshot(circuit: &Circuit) -> Result<ExperienceSnapshot, String> {
+    if circuit.dendrite_count() == 0 {
+        circuit.snapshot().map(ExperienceSnapshot::V1).map_err(e)
+    } else {
+        circuit.snapshot_v2().map(ExperienceSnapshot::V2).map_err(e)
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Experience {
     pub id: u32,
@@ -53,8 +93,8 @@ pub struct Experience {
     pub source: NodeId,
     pub payload: i32,
     pub at: u64,
-    pub before: CircuitSnapshot,
-    pub after: Option<CircuitSnapshot>,
+    pub before: ExperienceSnapshot,
+    pub after: Option<ExperienceSnapshot>,
     pub complete: bool,
     pub valid: bool,
 }
@@ -157,7 +197,7 @@ impl SynapticEpisode {
         &self.trace
     }
     pub fn state(&self) -> String {
-        format!("config={:?}\ncircuit={:?}\ngrants={:?}\nexperiences={:?}\nupdates={:?}\ntrace={:?}\nchanges={} clock={} last={:?}\njournal={:?}",self.config,self.circuit.as_ref().map(Circuit::snapshot),self.grants,self.experiences,self.updates,self.trace,self.changes,self.clock,self.last_change,self.journal)
+        format!("config={:?}\ncircuit={:?}\ngrants={:?}\nexperiences={:?}\nupdates={:?}\ntrace={:?}\nchanges={} clock={} last={:?}\njournal={:?}",self.config,self.circuit.as_ref().map(experience_snapshot),self.grants,self.experiences,self.updates,self.trace,self.changes,self.clock,self.last_change,self.journal)
     }
     pub fn execute(&mut self, line: &str) -> Result<String, String> {
         if line.len() > 256 || line.chars().any(char::is_control) {
@@ -289,6 +329,73 @@ impl SynapticEpisode {
                 self.trace.push(Trace::Link(id));
                 Ok("Sinapse cadastrada".into())
             }
+
+            ["dendrito", neuron, id, threshold, limit] => {
+                if !self.experiences.is_empty() {
+                    return Err("topologia fixada".into());
+                }
+                let neuron = node(neuron)?;
+                let id = DendriteId::new(number(id)?).ok_or("ID dendrítico inválido")?;
+                let address = DendriteAddress {
+                    neuron,
+                    dendrite: id,
+                };
+                let c = self.circuit.as_mut().ok_or("sem circuito")?;
+                if c.dendrite_count() >= 4 {
+                    return Err("limite de dendritos".into());
+                }
+                c.add_dendrite(
+                    address,
+                    Dendrite::new(signed(threshold)?, signed(limit)?).map_err(e)?,
+                )
+                .map_err(e)?;
+                Ok("Dendrito cadastrado".into())
+            }
+            ["sinapse_dendritica", id, from, to, dendrite, weight, delay] => {
+                if !self.experiences.is_empty() || self.links.len() >= 4 {
+                    return Err("topologia fixada ou limite de sinapses".into());
+                }
+                let id = synapse(id)?;
+                let from = node(from)?;
+                let to = node(to)?;
+                let dendrite =
+                    DendriteId::new(number(dendrite)?).ok_or("ID dendrítico inválido")?;
+                let weight = signed(weight)?;
+                let config = self.config.as_ref().ok_or("sem circuito")?;
+                if weight < config.min || weight > config.max {
+                    return Err("peso fora dos limites".into());
+                }
+                fn reaches(
+                    edges: &[(SynapseId, NodeId, NodeId)],
+                    a: NodeId,
+                    b: NodeId,
+                    depth: usize,
+                ) -> bool {
+                    a == b
+                        || (depth > 0
+                            && edges
+                                .iter()
+                                .any(|(_, f, t)| *f == a && reaches(edges, *t, b, depth - 1)))
+                }
+                if reaches(&self.links, to, from, 4) {
+                    return Err("ciclo fora do recorte MP05".into());
+                }
+                let address = DendriteAddress {
+                    neuron: to,
+                    dendrite,
+                };
+                self.circuit
+                    .as_mut()
+                    .unwrap()
+                    .connect_dendrite(
+                        Synapse::new(id, from, to, weight, time(delay)?).map_err(e)?,
+                        address,
+                    )
+                    .map_err(e)?;
+                self.links.push((id, from, to));
+                self.trace.push(Trace::Link(id));
+                Ok("Sinapse dendrítica cadastrada".into())
+            }
             ["autorizar", source, start, end] => {
                 self.resting()?;
                 let g = Grant {
@@ -324,7 +431,7 @@ impl SynapticEpisode {
                 }
                 self.at(at)?;
                 let c = self.circuit.as_mut().unwrap();
-                let before = c.snapshot().map_err(e)?;
+                let before = experience_snapshot(c)?;
                 c.stimulate(source, payload, at).map_err(e)?;
                 let x = Experience {
                     id,
@@ -354,7 +461,7 @@ impl SynapticEpisode {
                 }
                 x.valid &= r.first_error.is_none();
                 x.complete = c.queue_len() == 0;
-                x.after = Some(c.snapshot().map_err(e)?);
+                x.after = Some(experience_snapshot(c)?);
                 self.trace.push(Trace::Cycle {
                     experience: x.id,
                     processed: r.cycle.processed,
@@ -367,8 +474,8 @@ impl SynapticEpisode {
                 Ok(format!(
                     "Execução {:?}; antes={:?}; depois={:?}",
                     r,
-                    x.before.neurons,
-                    x.after.as_ref().unwrap().neurons
+                    x.before.neurons(),
+                    x.after.as_ref().unwrap().neurons()
                 ))
             }
             ["feedback", fid, experience, context, source, evidence, syn, signal, at] => {
@@ -407,7 +514,7 @@ impl SynapticEpisode {
                     .after
                     .as_ref()
                     .unwrap()
-                    .neurons
+                    .neurons()
                     .iter()
                     .find(|n| n.id == *from)
                     .ok_or("origem ausente")?
@@ -415,7 +522,7 @@ impl SynapticEpisode {
                     .activations;
                 let before = x
                     .before
-                    .neurons
+                    .neurons()
                     .iter()
                     .find(|n| n.id == *from)
                     .unwrap()
