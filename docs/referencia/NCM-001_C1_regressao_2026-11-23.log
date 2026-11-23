@@ -1,0 +1,213 @@
+COMMAND ["cargo", "build", "--offline", "--locked", "--lib", "--bin", "neurons"]
+   Compiling neurons v0.1.0 (/tmp/neurons-ncm001-c1/isolated)
+warning: variants `WrongSource` and `DuplicateTerminal` are never constructed
+  --> src/axon.rs:10:5
+   |
+9  | pub enum AxonError {
+   |          --------- variants in this enum
+10 |     WrongSource { expected: NodeId, actual: NodeId },
+   |     ^^^^^^^^^^^
+11 |     DuplicateTerminal(SynapseId),
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AxonError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `synapse_id` is never used
+  --> src/axon.rs:20:12
+   |
+19 | impl AxonTerminal {
+   | ----------------- method in this implementation
+20 |     pub fn synapse_id(&self) -> SynapseId {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `source`, `terminals`, `add_terminal`, and `distribute` are never used
+  --> src/axon.rs:44:12
+   |
+31 | impl Axon {
+   | --------- associated items in this implementation
+...
+44 |     pub fn new(source: NodeId) -> Self {
+   |            ^^^
+...
+51 |     pub fn source(&self) -> NodeId {
+   |            ^^^^^^
+...
+55 |     pub fn terminals(&self) -> &[AxonTerminal] {
+   |            ^^^^^^^^^
+...
+59 |     pub fn add_terminal(&mut self, synapse_id: SynapseId) -> Result<(), AxonError> {
+   |            ^^^^^^^^^^^^
+...
+72 |     pub fn distribute(&self, emission: Emission) -> Result<Vec<SynapseId>, AxonError> {
+   |            ^^^^^^^^^^
+
+warning: function `measurement_from_experience` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:170:15
+    |
+170 | pub(super) fn measurement_from_experience(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralOffer` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:216:19
+    |
+216 | pub(super) struct NeuralOffer {
+    |                   ^^^^^^^^^^^
+
+warning: struct `NeuralMeasurement` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:224:19
+    |
+224 | pub(super) struct NeuralMeasurement {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `select` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:230:15
+    |
+230 | pub(super) fn select(
+    |               ^^^^^^
+
+warning: struct `NeuralCausalEvidence` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:281:19
+    |
+281 | pub(super) struct NeuralCausalEvidence {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_with_causal_evidence` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:286:15
+    |
+286 | pub(super) fn select_with_causal_evidence(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralCounterfactualResult` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:340:19
+    |
+340 | pub(super) struct NeuralCounterfactualResult {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:346:15
+    |
+346 | pub(super) fn verify_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_from_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:408:15
+    |
+408 | pub(super) fn select_from_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `neurons` (lib) generated 12 warnings
+    Finished `dev` profile [unoptimized] target(s) in 9.82s
+COMMAND ["cargo", "test", "--offline", "--locked", "--quiet", "--test", "runtime_cli", "--test", "concept_goal_supervision", "--test", "development_runtime", "--", "--skip", "bounded_update_probe", "--skip", "bounded_cost_probe_for_activation_and_communication"]
+warning: variants `WrongSource` and `DuplicateTerminal` are never constructed
+  --> src/axon.rs:10:5
+   |
+9  | pub enum AxonError {
+   |          --------- variants in this enum
+10 |     WrongSource { expected: NodeId, actual: NodeId },
+   |     ^^^^^^^^^^^
+11 |     DuplicateTerminal(SynapseId),
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AxonError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `synapse_id` is never used
+  --> src/axon.rs:20:12
+   |
+19 | impl AxonTerminal {
+   | ----------------- method in this implementation
+20 |     pub fn synapse_id(&self) -> SynapseId {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `source`, `terminals`, `add_terminal`, and `distribute` are never used
+  --> src/axon.rs:44:12
+   |
+31 | impl Axon {
+   | --------- associated items in this implementation
+...
+44 |     pub fn new(source: NodeId) -> Self {
+   |            ^^^
+...
+51 |     pub fn source(&self) -> NodeId {
+   |            ^^^^^^
+...
+55 |     pub fn terminals(&self) -> &[AxonTerminal] {
+   |            ^^^^^^^^^
+...
+59 |     pub fn add_terminal(&mut self, synapse_id: SynapseId) -> Result<(), AxonError> {
+   |            ^^^^^^^^^^^^
+...
+72 |     pub fn distribute(&self, emission: Emission) -> Result<Vec<SynapseId>, AxonError> {
+   |            ^^^^^^^^^^
+
+warning: function `measurement_from_experience` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:170:15
+    |
+170 | pub(super) fn measurement_from_experience(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralOffer` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:216:19
+    |
+216 | pub(super) struct NeuralOffer {
+    |                   ^^^^^^^^^^^
+
+warning: struct `NeuralMeasurement` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:224:19
+    |
+224 | pub(super) struct NeuralMeasurement {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `select` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:230:15
+    |
+230 | pub(super) fn select(
+    |               ^^^^^^
+
+warning: struct `NeuralCausalEvidence` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:281:19
+    |
+281 | pub(super) struct NeuralCausalEvidence {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_with_causal_evidence` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:286:15
+    |
+286 | pub(super) fn select_with_causal_evidence(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralCounterfactualResult` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:340:19
+    |
+340 | pub(super) struct NeuralCounterfactualResult {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:346:15
+    |
+346 | pub(super) fn verify_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_from_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:408:15
+    |
+408 | pub(super) fn select_from_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+running 20 tests
+....................
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+
+running 29 tests
+.............................
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 33 tests
+.................................
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.41s
+
+PUBLIC_RESULT {"passed": 82, "failed": 0, "ignored": 0, "filtered": 0}
