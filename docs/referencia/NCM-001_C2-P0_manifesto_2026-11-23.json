@@ -1,0 +1,866 @@
+{
+  "checkpoint": "NCM-001/C2-P0",
+  "head_initial": "4e231ca17ee88ff2870c6b91074c934e0172ee5b",
+  "captured_at": "2026-11-23T14:06:38.861658+00:00",
+  "git_status_initial": {
+    "branch": "devs",
+    "index": "empty",
+    "modified": 15,
+    "untracked": 544,
+    "remote_dev_confirmed": "4e231ca17ee88ff2870c6b91074c934e0172ee5b"
+  },
+  "c1_recovered_artifacts_sha256": {
+    "docs/referencia/NCM-001_C1_revisao_2026-11-23.md": "2f7bcdef0c65e33724e4fbd5f00527b29b2c3c7de10c8285970342901e68e5d5",
+    "docs/referencia/NCM-001_C1_manifesto_2026-11-23.json": "e9587f5135ad734d394274412f255309a5fe1a9a372156e6b64b665d2bb31d5d",
+    "docs/referencia/NCM-001_C1_regressao_2026-11-23.log": "7fc603ed13b75edd8c1772359c6977571f49b8cca161b7c8e2d5f424c4499e0f",
+    "docs/referencia/NCM-001_C1_atualizacoes_operacionais_2026-11-23.patch": "7b93815ce2ac26fcf6aa4a877cda30d81586d9441aaf5f4c308779b152ed687d"
+  },
+  "sources_unchanged_since_c1": true,
+  "preexisting_files_verified_before_documentation": 897,
+  "preregistration": {
+    "checkpoint": "NCM-001/C2-P0",
+    "head": "4e231ca17ee88ff2870c6b91074c934e0172ee5b",
+    "classification": "seguro: teste diagnostico isolado, sintetico publico, sem filesystem/rede/subprocessos no Rust; somente construcao de Session, supervisor MP09, consulta imutavel e clones de relatorios",
+    "diagnostic_path": "docs/referencia/NCM-001_C2-P0_diagnostico_2026-11-23.rs",
+    "diagnostic_sha256_before_execution": "b800df593fc3658d51e30c148592d74a89f1a3de08ed264ca43ce9ee46434aa5",
+    "sources": [
+      {
+        "path": "Cargo.lock",
+        "sha256": "91de8856cddf8c036410042b3d70b2038f5c8c04c386fe1b0d77a332a0056931",
+        "bytes": 151,
+        "tracked": true
+      },
+      {
+        "path": "Cargo.toml",
+        "sha256": "1d0dd589aeb345312a2e755d4dce0f9fe28c521731325757b3e9389a4259b860",
+        "bytes": 176,
+        "tracked": true
+      },
+      {
+        "path": "src/axon.rs",
+        "sha256": "e144d857a8d9aea465dd23baaad4c57c5e762d3731415d16a6e338af07bb37ec",
+        "bytes": 2079,
+        "tracked": false
+      },
+      {
+        "path": "src/circuit.rs",
+        "sha256": "7683ef076cabed54fc8fc66755827269310d9011629db97bbda7af25299baf65",
+        "bytes": 17727,
+        "tracked": true
+      },
+      {
+        "path": "src/circuit_persistence.rs",
+        "sha256": "6d154bec551e220f1c8af15310f391f0355ef505da1f16a59e7a0071e6a6a98d",
+        "bytes": 9779,
+        "tracked": true
+      },
+      {
+        "path": "src/cognition.rs",
+        "sha256": "f38174625ec63ba4615f0891adaa1931b649685bb996782c7f8a6771a8f5d2d3",
+        "bytes": 9310,
+        "tracked": true
+      },
+      {
+        "path": "src/cognition/bounded.rs",
+        "sha256": "f0f2cf0ef5b2bde030ee499860d850dec0720787ab20d72816b0794bbd3c2745",
+        "bytes": 4408,
+        "tracked": true
+      },
+      {
+        "path": "src/cognition/concepts.rs",
+        "sha256": "0a6bcab7fc000f56cefb3eb96e488bb7adbd803b311e731c67b9cdcee74b6b20",
+        "bytes": 6915,
+        "tracked": true
+      },
+      {
+        "path": "src/cognitive_contracts.rs",
+        "sha256": "b0dfa68dc79c3ccb4e37c7c0d6875ea1211c0d17836d4bc634f8326e47320c91",
+        "bytes": 27140,
+        "tracked": true
+      },
+      {
+        "path": "src/curriculum.rs",
+        "sha256": "4146573134cd02b596b52a5e2f999646ec6912b22b25c2162d9aec36092dbdd3",
+        "bytes": 36747,
+        "tracked": true
+      },
+      {
+        "path": "src/dendrite.rs",
+        "sha256": "5115ae6b7b1686c7aa859f6b444d788b476bdcb8611bf7a29f0f8692437a6115",
+        "bytes": 7372,
+        "tracked": true
+      },
+      {
+        "path": "src/engine.rs",
+        "sha256": "4d72c74155f1e8aa7cc956c957822f863513ea93034ea1a6a46bdba0d2a5e420",
+        "bytes": 14937,
+        "tracked": true
+      },
+      {
+        "path": "src/engram.rs",
+        "sha256": "f9bcd93b9f2894f6d3bdf68d9eaa2be9d93f6b94eb40bce3396195d26dfb9c3d",
+        "bytes": 6336,
+        "tracked": true
+      },
+      {
+        "path": "src/event.rs",
+        "sha256": "e998ad1e290f85c9e9b4266ae19d461898735c02aabf40f51d6864ffaeacf4d5",
+        "bytes": 1782,
+        "tracked": true
+      },
+      {
+        "path": "src/integration.rs",
+        "sha256": "2674070c017670a4e7574a6226c91530fc1d6d7846b68f5c412c0e7223c2883d",
+        "bytes": 2736,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/acquisition.rs",
+        "sha256": "6b0497cb71053335808600f8682a501013d8dc7528b6ae2121143d1738642e87",
+        "bytes": 21534,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/associative.rs",
+        "sha256": "0d00e00835327b2d4089c4c779b92761a7d185c9ee5c570300c816b4e4d8b3ac",
+        "bytes": 1272,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/cognitive_coordination.rs",
+        "sha256": "f5283805772ce1224cc69da0344f15b8a3faae80101e1941a0e8a8ca3c3874e8",
+        "bytes": 11694,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/composed.rs",
+        "sha256": "778ac558efa3ef2295a3fb17840bfac1cb773148f9937c1301ed1c548664f5b2",
+        "bytes": 35109,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/composed_two.rs",
+        "sha256": "04b218504d24003497c7ad0c6d5f37e4677319f41529a30a52cb14678518ca8d",
+        "bytes": 10426,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/concepts.rs",
+        "sha256": "d7bb0b6478d93feb6f90abc558fe5c8953206a4134d6fec31a2a50650254fc22",
+        "bytes": 19051,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development.rs",
+        "sha256": "4393161868f1b1cd479a97cee0f5059baaceaba1f6a4434b7f6987c2e4355863",
+        "bytes": 34524,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/actions.rs",
+        "sha256": "4d41472927f601f8d39648a3dc1bbe30186581a2226ec56ac3df50f0f4faabbc",
+        "bytes": 31691,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/archive.rs",
+        "sha256": "90b9c18a176316d5fd0926c0a3017d440b840ee1854f33e0eca7137ba89a8c33",
+        "bytes": 27384,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/archive/selective.rs",
+        "sha256": "6aa67ecd5fd0bec40182bfed27dffd83c6432c5c5276997d43406c4b8bd3d075",
+        "bytes": 38304,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/checkpoint.rs",
+        "sha256": "fb38ea6a3d56c9266a8af093433fa08db594531f71c4e9f98551029e6150f097",
+        "bytes": 24164,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/consequences.rs",
+        "sha256": "d66f2f53eab503183161638ba611978992c2c055e09e765781e152288ac0d0d6",
+        "bytes": 16314,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/discrimination.rs",
+        "sha256": "577fed79422bbc9a72cf0308c20feb3cdffcb03f77169478ec4785a017942f5d",
+        "bytes": 19196,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/discrimination/neural_priority.rs",
+        "sha256": "13c251db859b9afd85eb1a6c04c479a51564104b193e191a9f011cab292a4e61",
+        "bytes": 48368,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/development/discrimination/search.rs",
+        "sha256": "ab2bc116f36d6ff34e84dca9295baafe71c78f37427955626028d6a737c48e05",
+        "bytes": 19032,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/epistemic.rs",
+        "sha256": "02f87c795787cdfce67c15df33d138498f028c49b62517100b1fed321cf10c45",
+        "bytes": 15137,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/predictive.rs",
+        "sha256": "7643b98eca62ecc68b33636ef10bbdcc779c47f35995c11e82011989affa99b2",
+        "bytes": 25173,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/e13_bundle.rs",
+        "sha256": "5e5985d4e6a59b66853913d56514bbb7393cc932b51d33bd484145736d74ec86",
+        "bytes": 3072,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/e13_storage.rs",
+        "sha256": "dbb9586e564778d18b9b6d1a0d12ffd582776613ec273de003952a3b37b4594e",
+        "bytes": 7787,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/experiential.rs",
+        "sha256": "84496663b9d89eaff9a7b97298780bcb0697413be4f7687db851bcca9a5f96c9",
+        "bytes": 14660,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/investigation.rs",
+        "sha256": "e2de2e5d722c53a196075ebf4546853b9a08674ea649f3e61664cdf14aa98d23",
+        "bytes": 28084,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/query.rs",
+        "sha256": "28dd134212341acc0d24fbbe15356e1988471cd97dc67ab05dd7281948d9dee8",
+        "bytes": 22343,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/synaptic.rs",
+        "sha256": "6a464a00fef1c76717ccd6cd0751db827664307dc3fd1cfa9144a8e2f878b0f6",
+        "bytes": 26186,
+        "tracked": true
+      },
+      {
+        "path": "src/languages.rs",
+        "sha256": "726dff0be9ee7ffa85335c614e1370ce1a26239322581bc9dde90030324705db",
+        "bytes": 13734,
+        "tracked": true
+      },
+      {
+        "path": "src/languages/contextual.rs",
+        "sha256": "9005bda6c0b3d56c36e40639c9c61565e82b7111a75da4803106b90a2668b2a5",
+        "bytes": 13109,
+        "tracked": true
+      },
+      {
+        "path": "src/languages/sentences.rs",
+        "sha256": "554eeda26e884a0d01f440307835c978ee5ce22cd4fc020ec8640460c630bf1f",
+        "bytes": 10093,
+        "tracked": true
+      },
+      {
+        "path": "src/learning.rs",
+        "sha256": "ff31dcc8273148a605e6cad4e68e4f53cd6f02aaa988314c934ba957a7a66de1",
+        "bytes": 3367,
+        "tracked": true
+      },
+      {
+        "path": "src/learning/concepts.rs",
+        "sha256": "3f67b8e7a443e4775622df1b0ef56aa266539561a4d722b3dd09b1a1bac2e535",
+        "bytes": 2065,
+        "tracked": true
+      },
+      {
+        "path": "src/lib.rs",
+        "sha256": "78770e397f4b61f98f0dc703fddbfb546c9bd453a70d53d0b38946035ea224a0",
+        "bytes": 548,
+        "tracked": true
+      },
+      {
+        "path": "src/main.rs",
+        "sha256": "362c326c07f6af30d80e520daf87cea8c832ec84e9ae6059b6fcb94a79e9d824",
+        "bytes": 3805,
+        "tracked": true
+      },
+      {
+        "path": "src/metacognition.rs",
+        "sha256": "bd3c6f5d9cc5937d7082f7445c579a4b2c456104e5095c7af0e253f9af01a8f7",
+        "bytes": 16201,
+        "tracked": true
+      },
+      {
+        "path": "src/metacognition/concepts.rs",
+        "sha256": "317b3ecf0f526e951abccfe6056d1c0a6fb1ea97f52a770cc77d71959643269b",
+        "bytes": 4551,
+        "tracked": true
+      },
+      {
+        "path": "src/neuron.rs",
+        "sha256": "513fa4f06c6a5af6466fbd525112eb1bee5659efcade738b4cffdf0657f15e1c",
+        "bytes": 4572,
+        "tracked": true
+      },
+      {
+        "path": "src/persistence.rs",
+        "sha256": "db66f7c680b800735fdc4cca8e57cdb5165fc8c9b52ea2b2cf7763ab03e5f918",
+        "bytes": 12635,
+        "tracked": true
+      },
+      {
+        "path": "src/personality.rs",
+        "sha256": "1b3cc6af1bce2b8f1a104292e54f145b35a8b9cb8f5cfca31ff54bef559e426b",
+        "bytes": 755,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/audit.rs",
+        "sha256": "b6eeb50b25b4e654a2283548b41eb1991c1b99a9a7cb6972eaf43d98e99d06c6",
+        "bytes": 19372,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/controls.rs",
+        "sha256": "380e9b0def256ca6df51d34df5bbb2d8c8055dfad2cf582cc89329a878c8e5f2",
+        "bytes": 6988,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/custody.rs",
+        "sha256": "9a18e44e820fa5109d631c0154f54b904e5ecbd9b4b8b12e4952fd67e13851ee",
+        "bytes": 7083,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/mod.rs",
+        "sha256": "fee6b9d742e90c329ece80febdb689d5c642957fbd6f02ded8bc96a80700b5fb",
+        "bytes": 3302,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/plan.rs",
+        "sha256": "cf611cfb0965a271a61ef053f9ff320ba38b26b59f233c6f929fae357bc0b2f3",
+        "bytes": 8180,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/recording.rs",
+        "sha256": "f3d1f3cf853de7fde2db4ff16f9536c3d72ae980fe6543fd973eda313f0ca349",
+        "bytes": 3001,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/controls.rs",
+        "sha256": "3ee72c712b72f62d186b0d2018eb020d8276a98ca3014b9905395bea0ee7cac1",
+        "bytes": 11094,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/evaluator.rs",
+        "sha256": "3aa4279b2c61bbaab42c36700ab8b9f5c57addde5317f2bdc0a471216e50050a",
+        "bytes": 28458,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/fixtures.rs",
+        "sha256": "347259bd00c22e3690670e5ad4d0e05c2a6a28aa8da44e060195306aec70e4a9",
+        "bytes": 6877,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/history.rs",
+        "sha256": "1ed4a178003bca5ee6fc97bd7f42f648812cfc189c82eb8afc86c04f1c1593e0",
+        "bytes": 9920,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/mod.rs",
+        "sha256": "229cda58db3b6b2628ffd89c20a31a86840e1f1700733c85cd72778d9d33560c",
+        "bytes": 2786,
+        "tracked": true
+      },
+      {
+        "path": "src/session.rs",
+        "sha256": "102ed5b3ac3c5a5c443416cad70a2b6eddc2f2b5a32bd024a9833060b319f644",
+        "bytes": 4895,
+        "tracked": true
+      },
+      {
+        "path": "src/session/conversation.rs",
+        "sha256": "6670b2404283f6a7e13862e0d71f2f6e88f3f47c5f0c5c01ba62a176436bab83",
+        "bytes": 8032,
+        "tracked": false
+      },
+      {
+        "path": "src/session/f1.rs",
+        "sha256": "bcf6053e4b2b02ef8e1df64f89e30d0b064f683782b3dc14f6ac93d8832910e8",
+        "bytes": 75170,
+        "tracked": true
+      },
+      {
+        "path": "src/session/f1/composed.rs",
+        "sha256": "98393b0d44382283bc129c636a5b1148cdce59d0d82f069fba83adccc08704f1",
+        "bytes": 12029,
+        "tracked": true
+      },
+      {
+        "path": "src/session/intent.rs",
+        "sha256": "36fbc00fb26e527aad33a9e786666c7117bff01e900b9697696a6e15f8ef0d52",
+        "bytes": 4210,
+        "tracked": false
+      },
+      {
+        "path": "src/session/runtime.rs",
+        "sha256": "7087ad2c8527aed034692dd91e7f290eb487e12af14b440f514d62438e4f11be",
+        "bytes": 49206,
+        "tracked": true
+      },
+      {
+        "path": "src/session/synaptic.rs",
+        "sha256": "4e977740d1716c9ec813f10b112f0b4365e3bda7c4443a870bf1b00cdc68f6ac",
+        "bytes": 2901,
+        "tracked": true
+      },
+      {
+        "path": "src/synapse.rs",
+        "sha256": "f25daf865e74950666cd8656fd6baa118b0fb9f52c8f7755463c3f7d6ad117bd",
+        "bytes": 2665,
+        "tracked": true
+      }
+    ],
+    "copied_files": 70,
+    "test_target": "ncm_c2_p0",
+    "planned_tests": 6,
+    "planned_cases": 23,
+    "expected_mismatch_cases": [
+      "initial_observation",
+      "initial_catalog",
+      "initial_context",
+      "initial_rule_id",
+      "initial_rule_version",
+      "initial_validity",
+      "final_observation",
+      "final_catalog",
+      "final_context",
+      "final_rule_id",
+      "final_rule_version",
+      "final_validity",
+      "real_other_observation",
+      "real_other_context"
+    ],
+    "interpretation": "Testes diagnosticos exigem reproducao do falso positivo atual; PASS nao significa conformidade. expected_* registra contrato de vinculacao; observed e calculado exclusivamente pela implementacao produtiva intacta. Nenhuma correcao C2-P1 autorizada.",
+    "regressions": "C1 existente 82/0/0/0 preservado, nao reexecutado sem mudanca produtiva.",
+    "scope_exclusions": [
+      "EC-10 R3 e suportes",
+      "testes internos reservados",
+      "painel CPF-I03 e verify_generalization",
+      "E13 e integracao temporal AXN",
+      "outros alvos e instrumentos",
+      "onedell"
+    ]
+  },
+  "annotation_revision": {
+    "reason": "Refinar expected_knowledge para casos de consulta inicial incompatível com consulta final válida, preservando expectativa learning=false e todos os dados/intervenções/asserts de reprodução; não corrige candidato.",
+    "preliminary_sha256": "b800df593fc3658d51e30c148592d74a89f1a3de08ed264ca43ce9ee46434aa5",
+    "final_sha256_before_execution": "2aa3435f5aaa38d396cc34e698cb918fdb2edff0a07382e356cf37398d68466e",
+    "expected_final_cases": 23,
+    "expected_false_learning": 14,
+    "expected_false_knowledge": 8
+  },
+  "diagnostic_annotation_diff": "--- preliminary.rs\n+++ final.rs\n@@ -126,5 +126,9 @@\n }\n-fn assert_reproduced_false_positive(id: &str, report: &ConceptGoalReport) {\n+fn assert_reproduced_false_positive(\n+    id: &str,\n+    report: &ConceptGoalReport,\n+    expected_knowledge: bool,\n+) {\n     assert!(!bindings_match(report));\n-    let observed = row(id, report, (false, false));\n+    let observed = row(id, report, (expected_knowledge, false));\n     // Pre-registro diagnostico: a implementacao atual aceita indevidamente.\n@@ -220,3 +224,4 @@\n             }\n-            assert_reproduced_false_positive(&format!(\"{phase}_{field}\"), &altered);\n+            // Uma consulta final valida ainda sustenta conhecimento, mas nao aprendizagem.\n+            assert_reproduced_false_positive(&format!(\"{phase}_{field}\"), &altered, initial);\n         }\n@@ -241,3 +246,3 @@\n     transplanted.final_query.as_mut().unwrap().report = other;\n-    assert_reproduced_false_positive(\"real_other_observation\", &transplanted);\n+    assert_reproduced_false_positive(\"real_other_observation\", &transplanted, false);\n \n@@ -246,3 +251,3 @@\n     transplanted.final_query.as_mut().unwrap().report = other_context.final_query.unwrap().report;\n-    assert_reproduced_false_positive(\"real_other_context\", &transplanted);\n+    assert_reproduced_false_positive(\"real_other_context\", &transplanted, false);\n     assert_eq!(session.encode(), bytes);\n",
+  "execution_final": {
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--test",
+      "ncm_c2_p0",
+      "--",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "cwd": "/tmp/neurons-ncm001-c2-p0/isolated",
+    "returncode": 0,
+    "elapsed_seconds": 0.8181104279356077,
+    "environment": {
+      "CARGO_HOME": "/tmp/neurons-ncm001-c2-p0/cargo-home",
+      "CARGO_TARGET_DIR": "/tmp/neurons-ncm001-c2-p0/target",
+      "TMPDIR": "/tmp/neurons-ncm001-c2-p0/tmp"
+    },
+    "timeout_seconds": 120,
+    "annotation_revision": {
+      "reason": "Refinar expected_knowledge para casos de consulta inicial incompatível com consulta final válida, preservando expectativa learning=false e todos os dados/intervenções/asserts de reprodução; não corrige candidato.",
+      "preliminary_sha256": "b800df593fc3658d51e30c148592d74a89f1a3de08ed264ca43ce9ee46434aa5",
+      "final_sha256_before_execution": "2aa3435f5aaa38d396cc34e698cb918fdb2edff0a07382e356cf37398d68466e",
+      "expected_final_cases": 23,
+      "expected_false_learning": 14,
+      "expected_false_knowledge": 8
+    }
+  },
+  "execution_preliminary": {
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "--locked",
+      "--test",
+      "ncm_c2_p0",
+      "--",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "cwd": "/tmp/neurons-ncm001-c2-p0/isolated",
+    "returncode": 0,
+    "elapsed_seconds": 9.957278260029852,
+    "environment": {
+      "CARGO_HOME": "/tmp/neurons-ncm001-c2-p0/cargo-home",
+      "CARGO_TARGET_DIR": "/tmp/neurons-ncm001-c2-p0/target",
+      "TMPDIR": "/tmp/neurons-ncm001-c2-p0/tmp"
+    },
+    "sanitization": "NEURONS_*, CARGO_* e RUST* herdadas removidas; offline e locked; sem cargo test global",
+    "timeout_seconds": 120
+  },
+  "results": {
+    "tests_passed": 6,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "distinct_cases": 23,
+    "false_learning": 14,
+    "false_knowledge": 8,
+    "competence_true": 0,
+    "cases": [
+      {
+        "id": "guard_final_goal_id",
+        "knowledge": false,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "guard_initial_goal_id",
+        "knowledge": true,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "guard_revision",
+        "knowledge": true,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": true
+      },
+      {
+        "id": "guard_outcome",
+        "knowledge": false,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": true
+      },
+      {
+        "id": "guard_execution",
+        "knowledge": false,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": true
+      },
+      {
+        "id": "positive_taught",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": true,
+        "bindings_match": true
+      },
+      {
+        "id": "real_other_observation",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "real_other_context",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "initial_observation",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "initial_catalog",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "initial_context",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "initial_rule_id",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "initial_rule_version",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "initial_validity",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "final_observation",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "final_catalog",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "final_context",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "final_rule_id",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "final_rule_version",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "final_validity",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": false
+      },
+      {
+        "id": "control_original_after_mutations",
+        "knowledge": true,
+        "learning": true,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": true,
+        "bindings_match": true
+      },
+      {
+        "id": "control_already_supported",
+        "knowledge": true,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": true,
+        "expected_learning": false,
+        "bindings_match": true
+      },
+      {
+        "id": "control_no_teaching",
+        "knowledge": false,
+        "learning": false,
+        "competence": false,
+        "expected_knowledge": false,
+        "expected_learning": false,
+        "bindings_match": true
+      }
+    ]
+  },
+  "actual_rust_dependencies": [
+    "src/axon.rs",
+    "src/circuit.rs",
+    "src/circuit_persistence.rs",
+    "src/cognition.rs",
+    "src/cognition/bounded.rs",
+    "src/cognition/concepts.rs",
+    "src/cognitive_contracts.rs",
+    "src/curriculum.rs",
+    "src/dendrite.rs",
+    "src/engine.rs",
+    "src/engram.rs",
+    "src/event.rs",
+    "src/integration.rs",
+    "src/integration/acquisition.rs",
+    "src/integration/associative.rs",
+    "src/integration/cognitive_coordination.rs",
+    "src/integration/composed.rs",
+    "src/integration/composed_two.rs",
+    "src/integration/concepts.rs",
+    "src/integration/development.rs",
+    "src/integration/development/actions.rs",
+    "src/integration/development/archive.rs",
+    "src/integration/development/archive/selective.rs",
+    "src/integration/development/checkpoint.rs",
+    "src/integration/development/consequences.rs",
+    "src/integration/development/discrimination.rs",
+    "src/integration/development/discrimination/neural_priority.rs",
+    "src/integration/development/discrimination/search.rs",
+    "src/integration/development/epistemic.rs",
+    "src/integration/development/predictive.rs",
+    "src/integration/e13_bundle.rs",
+    "src/integration/e13_storage.rs",
+    "src/integration/experiential.rs",
+    "src/integration/investigation.rs",
+    "src/integration/query.rs",
+    "src/integration/synaptic.rs",
+    "src/languages.rs",
+    "src/languages/contextual.rs",
+    "src/languages/sentences.rs",
+    "src/learning.rs",
+    "src/learning/concepts.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/metacognition.rs",
+    "src/metacognition/concepts.rs",
+    "src/neuron.rs",
+    "src/persistence.rs",
+    "src/personality.rs",
+    "src/protocol_verification/conceptual/audit.rs",
+    "src/protocol_verification/conceptual/controls.rs",
+    "src/protocol_verification/conceptual/custody.rs",
+    "src/protocol_verification/conceptual/mod.rs",
+    "src/protocol_verification/conceptual/plan.rs",
+    "src/protocol_verification/conceptual/recording.rs",
+    "src/protocol_verification/controls.rs",
+    "src/protocol_verification/evaluator.rs",
+    "src/protocol_verification/fixtures.rs",
+    "src/protocol_verification/history.rs",
+    "src/protocol_verification/mod.rs",
+    "src/session.rs",
+    "src/session/conversation.rs",
+    "src/session/f1.rs",
+    "src/session/f1/composed.rs",
+    "src/session/intent.rs",
+    "src/session/runtime.rs",
+    "src/session/synaptic.rs",
+    "src/synapse.rs",
+    "tests/ncm_c2_p0.rs"
+  ],
+  "warnings": {
+    "distinct": 12,
+    "type": "dead_code",
+    "scope": "3 axon; 9 neural_priority; repetidos nas duas execucoes, sem soma como defeitos novos"
+  },
+  "reproduction": "Conferir e copiar somente preregistration.sources[] (69 arquivos do conjunto C1, sem outros testes/runner), copiar diagnostic_path para tests/ncm_c2_p0.rs, usar CARGO_HOME/TMPDIR/target novos, limpar NEURONS_*, CARGO_* e RUST* herdados e executar execution_final.command. PASS reproduz defeito atual, nao deve ser usado como teste verde de conformidade apos C2-P1.",
+  "productive_code_changes": [],
+  "C2_P1_authorized": false,
+  "operational_updates": [
+    {
+      "path": "NEURONS_CONTROLE_MESTRE.md",
+      "before_sha256": "ed4200139eb6cb4e785de13f3bd3e526001f1724fa66f3507845a7b630c6d9f1",
+      "after_sha256": "5b8748177e21a381dd0d19f3f8d63c16e1e8b3afd25370c3c746c6be680e704d",
+      "append_only": true,
+      "whole_file_staged": false
+    },
+    {
+      "path": "NEURONS_PIFI_001_PROGRESSO.md",
+      "before_sha256": "8d63c5a6a6fe214b2d1c362d98c185dd8cc991c0443cb3a5eb4321fd3449d673",
+      "after_sha256": "f33948bdb02608e1363e8654c9dc6489aedd03433d53eaf93ae03e86b3c6f4be",
+      "append_only": true,
+      "whole_file_staged": false
+    }
+  ],
+  "publication_scope": [
+    "docs/referencia/NCM-001_C2-P0_atualizacoes_operacionais_2026-11-23.patch",
+    "docs/referencia/NCM-001_C2-P0_diagnostico_2026-11-23.rs",
+    "docs/referencia/NCM-001_C2-P0_manifesto_2026-11-23.json",
+    "docs/referencia/NCM-001_C2-P0_relatorio_2026-11-23.md",
+    "docs/referencia/NCM-001_C2-P0_validacao_2026-11-23.log"
+  ],
+  "evidence_sha256": {
+    "docs/referencia/NCM-001_C2-P0_atualizacoes_operacionais_2026-11-23.patch": "49cf606e8ab3cb383ca3d1cb53a1e4ddd6f63642024cce5f4f6ee00172f9d999",
+    "docs/referencia/NCM-001_C2-P0_diagnostico_2026-11-23.rs": "2aa3435f5aaa38d396cc34e698cb918fdb2edff0a07382e356cf37398d68466e",
+    "docs/referencia/NCM-001_C2-P0_relatorio_2026-11-23.md": "fdb15c2486e9f88dcf6830b4091acaa95980641ad2ee4be4755e68226714c64e",
+    "docs/referencia/NCM-001_C2-P0_validacao_2026-11-23.log": "aa330a556d8998ac638942ea5b2ef40bf04fe488f06375fb8f1fa751ad9a099d"
+  },
+  "log_preservation": {
+    "raw_preliminary_sha256": "d581b9969326e531f50c19a4446746fc8c0ae8e03ac98c67f7c36658396fca8d",
+    "raw_final_sha256": "748518d4a9644514292b8ea62ed7836f3c89d1e31362a168c8fd7bfff9cb790e",
+    "publication_normalization": "Log concatenado preserva stdout/stderr das duas rodadas; somente linhas vazias extras no EOF removidas apos primeira checagem de whitespace do indice. Originais temporarios intactos."
+  }
+}
