@@ -1,0 +1,4304 @@
+{
+  "checkpoint": "NCM-001/C0",
+  "captured_at": "2026-11-23T13:18:41.824318+00:00",
+  "head": "bc42f236e508906fd37f31f18ca263f7bf1cc836",
+  "branch": "devs",
+  "remotes": [
+    [
+      "origin",
+      "git@github.com:softstrucs/neurons.git",
+      "(fetch)"
+    ],
+    [
+      "origin",
+      "git@github.com:softstrucs/neurons.git",
+      "(push)"
+    ]
+  ],
+  "tracked": 347,
+  "ignored": 1707,
+  "status_counts": {
+    " M": 15,
+    "??": 544
+  },
+  "groups": {
+    "documentacao_operacional": 4,
+    "axonal_nucleo_dependencias": 33,
+    "integracao_cpf_associativa_runtime_revisar": 21,
+    "custodia_protocolos_revisao_especifica": 451,
+    "copias_historicas_preservar": 23,
+    "coordenacao_e13_proposta": 12,
+    "interface_conversacional": 5,
+    "edf_experimental": 10
+  },
+  "entries": [
+    {
+      "path": "NEURONS_PIFI_001_PROGRESSO.md",
+      "status": " M",
+      "group": "documentacao_operacional",
+      "size": 98204,
+      "sha256": "c9c4a5ba495212c3f077415b192b33fef1e5fa8a32f5debb99dfae67b4919d5c"
+    },
+    {
+      "path": "src/circuit.rs",
+      "status": " M",
+      "group": "axonal_nucleo_dependencias",
+      "size": 17727,
+      "sha256": "7683ef076cabed54fc8fc66755827269310d9011629db97bbda7af25299baf65"
+    },
+    {
+      "path": "src/curriculum.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 36747,
+      "sha256": "4146573134cd02b596b52a5e2f999646ec6912b22b25c2162d9aec36092dbdd3"
+    },
+    {
+      "path": "src/engine.rs",
+      "status": " M",
+      "group": "axonal_nucleo_dependencias",
+      "size": 14937,
+      "sha256": "4d72c74155f1e8aa7cc956c957822f863513ea93034ea1a6a46bdba0d2a5e420"
+    },
+    {
+      "path": "src/integration.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 2736,
+      "sha256": "2674070c017670a4e7574a6226c91530fc1d6d7846b68f5c412c0e7223c2883d"
+    },
+    {
+      "path": "src/integration/development/discrimination.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 19196,
+      "sha256": "577fed79422bbc9a72cf0308c20feb3cdffcb03f77169478ec4785a017942f5d"
+    },
+    {
+      "path": "src/lib.rs",
+      "status": " M",
+      "group": "axonal_nucleo_dependencias",
+      "size": 548,
+      "sha256": "78770e397f4b61f98f0dc703fddbfb546c9bd453a70d53d0b38946035ea224a0"
+    },
+    {
+      "path": "src/main.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 3805,
+      "sha256": "362c326c07f6af30d80e520daf87cea8c832ec84e9ae6059b6fcb94a79e9d824"
+    },
+    {
+      "path": "src/neuron.rs",
+      "status": " M",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4572,
+      "sha256": "513fa4f06c6a5af6466fbd525112eb1bee5659efcade738b4cffdf0657f15e1c"
+    },
+    {
+      "path": "src/session.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 4895,
+      "sha256": "102ed5b3ac3c5a5c443416cad70a2b6eddc2f2b5a32bd024a9833060b319f644"
+    },
+    {
+      "path": "src/session/runtime.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 49206,
+      "sha256": "7087ad2c8527aed034692dd91e7f290eb487e12af14b440f514d62438e4f11be"
+    },
+    {
+      "path": "tests/concept_goal_supervision.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 26977,
+      "sha256": "69bb4761fc29bf54814d5d3e7bdf1213dbd1723303a22e094e9fb0339a340f69"
+    },
+    {
+      "path": "tests/development_runtime.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 40415,
+      "sha256": "543902b17d6a1d91ec2031af2d2f0872487ebc59c2c5bd853d848b5ae03b734d"
+    },
+    {
+      "path": "tests/ec10_revision_r3.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 11199,
+      "sha256": "3e3c5d66f93c0ffbab67c3798c43bcbf1f3f6440f7af356d961df9d0625863b7"
+    },
+    {
+      "path": "tests/runtime_cli.rs",
+      "status": " M",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 25082,
+      "sha256": "d62c0da765115d8f49258a53a4d590dbc25d970c03fe0794ef3914f352d6ab64"
+    },
+    {
+      "path": "NEURONS_CONSOLIDACAO_ARQUITETURAL_2026-11-21.md",
+      "status": "??",
+      "group": "documentacao_operacional",
+      "size": 9364,
+      "sha256": "ebaba8c06738f02c1023cbc0ba05d1834c10abb8d2bfd337a14c7e248328993e"
+    },
+    {
+      "path": "NEURONS_CONTROLE_MESTRE.md",
+      "status": "??",
+      "group": "documentacao_operacional",
+      "size": 16281,
+      "sha256": "01928d528b3addcc0cec4d2900ca1f802d3b66fb89064ee28cd41f6fe7cb3288"
+    },
+    {
+      "path": "NEURONS_PIFI_001_v1.0.md",
+      "status": "??",
+      "group": "documentacao_operacional",
+      "size": 23246,
+      "sha256": "175cd6c110d6b2b239f4d9ad6e3666988a138534f77a3619c685100c30d37d45"
+    },
+    {
+      "path": "docs/protocolos/CIC-01_formacao_revisao_conceitos_PROPOSTA.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 34582,
+      "sha256": "92490036bdbcd3ff56803b69c5ada189827892f86ece50615006b2b406dcb038"
+    },
+    {
+      "path": "docs/protocolos/CIC-I1_contratos_mecanismo_conceitual.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 16494,
+      "sha256": "b420486dc4fc18c0815e2aabe5b0d5445e42556a5950f84d324dcf5b2e0910df"
+    },
+    {
+      "path": "docs/protocolos/CIC-I2_controles_avaliador_preparacao.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 18321,
+      "sha256": "d84672d647ae2867454bf2b898be7d60e42c615715f8c235bdcb2b60e3c6e5a3"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3-R1_atestacao_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 16923,
+      "sha256": "8f268d9ea7441c6511a11bad62e530b12bec4c40533b114045c5b7340705705a"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3-R2_preparacao_atestacao_real_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 14648,
+      "sha256": "2604b38a4de1fdcbe6f53de8c6ac1c9318349207fa62bb9efbb57110131ab187"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3-R2_procedimento_custodia_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12538,
+      "sha256": "030b650a7c1f45a9068344b33c9333f0acbaf01ec6073dbe3ff86cbc3c560f33"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3-R3_fechamento_impedimentos_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15968,
+      "sha256": "70283f50bc5bbf4ff2a83dc2d240d66e67e78e4ddb73f6b53c56d75713be311b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3-R4_consumidores_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 44729,
+      "sha256": "72ae9133f089d9913ad35a6f674d8f089d3345eda480ebf46d7a67b82dff4f53"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3-R4_fechamento_tecnico_B6.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12317,
+      "sha256": "31a3faf4a973b59ee19f71d32e0427e86f67bc4075f489b5d7d00c2a275df9f5"
+    },
+    {
+      "path": "docs/protocolos/CIC-I3_bloqueio_validacao_V.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12264,
+      "sha256": "aec2659937bf3d856e148382b0bf9f579cc144e9879c2e063306dc12e68e030d"
+    },
+    {
+      "path": "docs/protocolos/CIC-I4-R1_compatibilidade_catalogo_historico.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9044,
+      "sha256": "679c9dee2dc926086d62294202288bc0bc315a1825029adc813d7ffa419855fb"
+    },
+    {
+      "path": "docs/protocolos/CIC-I4-R1_revisao_catalogos.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 24254,
+      "sha256": "89810f8e80b37c3f4419cc66bf6014ef7fb73dc0502eeb166b8d82b3c9afa6e4"
+    },
+    {
+      "path": "docs/protocolos/CIC-I4_consumidor_operacional_sintetico_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 14956,
+      "sha256": "7584b278e1e54cb2cf9d0f7d6dceffd310fdf9f028945516f78f9c71bc65977a"
+    },
+    {
+      "path": "docs/protocolos/CIC-I4_consumidores_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 43732,
+      "sha256": "1567770ffdc93ad16462c7566b5a1dcd90363b9428244bd521b5a3dce32beb08"
+    },
+    {
+      "path": "docs/protocolos/CIC-I5_diagnostico_prontidao_operacional_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 18289,
+      "sha256": "9d3f8e806e57c37d5a6c952162791db44a999072d9eb391a492e21f8fb5d3da5"
+    },
+    {
+      "path": "docs/protocolos/CIC-I5_matriz_impedimentos_B1_B11.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 38916,
+      "sha256": "ade92292c242f82286b242e93c8053e5894f81ef37dda78fae030b57a0fd305c"
+    },
+    {
+      "path": "docs/protocolos/CIC-I5_plano_remediacao_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 11218,
+      "sha256": "e3635273eb3b33bd9b2ce6f110dfe6a44f3836b55f0f946d8c51fd2de0646f80"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P0_arquitetura_operacional_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7392,
+      "sha256": "78ca8a28f99cf33715c7ff737f64070418b298452f4d58378c02a46ea43c8175"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P0_criterios_aceitacao.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8286,
+      "sha256": "007a8f9c402c3db6b553ec1808d6e38cf05071c16c0034c275811c8cb1b565eb"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P0_fluxo_atestacao_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12031,
+      "sha256": "eba0dad3bac547c88a92623f466ad4e64704dbe1ff946f93c451fb372be5c924"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P0_modelo_ameacas_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 19446,
+      "sha256": "113f64cdda6aa80851c7ae681bdc47d049db4869f07d69394468b0840168f513"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P0_papeis_permissoes_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 11475,
+      "sha256": "53908576a7f7d17b1e2159821248ffaaac213f82653bbda7c9493d13720b9640"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P1_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12784,
+      "sha256": "a47c6ebb7da789b68c2b7d23f60829750213faaeafdc3ea799eb0d14337b960a"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P1_especificacao_manifesto_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 14940,
+      "sha256": "76048d5f1a50c71bf845420deb3a6ac153d0631336982ab960deee6d4b5c318f"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P1_matriz_ameacas_controles.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 21772,
+      "sha256": "fb16aa783cf1c5dfa2332eec0eae5484bce98673005fb6e23d1bf4f9565faf72"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P1_modelo_proveniencia_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 10092,
+      "sha256": "aa71e95cc18db3d532822a4d8a01e472498d4deea40e6f5ad85a2f38f9ee11ca"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P1_pacote_revisao_offline_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9549,
+      "sha256": "cc9dfc68192fc9c39ea7edc8dd092dffa1abbd591b8b0821b908ad8e3177d76d"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P1_procedimento_verificacao_independente.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9566,
+      "sha256": "71639de244a75b4601a9d0545d915473c527dc4a44ddc86fdebde3d006d94dee"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_cenarios_falha_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15536,
+      "sha256": "25f0eac396ded1ff0e2bbc9762885aafb3ffc3162a76f64738d6112150ac5627"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_controles_isolamento_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 13119,
+      "sha256": "55931f2fcd6ae1876e0b611ac8683d65d4d9bef085ae6ef2f5d65bf77ec2e16b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12323,
+      "sha256": "9124ce2cdb7c53756e1d143c3ce4b5b526349ae1c13ea482ea0f884b275e86aa"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_fluxos_informacao_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 33908,
+      "sha256": "db0e3f3c403516a37599a7cec00b22f738a3eaffc07cd14ab7f727ccb6ce1915"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_matriz_papeis_permissoes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 117472,
+      "sha256": "74687f240aee4463aaec63133b64ab35af1d47e28de90372f51e83eb1bfbfbe9"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_rastreabilidade_dependencias.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 28684,
+      "sha256": "829157bfced652e84b84ffea955a15bf251e8e831c9602462bcb979f3837b4a6"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_transferencia_offline_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9533,
+      "sha256": "ac61bca83076917b27f2f03d4f0231f1cefed557f7c1ed34c356cd84b491fd28"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P2_zonas_fronteiras_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15130,
+      "sha256": "71bd81d0ac39e1ad326f84a2e207d973b32ce848d5aafa03ece1c68c79c3429b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_ciclo_vida_chaves_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7536,
+      "sha256": "b939f7312e2cb7827e2f1d2c89f16afda35616028632b0db020934ecaf90140c"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_contratos_verificacao_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 26439,
+      "sha256": "36398d6b1d76da097477d3291509ae725f1d7dfd8360882d0ea5814e704a88de"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12567,
+      "sha256": "6777d68773295d7774e6212e35fb95282370d85b746565976b92eeb48ac35617"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_identidades_segregacao_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 355797,
+      "sha256": "f21d72a28f50d70bab3fd9a6b9d127beaf2bb34ace313ae9e751549fcf557696"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_matriz_ameacas_controles.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 63677,
+      "sha256": "a8f6ed0fb365d3760cfcb1668125c4c48cbabcea85678a42bfd489c728417c9b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_modelo_confianca_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8086,
+      "sha256": "030a253c1ef264c23c55163923a5c92e24797f09ca11096f9f0ded564cc97a89"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_modelo_tempo_confiavel_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6609,
+      "sha256": "5de1641290a4500ae07db91b17477cc50e0fd77fb041e69a8edfaa2d65d09b5b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_politica_criptografica_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7685,
+      "sha256": "b6e8a13b3f16bf037ef4e9bf1fd69d1bb843d0546351498aa90c699d37312585"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_procedimento_verificacao_independente.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8740,
+      "sha256": "77b5610740f00f1d984e4c604f5fe4fa962274ebffdceacb3b73b870ab3fddb2"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P3_revogacao_antireplay_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8280,
+      "sha256": "a91f12cfc2f56719b5b58ac32316497a17db0f52ea9d7f36e3a71dcf2da570e8"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_cenarios_falha_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 25181,
+      "sha256": "cfb45ab02f0a37c51ba8999e29f8e0754179bb2c2bc28d5e651e80165ad7c140"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_contratos_componentes_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 50931,
+      "sha256": "d369925bf0f4ac5dc798df625e9d1937723549f2396d2f9e44eafa8c6bbaf3d2"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12144,
+      "sha256": "ad44b11d9c37c2e5bfb00312b88eddfda8c08456694169b8e47aec301eeff018"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_emissao_custodia_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6136,
+      "sha256": "76f7f983ed20c87268529565fbc693a9a7fab5dce56b9494f5d0d8508ebee2a2"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_fluxo_integrado_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8092,
+      "sha256": "fbc4553af3a4a0b7db7ca637dd921e917ffc36d206bc3582ea4402887c51d219"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_maquina_estados_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 145522,
+      "sha256": "0d8eea2fe7ebe9e6d29d5556edfd89f783f31bb6655e25ce0ba47ef81d33b3f4"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_matriz_transicoes_zonas.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 74354,
+      "sha256": "b80db5d975c90c0e0da5ef14a8da289dae0226cdf042bb961a792e3b1c4f3e8f"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_procedimento_auditoria_independente.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5733,
+      "sha256": "da7ac4ab7bc75581b5e57c27bacf8f2c6539270f9eaed16aeb023444772ea77b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_rastreabilidade_integrada.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 344276,
+      "sha256": "e7bd69bf9d8eaf3761298591797346bc95935a4e61c050646b69c23e68dcdecb"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P4_transferencia_verificacao_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7821,
+      "sha256": "26010ee50350235d3b5f42de2f0162463a109b705b31414d7b99c47875c00af2"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_alternativas_reconciliacao.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 44700,
+      "sha256": "53719d8ad832aa2f10659243d39b60c13b1fa0fae63c4113ff9a1f4c2caee77c"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_analise_permissoes_P2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3252,
+      "sha256": "f7040ce0e30d305c083a4a6b8d82a7f750fc33c2b24e6391b5e4201e8d6527ff"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_classificacao_incompatibilidades.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 16386,
+      "sha256": "b4ccda2cda4a1750a8d503ad4515f5769d35d4ccf7db1988ac6329b073cbb941"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 13855,
+      "sha256": "fd9c16be4da3abffa642550f7f253b52e621cbce34bed50611dd0dbc800635f9"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_dependencias_confianca_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3427,
+      "sha256": "7ee3023c3112c2d4574464c3c1bb98b94e257228278889641b802be7547c6ac2"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_impactos_contratos_transicoes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 410729,
+      "sha256": "518eb11dd1b867c601de046b89fab33e1c2a3badcf280d5dc11ce48e152e8074"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_inventario_achados_P4.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 147941,
+      "sha256": "3ab676408e802065a5e7a2878fc6edf782fee39e48d5d5d8beb7c5985319ab38"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_matriz_decisoes_pendencias.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 141663,
+      "sha256": "92768a744329bc9ef4dfbdd309b7ce5be0c71d590455a889dfd7eec566a329aa"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_plano_resolucao_futura.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 16072,
+      "sha256": "5708b4d01c154818d1374a4618966c447f5102b434a94d815ad93c496a5c23f5"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P5_rastreabilidade_reconciliacao.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 405661,
+      "sha256": "14051fa6a7c4e6abeff711bfef9a3cb6e8b3541fd6c7052dd344fd78fca7d484"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_analise_contratos_transicoes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 456001,
+      "sha256": "d95c478b5b7d28ed9618e4500062b841b2c76b391de2a95a6958749c63124480"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_consolidacao_arquitetural_G2.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7721,
+      "sha256": "c819e3e0c601604e69014df4d322f9665278383dfbfd76d758121a2e07f59c8f"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 14460,
+      "sha256": "4f5075e3635e4f59fa33522d84d3c48f4c2be181224bb693cf37c5f07a9bccd1"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_criterios_entrada_bloqueio.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8371,
+      "sha256": "9ddff5b44c8940c544983f9c0ce89a5a34d76669028cc246bd6df3e13b2375a3"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_criterios_prontidao_G2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 52979,
+      "sha256": "60f3e4a901964977881aa3c77c4c8dc3d7fcaf05f5faac00565794d0ea3d8a16"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_inventario_decisoes_pendentes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 512277,
+      "sha256": "8089ec35504426a276ac447504f052cbf2a3d9ffacc3665f8eb998578fea124c"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_matriz_dependencias.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 567125,
+      "sha256": "0247635e5d10c7ec588466cfb83da78a745f71652c207c121eb4a07383280473"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_modelo_avaliacao_prontidao.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4130,
+      "sha256": "195a662a578781f2544213383db21c3bd8f358f537f77ce645c124fbd41da6db"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_propostas_decisao_arquitetural.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 30306,
+      "sha256": "1293947b3fce22ee2fefb8c31c4869c0e3fbd5724d3380e3fa9e616dd6fecd8b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P6_riscos_residuais.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 41740,
+      "sha256": "6f20f58328eb7b1da67a4306af357b8ac745f574fd743f29d0765c384b46bc6d"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 17195,
+      "sha256": "b13612072ba32f78fb5bad74cb5a367e567c6a5d430633c2d7e62cd6625daabd"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_criterios_aprovacao_rejeicao.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4900,
+      "sha256": "d5543765e992b8e594b268a3ce722cf49067ebb5f51d4f861b3ab85b189f602d"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_inventario_decisoes_governanca.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 835114,
+      "sha256": "8837724d46ea3760a1db3333834da12b645e66063783cb36287a05a3fbd83116"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_matriz_autoridades_responsabilidades.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 16573,
+      "sha256": "9d648c8163b8a1c14450ed26c938203c1fd72f0f3d2c80f0b6c2e837ec12eceb"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_matriz_impactos_dependencias.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1055013,
+      "sha256": "e0bb9f6879322e52792a7a4299fe1cc4ebcfcd412bd92097ec33ade0d3dbc278"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_modelo_registro_decisao.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 99316,
+      "sha256": "94afd83696f6a9b3af4617d227457033803c4d465b6ea7065c591b5c06c4175c"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_pacotes_decisao_dominios.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 177114,
+      "sha256": "f99cfc762e1ed121fd54404090ca8bad23bd74a24a71077ebadccc370d815c9b"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_procedimento_decisao_futura.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9605,
+      "sha256": "cceed5107c3ee55a1038dcde00bf0ad4c261cd3e1a377e6454f81837af579d44"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_rastreabilidade_decisoes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 852906,
+      "sha256": "06ae243953e2e491fb039338b40801638c2df9a56f1057273bb0b563e568c72f"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-P7_riscos_residuais_governanca.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 73110,
+      "sha256": "264326fab62942a7e1b2b76397572ba655cd68220f412bb8a0c441056cfa3eca"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_criterios_aceitacao_pendencias.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15062,
+      "sha256": "d942ba2b3ccb1dcf0007603974f7e032055c558a009729bd4ebcb588ee5e0480"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_criterios_deliberacao_futura.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9448,
+      "sha256": "2a360ccb31bef57927e74356037562de667d6b4f23f9357c26e9d67f4c6a29ba"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_inventario_reconciliacao.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 120934,
+      "sha256": "8fa87cfff35de3907c4060530e180a8a489080290dcd503501e4883cb5ecdcec"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_matriz_autoridades_competencias.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 22640,
+      "sha256": "a02a67911300ea2b703789a7c2c0ba5ad27bb97f1c09850f0d0903aa3fc9ba03"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_matriz_compatibilidade_P2.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 506247,
+      "sha256": "47b0887b44bae18f9e068ecc9bc12b05729930c48fc92e9d55a5a94af35d3812"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_matriz_dependencias_deliberacao.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 89636,
+      "sha256": "d3f373f5d27e7589fcd541fde7f3f988527881201915c58af7bb4a83f81a80dc"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_modelo_estados_decisorios.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 13335,
+      "sha256": "98e4ea6227542a4f84e40a3de7d9214095561af909dfc47b32085ce4a7a3c6f1"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_rastreabilidade_integrada.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1573464,
+      "sha256": "056389672f0545268e239c1fd6acf907351a1b4f970b8f8fe21570341c961886"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_reconciliacao_achados_alternativas.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 316701,
+      "sha256": "52caac51678adc615eab811a814ca215b27031335323a355bb9aeb0c42edbc33"
+    },
+    {
+      "path": "docs/protocolos/CIC-I6-RC01_reconciliacao_propostas_dominios.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 716686,
+      "sha256": "b3fa935a08ced65e6a9a4172023e0a56fdcdd049657f89de898f457c8b1488e4"
+    },
+    {
+      "path": "docs/protocolos/CPF-I03_ENC-001_parecer_encerramento.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2999,
+      "sha256": "1a2eb9693a3c261d85acc61c4bb7c2cc5cc44e2d9dd473400474eb1a0bfb902f"
+    },
+    {
+      "path": "docs/protocolos/M0_primeiro_ciclo_cognitivo_integrado_PROPOSTA.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 33177,
+      "sha256": "530e1f37992c74d34c2afead0a8c8022fa78bc67f8bb90617c899a3892701b6d"
+    },
+    {
+      "path": "docs/protocolos/M1_contratos_primeiro_ciclo_cognitivo_integrado.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8296,
+      "sha256": "1ebff52bca602c1ebfc9afa942b563d24a93f79778b532195500f6035f9f82e3"
+    },
+    {
+      "path": "docs/protocolos/M2_integracao_nucleo_cognitivo.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15027,
+      "sha256": "b1c1a99bb9d4da5c6ae78fa3e2d2ae6c40ed61b59cc32b987909055d913134e6"
+    },
+    {
+      "path": "docs/protocolos/M3_aquisicao_controlada_feedback_reavaliacao.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15332,
+      "sha256": "d3459f52d8dc19287ccc41179088d23eb77752342aedda3b26a195d69baa1e49"
+    },
+    {
+      "path": "docs/protocolos/M4_controles_verificacao_preparacao_M0.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 17023,
+      "sha256": "a9ec43a0de1e6254abcceaf2dcfde8acdcf045b328c2d7b85625400a49c3d05b"
+    },
+    {
+      "path": "docs/protocolos/M5_execucao_auditoria_primeiro_ciclo_cognitivo_integrado.md",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 17638,
+      "sha256": "0cbbb7a643e15db8d0e947ac1807980c0f526103fc830810df5cdefe3e576b63"
+    },
+    {
+      "path": "docs/protocolos/modelos/CIC-I3-R2/context.template.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2389,
+      "sha256": "bfe3d75b0e7417d0bc5511efdb4d5e07988e4d955fcc2e003a2282f0b61fac3c"
+    },
+    {
+      "path": "docs/protocolos/modelos/CIC-I3-R2/evidence.template.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 569,
+      "sha256": "ff9b6f5ed4560ca375f8faf6b6c17a6720c13df6c61a5cf053bd6b8e704f2e31"
+    },
+    {
+      "path": "docs/protocolos/modelos/CIC-I3-R2/manifest.template.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2063,
+      "sha256": "33bf92638772bcfdda2b8e69cd48f3969551975f240ad074632a0235a36ffaa3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/certificate_recheck.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 515,
+      "sha256": "95f5dad716ddf7b619014d0e47d1fe6329f688ece217923c4884be68de264eb7"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/00.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3059,
+      "sha256": "d952e25347c890691fad78ba97e9913dc7265f4c9a6983005806370f95891308"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/01.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 803,
+      "sha256": "e23c01a194b10fbff5a1fd560d55afbd48c157b8c0b0bc22fcc0cf03e202a39a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/02.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/03.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 60,
+      "sha256": "47d1ebe904a90b00c5b9e4f31a52db52e92ee8caeaa47e1a29a4a65b6baf0c9d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/04.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2539,
+      "sha256": "7d57cf644ea55731c88763631ed26acd7279acebea9ab5b2f8c73e5741af1be5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/05.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 632,
+      "sha256": "e5d01747961a2d50c24504cc0a44848cce1415b995204ea62555ca77eb1dc788"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/06.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1533,
+      "sha256": "008c60a6a199850cfa86f6c0a823d1792461004b242f8381717298fbbb414d94"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/07.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1452,
+      "sha256": "5b64bdd9e0507159ee317c38803e1e10238d10b30f9636788282bd6063500a1e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/08.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2745,
+      "sha256": "cd4d18e74e64fed55a133a70b71259348f4e8c8c6f8876c2e3463458a636a321"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/09.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2123,
+      "sha256": "a04b114f204ea4010aa5d19674fd197f0d127e641c787bbe609ac7bb8e2d2974"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/10.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2513,
+      "sha256": "0b98b7c349d7dd85356121eaaf49e92735a82f5033bb787aad2a6e565354567e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/11.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 581,
+      "sha256": "f4f40f3501a4b66be661f207682d78760b2152bbca100e81e6d87f206096940a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/12.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/13.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 432,
+      "sha256": "f38c0f6b07b5c8e4ac349a1bfaa36d2f84f533d9020ca9510a04856279b77a00"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/14.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 104,
+      "sha256": "68636d512082839e8f128b8787131fd651f07bef14f9ad99cb40e8e9dacc5b47"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/checks/commands.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3956,
+      "sha256": "2bd15826bbcd11cebf914d9ed1aa6d40efe9d85c8f6419cc507c6a6a31a1cce1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/disjoint.certificate.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1956,
+      "sha256": "5e9b0cee5cb2dea677f95d618ce92adc825e9a26279ab25378e0f6d40e3ec380"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/disjoint.context.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1268,
+      "sha256": "7be4d9827450beb77909c5b5e758aa87a3dd67c3b7bc7b132a41d35d1ce11f72"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/disjoint.inputs.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 642,
+      "sha256": "e33cfdbb9d161a42f0f7055367b6b6f23138d21fd473d86c74b08a75b501eaf5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/disjoint.verdict.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 89,
+      "sha256": "979033b0913b7d33167bdf18c585930451c4986c55e8bd53d73ce9fa9d0a333b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/missing.certificate.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1929,
+      "sha256": "04f748c3b7a7c2ffbde35890670eedf4100cbf877136e2558a0fe617b2335367"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/missing.context.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1268,
+      "sha256": "7be4d9827450beb77909c5b5e758aa87a3dd67c3b7bc7b132a41d35d1ce11f72"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/missing.inputs.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 442,
+      "sha256": "5a2464336217f99f0c04aea12f39f18baebc1f77f79af6177ee2c7f11e39793d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/missing.verdict.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 110,
+      "sha256": "b8d2e2023cd08edf37b57d3f9484fc8e9bd4be3b0a6326799d15130d62e1cc9c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/overlap.certificate.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1965,
+      "sha256": "bffffa936f3fcf37a4a26ea4e9db99a7c11b2e2c54ec9fd4619cbc4483c2fd8d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/overlap.context.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1268,
+      "sha256": "50a34f9dd1a8601f523389c43fad4d368bd38cab7613fcd106786652d7e69125"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/overlap.inputs.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 642,
+      "sha256": "4fe1887331aa64417456fe8eeac01b2968d72bcd7f712f3e449acdc57abdeb2e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/overlap.verdict.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 94,
+      "sha256": "626458c7e0ac8b84917de9af6190df212201bd17fa07dc7c54ce10a8e515c1da"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/real_gate.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 112,
+      "sha256": "e4956e258588be60b4112c0f05d6b33d54fc08e2ca098eb07bc12969f89fd0d1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/sha256.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1413,
+      "sha256": "ab5a920e8b90f3df68a11372520ff0deb059479e8e1124d8dea92979ea833ded"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/summary.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1038,
+      "sha256": "6f5f5e8fa7900f68474e538a515897f375f8c60788fa5f0cbf80a637edc3d321"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/demo/synthetic_inputs.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 642,
+      "sha256": "e33cfdbb9d161a42f0f7055367b6b6f23138d21fd473d86c74b08a75b501eaf5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 41642,
+      "sha256": "8c09f10011b4176d92bc532598201e6b5fc7d8893d992f27abeee1194af75ac8"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R1_synthetic_20261106T111835_025356Z/stage_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 471,
+      "sha256": "f04854be28853a0fbee8ec70b81be0805d5be88940e4ab06defd4c0b0266425e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/00.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2097,
+      "sha256": "59060389c003264a015995e683b15933408cd3c2aafb583749084ecb6d797ace"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/01.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3059,
+      "sha256": "561a848a559b06be8e51e1a6813d1fa238266f6d09997f1ae0f4e65c536f35ff"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/02.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 803,
+      "sha256": "99cfea4bbce9066b7d2a5ae0072155286d7c2fbefeacb83377500cb99469732d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/03.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/04.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 60,
+      "sha256": "47d1ebe904a90b00c5b9e4f31a52db52e92ee8caeaa47e1a29a4a65b6baf0c9d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/05.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2539,
+      "sha256": "d60ef98a6193331cd9645bf46134d60c9fcc31e45f2881aa41a4255f91c9f761"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/06.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 632,
+      "sha256": "6bf7f809902bd24db115172d27acd2c5d403a75c23182aa5fa90e480bcd1ccc7"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/07.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1533,
+      "sha256": "5a5e28c95e45ad9a70e54a9109eacad4dabd7915164e48718f339aba94be9a3d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/08.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1452,
+      "sha256": "c42c07c1fd12fa9ceaf04419af15445cc19a1cc6881d9242b8e125d11db2d7bf"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/09.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2745,
+      "sha256": "2332bc0f8110b028e0a922452e3060ae44b4fea177a3e3c7aabb30683fca26e5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/10.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2123,
+      "sha256": "bbff4fb9c07c749726d51239ff35ef261f51d9487ecf03c5f6d866da24163a32"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/11.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2513,
+      "sha256": "19704cc60e432e96368e2de29167f86051c33ce02673fdadb53707ea3ba9018d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/12.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 581,
+      "sha256": "f4f40f3501a4b66be661f207682d78760b2152bbca100e81e6d87f206096940a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/13.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/14.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 359,
+      "sha256": "f133df4eb122c4559c7719c2c686c4e13688e71ed079431484984072eaee5f21"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/15.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 104,
+      "sha256": "68636d512082839e8f128b8787131fd651f07bef14f9ad99cb40e8e9dacc5b47"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/checks/commands.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4152,
+      "sha256": "a6bf7ab84c588d99f57e3463bab51905eb99e758f354abcb2811b9fc4c0020ff"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 230,
+      "sha256": "d498b5204ff99b6128d836fb7b31096e5843bace468be561693185843ae1acd4"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 47899,
+      "sha256": "e966dd9b0d874f6d000ea659ef2453a1068f0eec2e38dc232091e01ad2f78db6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 48997,
+      "sha256": "334842d12234d4fc8495923625e4091dafcc4593e9336cefc27ee4df20910337"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/readiness_G0_G7.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2675,
+      "sha256": "8dcd8e20be7204e5b7b9aaec27346a7e995a81f540c617e1f9ff7e7ef2627a86"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/sha256.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2189,
+      "sha256": "2a6d5c994ede4af8ecc77c03ac0cc00bd7e9e21ab2610e376b1290da0b1cb3e1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/stage_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 600,
+      "sha256": "47c18cf4346c7723133e489c68a7ff0baa9e5d006c81eb282f17280c1be9b8a8"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R2_preparation_20261106T124954_349778Z/synthetic_rehearsal.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1263,
+      "sha256": "4c3be84178b2a52a4f5c5e15b6bb4dd7048b47561a42879fa57c3ae9a4566f47"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/blockers.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4821,
+      "sha256": "d175d275b46ea6cdbae8b33e605603cd072f8b5a09776580a67ca82cea5e6f61"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/00.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2369,
+      "sha256": "fbc6a2574abce30395413789a771da91f238b0e838fc80832ec43283d9e800b8"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/01.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2097,
+      "sha256": "f4304576c4bf559c41f1869c46bde2715e9f858de2ab406597c0cb6b38c6b9ea"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/02.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3059,
+      "sha256": "6e258fd378ac6aa885245e918b3b56e084e7e44a2db42a81d0ea6ce8d339673c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/03.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 803,
+      "sha256": "17a53b6d565833be2bd3602130304b204a3721e5e1e292177e362ef16fbb23e4"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/04.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/05.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 60,
+      "sha256": "af1d2cf35aacaf94dd1c8a40bb1eb81981171b00ae7b6668106f5acb3a38e60c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/06.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2539,
+      "sha256": "fbb658c5f304623cf3a3a3b129bc88c68e1059ead1a6d379086da27106c85a19"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/07.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 632,
+      "sha256": "78be0cda8d50cdfa6979b6f9ca472e3d7a08065e54b7e6826c5f93fd16d68643"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/08.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1533,
+      "sha256": "0182bf8ce6c8b2b56fc828c5a3491427f47dde004cb53ef1f8605492254d1580"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/09.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1452,
+      "sha256": "db5d4e60123d360a011992a1214fff5116ed1feff3c01623d7d6c2e2eea5bba2"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/10.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2745,
+      "sha256": "3f707b23f14a041634b9e290ff5db3c4825df5498a13977681fa402109205012"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/11.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2123,
+      "sha256": "767093d350e100b97fde107329768ee095e2460f65efe282f25d6362f3c939f2"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/12.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2513,
+      "sha256": "6284fdbb3b24502e021b59c340ebcdad4e0b608b334b8ff43067bc072e36cb25"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/13.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 581,
+      "sha256": "a104d956b7bcef9ddafb43476c0780554d71b63bb73af8d0b2c9013160f1a43d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/14.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/15.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 359,
+      "sha256": "f133df4eb122c4559c7719c2c686c4e13688e71ed079431484984072eaee5f21"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/16.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 289,
+      "sha256": "c9dddad61c8d74281b88512edfdfd2d7369fe6c55b4a06846446f6842534ab6d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/checks/commands.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4426,
+      "sha256": "7cc4882b05e5422481abe23705f19f52ed28b83e86b00a055593ccadcd750748"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 230,
+      "sha256": "39fc70e37ff7058415c46370b9e13a7b4ea77f935be0b3435e104c0d4b446e0a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 52627,
+      "sha256": "3852f59e57100f3afa70a8669da3d7118ad3412657703c0680663f2885261074"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 53833,
+      "sha256": "af5daea7216b9f33dfccf31d842ed2f31e946e87a964c0342949825e61468e55"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/readiness_G0_G7.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1360,
+      "sha256": "9aca6ed2c72530d2041a9d983c4a5185caaf6a42eb897932470c07f52fe382e4"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/sha256.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2277,
+      "sha256": "7f67fe713979f410186c8191dd90c77911f2e80a288532e8b1ab0b1617d949d9"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R3_review_20261106T135537_413247Z/synthetic_observations.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 780,
+      "sha256": "7e815ef6a5c56c2817b3171c7f5157765844de86836093d40d6db7c287b06ec5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_00.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1898,
+      "sha256": "04c65a55455ed10132726295def34bd1d3c4675763eb95ca88ef51360ecbaf5d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_01.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2589,
+      "sha256": "495cdb58d5f571725ceff4f8c6f723a86703c0d129ca371f69ea530b9cea16e3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_02.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2315,
+      "sha256": "40822ac9cb79f9a742e80f19bdabad93371268c79b99db61bdc514d97f3a79f6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_03.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3286,
+      "sha256": "a3152f154dfd1bf0c7a7ab5b65d91f46ed2fd3c7eaa698b58e8f166f62a52aaf"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_04.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1018,
+      "sha256": "d3f2fe910844e3668e10bbd5d5171ebc4fcd3ff28044b52aec558389bd972f1b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_05.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 528,
+      "sha256": "fc597b9e4da1584de55f5c079bef9dba5e84d465b713cfa90ebe6fecd56f6154"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_06.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 439,
+      "sha256": "59d42042da7772cbb02420173e236ff7837351fc99cb0e68fb59239608279c7f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_07.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 519,
+      "sha256": "0e333042a0070f66cf93e39b52569fabce12cc59c2df1003e627876394c57456"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/check_08.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 230,
+      "sha256": "24fa8bc225808a45353bebb4f2db3242c7e6ebc2af063402472b4f139c388146"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2485,
+      "sha256": "a6c02e9c03052f8724899589aaa19761bb5fe07d746b49e2934e72835997a416"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 690,
+      "sha256": "6645851be81ebe3078d7a77096b04eff8df4403473b93c665701d0bac4cfd8c6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/initial_git_status.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15802,
+      "sha256": "7c0b3b42632e4c8e8fef755126ec8d1aba7a7d59a460109c915e34292f946f7e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/initial_tracked_paths.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9019,
+      "sha256": "d8bd530f9f5c2503669078881409d3ad757c4237a424c52b483a1e0fa1a365ae"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 56872,
+      "sha256": "6ef34061dc5c6c8a65112b76fafa7191c63ff5194065d20cb20bee51530dd179"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/packaging_notes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 514,
+      "sha256": "c71cb44e97258304c51585b0b26d3657b5f4662e8b0854e563332a39831ae3ca"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 61286,
+      "sha256": "251086271fd71c31806b2a21fbbcd24a2b73ee57b92d91126af2229129369f60"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3-R4_B6_20261106T161320_083856Z/synthetic_observations.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1260,
+      "sha256": "e206d75a4886e0ff8397462cc33163c53d706032e2b8019437fb3bcf079724bd"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/00_inventory_git.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 40042,
+      "sha256": "83dc60726a28ef7c2ce24f6e6c7e9d166524f99c80a87f72b42bfb4d6c4499b5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/01_inventory_worktree.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 212101,
+      "sha256": "9c3f176e7ca79ac0404a3fb5cb4244bb0ea8838e816ed7e5f82527771a2f2d15"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/02_git_status_initial.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6602,
+      "sha256": "293f8d29c65114446ca62a0c78daf58ebf9ed7682c59919f18081a560815a31f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/03_cic_i2_manifest_copy.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5866,
+      "sha256": "061683d5e0f18e410cd3d8939fc2c8f39eca1bf18e1916c6678f3d1817ebc207"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/03_commands.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 845,
+      "sha256": "b92ef3a8c6f39e2866fec3bd559577e6a400a7b787782c2eb876467ab26d7304"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/04_preflight_manifest.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1031,
+      "sha256": "ed06aea96e53dd6fd923d08fac5cd93813143290e10de53abcf0b614204b433a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/05_gates.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2049,
+      "sha256": "fc7b297e03a190e9259d4d70b4b45ad5ecf3f66114ea7f4e38efd8b48fa37da1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/06_validation_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 755,
+      "sha256": "fff2ecaff72861688f95677dc113e2b3f7a4187f6dbf9c9c65fb6047e7640ebb"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I3_preflight_20261106T102311_238034Z/07_evidence_hashes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 882,
+      "sha256": "1174fcb198665a2d60990cdd54fb5b50f209d2ce1f319fc3604ebdb275d1d303"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/00_reproduced_failure.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2618,
+      "sha256": "34a80796fac534b3e9222be84b828b7af67df97f9b8b792a2d3aa8ee02f40c5b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/01_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2090,
+      "sha256": "938634563af12c1c3423e32d3370ae77bc02eb6b7d87c76ea42fdd6f1002c26f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/02_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2212,
+      "sha256": "9705e8e399617a477a9e43e3c8613928f7a73f86fb8a5917cf321319cbe94369"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/03_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2599,
+      "sha256": "379922002ca5756e11b7b24c5a6d9b7ccd4ef3f9b3f3212c0325e67fb95e03b9"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/04_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2325,
+      "sha256": "5176ccfebcf0099f813fab6dd7a06687efa7dab654c4bfe513e90564f24c05f3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/05_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3296,
+      "sha256": "470dc485dacdd31568d932c7d7a52f9634f6d9d412b1d0a56afa4dfa60948798"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/06_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1028,
+      "sha256": "7635b8d451ecd4c75251974c9ffa89f5d93f0f68ce0a5baa718fc83153b0f1ee"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/07_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 542,
+      "sha256": "16f0d0330d8f15f0f5e2a5891ee884a1f3d065c0e45243d6a79d4bb5168dd525"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/08_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 838,
+      "sha256": "8f67f2609d53913a5ce0878d6211eaefe856f12d4a7806553dd71d5d5ed5cdc5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/09_check.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 107,
+      "sha256": "02ac4fca97bb0baa645764ab61f3a0588d297105180b6a12f9c1f8457349d1c5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2502,
+      "sha256": "dad142fecf61028ee91e8ba1316d1908a39bd09832e5d98d11ffc2dd2c51e2cc"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 349,
+      "sha256": "fc58c29e9bcf96d5cf34dbe21aabc3efc3effc2d23a65cdd76daa50755354e74"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/git_status_initial.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 19094,
+      "sha256": "e2d77807a8c9d52226eea91ae8413ce3cdb0e6d3819ea20d8189d24c6a962e22"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 159,
+      "sha256": "18ef65bbc19e5dff9fa96bd1cb2d4fa3cebac3d41b8f97119f3475a39eb54649"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 63104,
+      "sha256": "2dad651c1b68c7fd1573715b78cacb5084a3e0e2d73a33247a612e214524d39a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/modified_files.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 423,
+      "sha256": "4d43d012adc51a5c15029cbc4963ae28ff2f127af8ecba36ea9c0fca12408b2c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4-R1_catalog_20261106T164952_755005Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 68129,
+      "sha256": "92ef78e378325e473a88c18a355a4d7581c0545fc9bb9f9c45796e2efbe61f05"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_00.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2212,
+      "sha256": "0373d35dbaf390bc96eca5558af05ba38d66c496e71f5c74b7b9d66b3a459f69"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_01.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2599,
+      "sha256": "c69e52654432cd40e899e826fed1d5a82dc907a9a53bfb374e90f3b432d3149f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_02.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2325,
+      "sha256": "6d27b724a288187bebb5c1c25afa068d6dae5bb0f96aaf70245a0c1fc7bc6298"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_03.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3296,
+      "sha256": "f3938861984b23d3532182714313515940626ec336c76df33db95bdc8da60bdc"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_04.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1028,
+      "sha256": "105706d36b9a13970410b5be7c4e97791652bba186da98f2ea69e932227bd6df"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_05.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2618,
+      "sha256": "c375288fed60fe47bcf62056f3c1f86b68f025e9f0b82d41270b89871ef62dae"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_06.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 838,
+      "sha256": "8f67f2609d53913a5ce0878d6211eaefe856f12d4a7806553dd71d5d5ed5cdc5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_07.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 542,
+      "sha256": "16f0d0330d8f15f0f5e2a5891ee884a1f3d065c0e45243d6a79d4bb5168dd525"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/check_08.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 107,
+      "sha256": "02ac4fca97bb0baa645764ab61f3a0588d297105180b6a12f9c1f8457349d1c5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2531,
+      "sha256": "327f64540c20974846cbe01aa2dc17c63e39ed0219f30ba1f9df28af1a3bdcba"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 346,
+      "sha256": "1a2d8f0b0d10051e75dc42ab7257edbd30abad256671e7dc97096cbb4e95031f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/git_status_initial.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 17415,
+      "sha256": "16e98a4ff6cac02375efe036e368ef81baedefe347dc99bbf7031142d1fe919a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 205,
+      "sha256": "c88eb814418eb2780d4d8aebe2a5d22a86e7e69cee2d7b5c190c3ac8c44539ff"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 59955,
+      "sha256": "cc551d50031c3d0781ead96d296275d641ce7f597f846d879e986112008137e6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 64549,
+      "sha256": "93f77cd51414c0a771af9506f841ed3ac3bf39266ac936e0b6d4292a6e186e47"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/readiness.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 709,
+      "sha256": "0b8251906b067bad9db0b40acaff90be78fc4620460eef1953210dc10d7fe28d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I4_synthetic_20261106T163031_076738Z/synthetic_observations.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 10940,
+      "sha256": "31c7b39065d0a9c3338f42c46dff8f09d0c8e06562656990a48a432f84ba8eee"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 13859,
+      "sha256": "4d388f0c0230021846031cfc01a653533b15355f701bb6ee224cfe56af3b9e9b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/evidence_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2965,
+      "sha256": "d7d43aa13822d1f7aa280de15bdb7dcf7d1985a1929ff000b6fd85f7746daf5a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/files_created_and_altered.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1660,
+      "sha256": "4b41eb77f07d308791880573e44b7d8d84b727ac365b471ec1ba3f49c7b39a8f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2041,
+      "sha256": "5fcf8368e597c7686e5e020e9668b856ccc390f1467803fadf99afa372efb892"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/git_status_initial.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 20724,
+      "sha256": "1f3b33115f8ec90c0cea44c61348342ba85838638781ff747509302abece31d1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 338,
+      "sha256": "fe51c2b753c68db6e041048bf56bcc4d3a34b89734ced5e65433a9a3c39a524f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 308320,
+      "sha256": "58cf5d5143095db06ffdc09f492776d4ce71b85d35e061c05756bde59dc0d6b0"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 172995,
+      "sha256": "24fd3494dfe9d2d2d7ad4d0b6afb791acb2d221ec9b3336143244dd6f1a5c181"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I5_diagnostic_20261106T231418_002489Z/readiness_G0_G7.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5416,
+      "sha256": "dcd1cc450f8f94d787b9621943fbc2d6b7d7d14f63aeeb9a3309b2a68930fc77"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 617,
+      "sha256": "dba2b49ba7cae21ec02c01e382f177e52dd5224f2525d17a7cc14be53a06bde2"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/dependency_matrix.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3567,
+      "sha256": "9b774e99ffad104d4d8fa1ec6fc2dff43e87ca8223213a2dd9c3802029cac9d6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6218,
+      "sha256": "779000d5984e5719db6b7a81312a01ea3456693d69d316670d44bf2cfdb3c1ea"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/files_created_and_altered.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1672,
+      "sha256": "3629f06ba3d89e389ff8e76371c6fd232ac9cea319faaaadf0fa28c05c9b512a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2133,
+      "sha256": "4098d1db090c7b97f511240e42df3d34b86d1f9d842d853c1f9e3c93cd0a8c0f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/flow_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12204,
+      "sha256": "65af929f6d919481481721ac781f162ae64e41b89665fd45d99a8a51974be754"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/git_status_initial.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 21732,
+      "sha256": "1943ea445421418f24ba913c573772b774df6bd411b18fe2d442585f04ded9f2"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 346,
+      "sha256": "158d6cdef4c2c2f7462220282844afc3b900eac51a0277ba9e1d5770bbf3f19c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 311556,
+      "sha256": "d264470f73906cab24f59eaa84fa7b4f9bba2347ec93dc88c5470ac6769c54db"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 175728,
+      "sha256": "58f7eb681c89f97335b06ef4d5ae5b7f63f62ea7cca57999d1364fda781fbad4"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7783,
+      "sha256": "a0b7b3f5c1dddaeb5d106d3b52b999fc1b7ad2924acf294bd8cff0a5287eda87"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P0_documentary_20261107T003141_176553Z/threat_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 20263,
+      "sha256": "db75ba62e12780206a78b62183ebd531cb05075ef8520ca7327ca5cca7fc8b4b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1062,
+      "sha256": "051e3d72c58b30bd5c4b0f959386600b3a567ff58cf984b0dabba2caaf71b8b0"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/dependency_matrix.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3265,
+      "sha256": "b9750ef633bd2a26bf623841b52f2ff7f5aaf1637d987ab3d8aa83f97f49be99"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7254,
+      "sha256": "d6eaafa4a1d3238d13314cc0e8d3ced03bccb127efbedc8ebbecfac5674572a9"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2621,
+      "sha256": "a9eed4cb87a1e1cf124810e4fdabe66688ab908398d56a95c0729f69812465aa"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 335,
+      "sha256": "bc4399c4f86d336b7f5e954f34626bc2cc17b7be4f845069afd7ea69b2b9f0c3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 339689,
+      "sha256": "9cb7357598cd29ae51c0e84dd7e025c6da97fea8457ae0a95d645f9f6cce10fb"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 178562,
+      "sha256": "bfb9ee3c49fe9c7e165cd91bfac89008eee267ca3ed24c60ef17cef2e380d527"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/provenance_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2941,
+      "sha256": "54ee4bffd88e82e3fc15006f13dd8ffd3509c5892319cc3b8368c29d7c072b6c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 10664,
+      "sha256": "867b5dc6c2f2d86dd03166a07e045a626c11081a768874e31dde150795682f8e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P1_documentary_20261107T020934_021434Z/threat_control_matrix.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 21772,
+      "sha256": "fb16aa783cf1c5dfa2332eec0eae5484bce98673005fb6e23d1bf4f9565faf72"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/boundary_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 14081,
+      "sha256": "04e1e26cd8cb58e6fabac344cc1eadee755205cc99fcac063fe4ca2c4cb05bec"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1091,
+      "sha256": "7aafc4b9591a52575f9548c7dfc05c667c2766f93f0de8fa907f1b61edf8c69b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/dependency_matrix.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2812,
+      "sha256": "150f3e05d22e1ec2413117a32ca1e62c7fc88136caa6281c685a86ab6a7f9665"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/evidence_index.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8490,
+      "sha256": "48df1705a520d106caf0228123964514ea49fd134cbff44a4ae9740306699b18"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4849,
+      "sha256": "dee0bac0f42cec97dfc1a9d21e5fe678f1d89809fbccec626792ea38c2439b33"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/flow_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1076,
+      "sha256": "42dafdea04cfe671224fbc48599a1360dad71a740cc5ad6d2f85f669fe22efa1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 335,
+      "sha256": "12b8bfe787fc2e4a9b1a42f7683b57a7549aa45c1f1819b10541401b5fd7ba63"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 345372,
+      "sha256": "f4acdec0806381600bd9ac6ecd2efad7c8f3e7d0885875cdc0faacb3b08d869d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 181699,
+      "sha256": "b654509d619fc085e2df65d7dec1c6b6deec122d249e89e4f30912f1e138813d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 11414,
+      "sha256": "061ad5627e32e7679d623ca1955fba55ebd5d31b260f7ed521dee26ca675bb7e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/role_permission_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1061,
+      "sha256": "18e045cc2fbc30fff35de175b4b1cb843c27e29f2b391fe5cb325a956396a0d3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P2_documentary_20261107T035656_530925Z/threat_control_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 38435,
+      "sha256": "49240d95da8aab8ccd8b02defd9175f79257cc28299ad03d7c9d0aca20ee918b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/crypto_time_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1192,
+      "sha256": "363ad80c78dd2ed43086d18a61c0911cc1953eed7435a107e20e92b294963054"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3615,
+      "sha256": "58ca28b89be1941f5b33ffc9853687017d7cd8439e3eea09cc8f112c51b31fa0"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/dependency_matrix.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5001,
+      "sha256": "06e03326d75a37b131080c1d63654c9c05d44c0e4c5bf651a0342e234991e1f5"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5324,
+      "sha256": "05c4e3e202fd10ffaabded666abe4af0a485c77ca4844160e68356dac7a37d0d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 342,
+      "sha256": "2e104129359ff3b61a5b68dc334ce3487351b088e874aaacbadad3a12130a37f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 352417,
+      "sha256": "65763b791c68055be66bfb730b611d1bd024a1c8aff4a3e5d34f18c8417e042e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 185288,
+      "sha256": "51f06e9898a61fd01e2199589078769c8dea4736b9c96ebd77f5eee58807c90a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 14560,
+      "sha256": "2cb22ba4f1604d2a0acd855260132da5600a73d7c8b37eba8fdc11d207c277e0"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/revocation_replay_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1263,
+      "sha256": "a5577b36e9a6555cdb35729c90c61b1bcae1f59da71e80503b616703b2d4c0c8"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/role_segregation_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1105,
+      "sha256": "6534b3d8c125c113359385b29e763573b9d678879406c96dcf1787fd9889065d"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/threat_control_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 45793,
+      "sha256": "b189eff4f01a760658dec7d319ad01ef0c34f16e16cb398f3bfb0d616ec84878"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P3_documentary_20261107T050304_418496Z/trust_model_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 21367,
+      "sha256": "339d17c1c1204ca4aed4731daadfe0fc3e15b981b6627666acfec55c976d30c3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/contract_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1244,
+      "sha256": "b350a9dd8d90768dd27695cd14db11e01b2d4dd5e95cd458ca6b95ec76d71cb9"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4091,
+      "sha256": "c5e229c9b357d509a959eea98dfe161d3c9bb103bfab2262295c2fd979226c5e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/failure_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1212,
+      "sha256": "3357a3918c51ba3673d4fb6282edfc9b22c21e2054f44fb5bdc2561b5ac0b11b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6319,
+      "sha256": "aa551e6a87dde480634f6e4218c2474921e6b73ecfedb790dc1529a54f9475e9"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/flow_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1207,
+      "sha256": "63a729e1c1c42e24760d7a231affb8e0cc6bfa4263e2068399658dd7a3a00779"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 347,
+      "sha256": "4835d9bd6b81954fb0a02d73c38b325dac07362fd4d03970ec7599a0e2d68bf3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 360095,
+      "sha256": "58b6054726837e85b43fb85fe4d3d397e570ae949deb23bd54638d1fddd81672"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 188746,
+      "sha256": "4ead3cff407da0842263265d6f92070455ae23572005aee7fb5550243357684b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 18038,
+      "sha256": "b021cb7a9c37305485bd7f4bf9ee9f28e958d013dddb3d7d14b9527719d5a8fd"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/state_machine_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 977,
+      "sha256": "f2f5d70ad20b4a6fee534aa1783ac9894c3a8a9600e8992ae49dfc3eeeb1c92b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/traceability_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1132,
+      "sha256": "70ca82d2549ff7a403baa4f28ae2510147e3310a60b46f3d85a7971c04de3825"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P4_documentary_20261107T054757_126771Z/zone_transition_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4873,
+      "sha256": "23be7887dd151eaef022296a9c7fd25390cb4b30e858b6ed0158392473061e5a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/alternative_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1647,
+      "sha256": "7aa7bafd5f9d812bea65ea9c98ac2620bbd0d5b181995b85917f5b5cbe4e53c6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/classification_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 15226,
+      "sha256": "adf813f34867c29fb29bf1509677968fdecc9eac0ad297fa9408a9c7fc154dd7"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/contract_transition_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1233,
+      "sha256": "49e8154c422fdb8c746a284cf9b67d61f285fb7e07a46a1ab7885073c0590ece"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 141343,
+      "sha256": "8a2a5bd4de30ae7cec53e5fc908a53c606b6eb09eba3d4ca4e3c0658b037046e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5502,
+      "sha256": "811b9225f4f2039eb0bc97b84da13f3976b06e85c0fba1f63d28837a050322a3"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/finding_inventory_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 751,
+      "sha256": "a230a144d6621ee548f6e49e3fa98989e0786356c4f4e9b2598a58540cf60a3f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 301,
+      "sha256": "9edc8010b994a68f62d6696711f1da6babf83b1a2f7ae41d94ec8af74ed3dfa2"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 454182,
+      "sha256": "8de9503a4d1d134ae979a804415f64c5676618dd75cfc82de0cae02c7c0e5d2f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/permission_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 39752,
+      "sha256": "8cb239fb223af501c24e859b08df504e86963dd0ae7c6100096dbaa9471ada8f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1028707,
+      "sha256": "957b5b0f969a5775b81791b8c8e284c34d1dd2dbc48fb9ec124e61c4a4bf7495"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 34977,
+      "sha256": "2b93eaeb909001dd72ad440b1aea2d625fd1dd778abe66652ee9f7a24655d7ff"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P5_documentary_20261107T084337_604155Z/traceability_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 454,
+      "sha256": "9d3a6ca2690f51d867fd5ac5bacfe6f45fa396a00b7ba6993c21347e81a6a4db"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/architecture_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 22605,
+      "sha256": "1b692373550f7881f9a765406c7b490666f872578d81fed384e114ae27653b34"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/contract_transition_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 420,
+      "sha256": "6fa459baac986f5449e8d6f8dd5634889e7502d3a5a66403169e1d52c36bb9aa"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/decision_inventory_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 703,
+      "sha256": "cc2fc43f0b584586f952557fb6c3c62a28986e8b586bd47acfdf185b16927ea1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1283,
+      "sha256": "6620be6e84f1d4ced62a914032354b825d368831322c98090139fdc25efff256"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/dependency_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 362,
+      "sha256": "af3e5781f4d1dc9a804697d6ccc7fd1839bbf3cb76e3a56676aa2fe3b945376e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5541,
+      "sha256": "eaa5669e39e2097c0e51daca8f60340cfdb6510a9add9498abce5e26f5cf7924"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 376,
+      "sha256": "6f390b2f0a6c3d83825afc96c485d55379622394eb634e0d6a62d623296a5797"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 466330,
+      "sha256": "d99e85134cbe2dc64231a66764e3c628d102c990ae481e82f20b6583775f6424"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1051989,
+      "sha256": "36ccc3d0598407413daec831dbe83cb8442c1d74a50b081d9e6b4ff74af479e1"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/readiness_criteria_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 585,
+      "sha256": "553661b2f83673bc12805d655cd944f3651a8257937eda09270e92936c00cd24"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 41945,
+      "sha256": "263eb1f973b92e9c836b4d30dfacdf86c63f46fd343b8b31c9312fa6aa8d7157"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/risk_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 214,
+      "sha256": "11d4cec103555148e5fe07c031fa71be33e61f771b7e4050c634df0116a0771c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/authority_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1810,
+      "sha256": "0e8528a3ebe622de2ac225c6f3ac29b326cc2fe4bd143e2c4a081551730125aa"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/criteria_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2483,
+      "sha256": "149083d685bf690492535c4c2b4bffb5a6dc88998b49f4904324c0a05ac5fbda"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/decision_inventory_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 346,
+      "sha256": "2d57882be46e8af877578edc010918de01dfcec1749b638ccbeb24dc70a58ec4"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/decision_package_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 502,
+      "sha256": "3f5b552b8f28e2c3e965cdd4179d8da8bf7cefcea8d8693d1d8e5b3eaf22428f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1517,
+      "sha256": "ae11b33e5865c9dc0be13cafa4ef1d730e322024cd0a3f3a0d4aef178c593245"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6223,
+      "sha256": "30bee0fd25d434f922175efc2424ea19b6b678d7fd186d631ecef93d3bc864e2"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 368,
+      "sha256": "d80361aca1a365b2c91e29607498ebcb222e16d470727e44a5373840de41f65a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/impact_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 573,
+      "sha256": "72ea19511ad492e9036c92b31718092d924812f89e182f67d701a9dec4c63b96"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 475492,
+      "sha256": "d0d8ea99fe25a93440a57d7940814da56fced1037570ec6c52aff433cfa5a40a"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1193565,
+      "sha256": "6abb01e558314078d9f53f05a2b141db7ed4a90d4c465dd1700f2d2284042d2b"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 48757,
+      "sha256": "5222ce67b009a6f1dbb47928b8bb5349910406b701184f4f1230a76c6fb1c692"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/traceability_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 796,
+      "sha256": "bbbfa030b4133e66b821ff080e7f6f65867a2b8e4563b83bca8b6637185963db"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/authority_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 488,
+      "sha256": "ff7c118733bdfaef2da21f0f4f82f907754acddb93ec6c39c165cea7b996c583"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/decision_states_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 706,
+      "sha256": "cc382d049399ecb0716bf44ee6dd117bf7a661bc83d6d3f67876bbe9afe3d9ad"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/decision_status.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1841,
+      "sha256": "d60a1edca43031f8fa789c2254340328b2b7a9c23b5afb3b91e940d3e6c66eb6"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/dependency_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1917,
+      "sha256": "f0090c4937ab13241bb75f3e55de92b5ac58d1282dc26d995f8db310bab9b700"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/final_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 10813,
+      "sha256": "6a6d3c25d34f0b83234c5ab154a74d9597a5c41ad5043afb8c6ebd1a6625d35c"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/findings_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 409,
+      "sha256": "006a9c7944b0a08c47bbe3519f49888cdaf3421b3fe3732eccc5c1c41acfa02f"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/identity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 426,
+      "sha256": "543b0dac8fe11812cfcff22cf68a297624a77a4c0756fb15b5af724bf63b926e"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/input_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 622275,
+      "sha256": "1a683cecbe3b4339b45177d092332f8361034ceb0fc4238e736d7697ee19d3ea"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/permission_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3770,
+      "sha256": "c4d10d63c66f565078b372d8cffbee8ee4fce9520b26971512b5c8592fa7b797"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/preservation.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1513922,
+      "sha256": "50dbee547840fd950a26964d26e78daa38de75de63090c38aeeafd734b025423"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/reference_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 61995,
+      "sha256": "3bbd852545a567afa2cce8228aed25fd4c155d2f6da2f18533d7a151078c0b75"
+    },
+    {
+      "path": "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/traceability_review.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 557,
+      "sha256": "2ee32f84c9ce767187368f0c04158e53d5305b104a17b6cfa150cd1bba3ea19a"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/00_git_status.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 835,
+      "sha256": "da1cd9b01498a8179061575044133211de42ea48ed0ff8c84fb1bbcebe269ef9"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/00_inventory.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4390,
+      "sha256": "ce3d2f5f82e39f7f7166ecd9c8bef1de18faf76bacfc52b25294a4477e05d8a4"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/01_configuration.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2215,
+      "sha256": "1af708ddde0f179343da99c4fc3ec700c52d6474839447c30cf879048607e509"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/01_manifest.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5037,
+      "sha256": "c9c5c03122049c90ac02274e09f2c5f3c94ee8fe3364257fd5878f41c8fe03fc"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_build.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 195,
+      "sha256": "5d19e432173dfd2ac27eef4394826edf6df0e7a5d9848b140f75d1be2be4b106"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_00.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 26,
+      "sha256": "5bd2c4787084677798c6fd838467a305f2dfa8bae7469f20aeed41fb6c07e93b"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_01.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 90,
+      "sha256": "03a555d66f4ca74dad80cae63d551172d04c7ba199a332edd3648a18eb987588"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_02.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1508,
+      "sha256": "b30c10ba9bde8be722ef7020ce53df692ce1d40e69819775f8712217ef63bb6c"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_03.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2800,
+      "sha256": "acc4b369f6fb8d54f7298459f18254665da82d4ad1cdd56ed26754ca56d6149b"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_04.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2184,
+      "sha256": "6d782da1e8e9fae984da332def8752b4c5a6686bf39ad43fc6dd37d6de611cc3"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_05.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2571,
+      "sha256": "c53ed8907567d8c539c9bfe0330b12c793ad87808836ec70ae57cb04b4efc512"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_06.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 719,
+      "sha256": "9324db3a724eb924e4a0f5c3ec8c3268b06bad018ed9e009052c60a61dee3f92"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_check_07.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 199,
+      "sha256": "db92c47444100a938685e332497360a97c6018778804a02f66e1c075e91c4bbf"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_checks.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2518,
+      "sha256": "7bfb6591e3752e9059291a03d39607b85cee4a2b6efa0e81b02059647d0cad7a"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_probe_command.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 127,
+      "sha256": "c8379c67c56ed20161ba992368d0b7ec78f297b8554058dbf4ed7bbd57cfe4b9"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_probe_launcher.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 857,
+      "sha256": "169b8ca22f98af36d70d21052afc23d5aeb2f1deed8517ebb3001e7b1e7f1a76"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_probe_resources.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 857,
+      "sha256": "169b8ca22f98af36d70d21052afc23d5aeb2f1deed8517ebb3001e7b1e7f1a76"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_probe_stderr.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/02_probe_stdout.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1464,
+      "sha256": "a71954c7497687db17784f49a02736b60bbc3e75f9b32d8329a0b84208d8fd58"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/03_gates.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2498,
+      "sha256": "06de9cf491e603ad8a582b5019d38fc248cc494f5acdf9a2d4683da93a09aaca"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/04_launcher_output.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1835,
+      "sha256": "e2f8235a372506694ed0d6299b39fb63d7765c753c1a49b457a1f8ecff93be44"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/04_panel_command.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 260,
+      "sha256": "2d369c6e28afbc5feb45d9b4c907a0d7b37cc1a84869b5c1b84dba73a3bdffb4"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/04_panel_resources.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1010,
+      "sha256": "bb7b737f56f90cb40a7e49207f6b4c2f71527dac1764cbb9e6b5808505b02886"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/04_panel_stderr.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/04_panel_stdout.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 62,
+      "sha256": "39dea088731f08d7b897579e73783c42fb54e495b9bb2805dd0d5b098bb1851e"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/05_audit.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1835,
+      "sha256": "e2f8235a372506694ed0d6299b39fb63d7765c753c1a49b457a1f8ecff93be44"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/06_artifact_hashes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5164,
+      "sha256": "91998de15c0aa2c959b9d4e1fa1dc5823cc94939703feecb461912fe17a7a618"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/07_history_counts.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1532,
+      "sha256": "031800bc837c9e18469975d97fe141ece823be066bb9aed80ff87df89e0fefeb"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/07_independent_audit.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1415,
+      "sha256": "47ddfa4863406ebf5aa02a446d376b3dcba266e779d9b5ae66e4e955c90c6f35"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/07_summary_by_cell.tsv",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5495,
+      "sha256": "ab11ce48c747a9dea3c3003a35b46d1e66a62e66f311de99a0e42303972ddc34"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/08_git_status.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5701,
+      "sha256": "1bf6fff68dd4e0c1e099007b7b2ce4ac20ec928ba94f13eb2bd0a244e7139fad"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/08_source_integrity.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 315,
+      "sha256": "1aa9090670a9507bdcd73c496e0bc93d4dcf4545997baa91ff594837a5952aed"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/09_final_hashes.json",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 6372,
+      "sha256": "e8c1611cad25b8e41a0d7992d49edf396ef5eefeb3aa0e5cb0c7bd8c26419b9d"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/PANEL_ALLOWED.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 45,
+      "sha256": "c537715e9e9e1513e7b280ebe77116fa30ca0c4f17dcfbe111aabf56a6fee0ca"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_C0.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 178265,
+      "sha256": "6e0832b408afc57ddc9708b8095ad299c166870bfb8950be67035c68d7d198e3"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_C1.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 194076,
+      "sha256": "0b5cf158749de4aced449106e87df90168ebd129f42a40d86e2d849f13917366"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_C2.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 265984,
+      "sha256": "8aaeb185b94ab383b3955f3c48c4d4801964715a5cfa14c988bd442c0e28cd16"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_C3.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 64916,
+      "sha256": "167d7caaba3919fddd392452cf995626e599cd2f37c109e3e184180e4e7dd0ad"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_C4.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 163897,
+      "sha256": "e1c57c6a33efcd1ba4446293f8a6b6ed9cafab75731f1c68ca0b3c9628aadf56"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_C5.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 164344,
+      "sha256": "bf30aad178d7dd0aa0bd70d14cc1f18994e385bf006cdac7cbd80a979e264a40"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r1_P.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 263574,
+      "sha256": "7e26655106d74230c1725cb92ad5c4ec161c3a7df30cd304785cc40846f39596"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_C0.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 178265,
+      "sha256": "6e0832b408afc57ddc9708b8095ad299c166870bfb8950be67035c68d7d198e3"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_C1.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 194076,
+      "sha256": "0b5cf158749de4aced449106e87df90168ebd129f42a40d86e2d849f13917366"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_C2.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 265984,
+      "sha256": "8aaeb185b94ab383b3955f3c48c4d4801964715a5cfa14c988bd442c0e28cd16"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_C3.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 64916,
+      "sha256": "167d7caaba3919fddd392452cf995626e599cd2f37c109e3e184180e4e7dd0ad"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_C4.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 163897,
+      "sha256": "e1c57c6a33efcd1ba4446293f8a6b6ed9cafab75731f1c68ca0b3c9628aadf56"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_C5.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 164344,
+      "sha256": "bf30aad178d7dd0aa0bd70d14cc1f18994e385bf006cdac7cbd80a979e264a40"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/canonical/r2_P.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 263574,
+      "sha256": "7e26655106d74230c1725cb92ad5c4ec161c3a7df30cd304785cc40846f39596"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/evaluations.tsv",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 47289,
+      "sha256": "88eb7911408cc5e4903e12193a2cdf8602475f53e5fa659a9e7de50823a0e81e"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/literal_checks.tsv",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 19212,
+      "sha256": "73e2a51cc13135c11aa6ec3a3e4a9006b636909db8666ee2335ad99255563685"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_C0.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 172856,
+      "sha256": "3950ca71b8fcaf97b215dda55c9741cc216b6b627886763e988faa73959a8c78"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_C1.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 188446,
+      "sha256": "416baa5f821e887ee7129f1db574f9e4cd06864c8da439ab8330bba1871c1bc3"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_C2.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 254868,
+      "sha256": "81aa90fbd3b4112b4a81a2214f3529402796e773e7885e3b59a478f8d56b9a33"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_C3.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 66374,
+      "sha256": "60db1fade19ea4f46e7267604d9bd83d6c9fa3c66e231801a159bc331048dee9"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_C4.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 161380,
+      "sha256": "adf2da2c8c2ac1820d3e915ac48be2762173ef3ecd40da15c66f97a2b81975c1"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_C5.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 161913,
+      "sha256": "ebbe88efb41c2700aecae0cc961337395a932a19da48dd7720a2811a0625ed35"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r1_P.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 251301,
+      "sha256": "5f1455b7212c06e416905b32ab97e591aff100d8b35949bbbeae35b70ab1b9a1"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_C0.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 172856,
+      "sha256": "9771b1a7f96fb7d4541f415991352b908a0e37d65e6f04285388bf5d9afae531"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_C1.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 188446,
+      "sha256": "1a9efc434d39e334bb3a792dc1afcaa7f78ca6a71f84b817e767e601401382dc"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_C2.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 254868,
+      "sha256": "56b120032eaeafc774828481cb983154c0833ca60c8e3dad17cd13a048e03a8c"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_C3.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 66374,
+      "sha256": "a74e909358b1d95b867a1d9f876ab07f400fb459e3001ca1bb5453196c09c264"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_C4.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 161380,
+      "sha256": "e5faa970c586df78498e3e82da192e43b0f6b2124a03a0d0fe1b8cb6883ada99"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_C5.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 161913,
+      "sha256": "0e36a066cd6f06ab565fa2746ae5f1b93a6d3e51d5a30ce96388f474d14bc660"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/raw/r2_P.txt",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 251301,
+      "sha256": "c945c5503727e2494ab58062bc1926f434e9ee5902d8fc8d2ddc998aa37b2f11"
+    },
+    {
+      "path": "docs/protocolos/resultados/M5_20261105T235751_428503Z/resource_samples.tsv",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 818,
+      "sha256": "3ab98c4eff961929ca51b14d4c945b521615c5647371f31a3ae09fb865735a0a"
+    },
+    {
+      "path": "examples/m5_panel.rs",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 19646,
+      "sha256": "b9491bd548fc06d118a15cba41b53cfb4aeb3c78852af7dfc6c69f4de41d6c2b"
+    },
+    {
+      "path": "scripts/cic_i2_instruments.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 4595,
+      "sha256": "9caced7b39558be8cc79ad28d097dcd4edcce32216db4b9a560ff6bf07a14bdc"
+    },
+    {
+      "path": "scripts/g2_attestation.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12924,
+      "sha256": "ea805380b75a694855222a74a528a55ad53a2662b3e06405b50c47643ac29392"
+    },
+    {
+      "path": "scripts/g2_boundary_audit.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 5764,
+      "sha256": "8b976381e57c303f3f7678cbdb624e1571be162355efd1552346c48ca92339a5"
+    },
+    {
+      "path": "scripts/g2_policy_gate.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7727,
+      "sha256": "8760857b82ab09423bc23de50c7443d51d8a21373fe0ce525b20ca5ce08b2ab6"
+    },
+    {
+      "path": "scripts/g2_preparation.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 10019,
+      "sha256": "2b723d88cf8a6ae243f41a2388956dc63f491e3d64c0c7880d13366404dfc60d"
+    },
+    {
+      "path": "scripts/g2_synthetic_consumer.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 7730,
+      "sha256": "8334eb4f1a07879e3734c69e8213d0827c6e7f42b41024dbb5d314eb11faa8cb"
+    },
+    {
+      "path": "scripts/g2_synthetic_demo.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 3785,
+      "sha256": "09639d7b14ccd5eb32fa1eec96c9d4ed768ef0cef4a11a646d9e1f4fbfc06620"
+    },
+    {
+      "path": "scripts/g2_verdict.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 1838,
+      "sha256": "a5a736712e8d8da7c5f47435397a54ae6bfd876cd1183c2ac49e45a3b46c5458"
+    },
+    {
+      "path": "scripts/m5_execute.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8283,
+      "sha256": "7802616660cdb90fe404d75ad693b5d5e12b1a6e44aa7d742125019a68e9aef5"
+    },
+    {
+      "path": "scripts/test_cic_i2_instruments.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 2271,
+      "sha256": "473146546c028ddc66edf2e05f31b35d943344aed5049f7564fb0ba94ebad954"
+    },
+    {
+      "path": "scripts/test_g2_attestation.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 12943,
+      "sha256": "6a7256e6e66fd7f9879054ee3ae47be8047746ac96c902cdfb9ef7cd7e0f832e"
+    },
+    {
+      "path": "scripts/test_g2_boundary_audit.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 10120,
+      "sha256": "f2d216c79d1035f0d2a351f4e32dd9fb6080c3540a921287677249cefff257bd"
+    },
+    {
+      "path": "scripts/test_g2_policy_gate.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9420,
+      "sha256": "3eef99f39e69ed24b96c0f5b4bfe0e134254f8455539ea9ec4ba586cad3c2046"
+    },
+    {
+      "path": "scripts/test_g2_preparation.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 9527,
+      "sha256": "0ddce05224f03dc1d45f83e6d1e27a307cf93566eadfc4f13a59fda96b12cbb5"
+    },
+    {
+      "path": "scripts/test_g2_synthetic_consumer.py",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 8352,
+      "sha256": "d3b44e6b9ce71cb117049c3a30ed98f620619ca678a5fa6fc131e28004214c6a"
+    },
+    {
+      "path": "src/axon.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 2079,
+      "sha256": "e144d857a8d9aea465dd23baaad4c57c5e762d3731415d16a6e338af07bb37ec"
+    },
+    {
+      "path": "src/axon.rs.int-p3.2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 1740,
+      "sha256": "932934423f6816333513388543418959aedfcc0f2de758e8295756cb21193693"
+    },
+    {
+      "path": "src/axon.rs.int-p5.2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 1740,
+      "sha256": "932934423f6816333513388543418959aedfcc0f2de758e8295756cb21193693"
+    },
+    {
+      "path": "src/axon_branch_conduction.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 1124,
+      "sha256": "3b2eb41120b35ba927e17a32e562826bc5622d300c2e8e072da19a4298a25f27"
+    },
+    {
+      "path": "src/axon_conducted_emission.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 761,
+      "sha256": "23c850c2c8b9c4ab9d11583fd99473be3af37167a09e28f667a938afc4bad399"
+    },
+    {
+      "path": "src/axon_conduction.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 663,
+      "sha256": "b5fe6a17f29a7745c7baf1f351ec8d27d57280e2f3aa2d18fea1c979337acfd8"
+    },
+    {
+      "path": "src/axon_identity_contract_tests.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4263,
+      "sha256": "f07bd94adc3ffcde9b1f86eb01723776bc8be6eb20bc5b16360307bd54017993"
+    },
+    {
+      "path": "src/axon_outcome_adapter.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 1658,
+      "sha256": "cc01bf35afa34fdc6f3c3d5035e1a0740902a9db6b85e2f030fc310dca4cafbd"
+    },
+    {
+      "path": "src/axon_transmission_policy.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 1606,
+      "sha256": "f94a3deab9d9de7b978dca5d7eb45e6870e8cc257c1168fb058a52615b9d0394"
+    },
+    {
+      "path": "src/circuit.rs.d43a.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 10708,
+      "sha256": "a50a1fad8f64eee738d12ac9ffcf21dcb884c89dae7494819691847313145ed3"
+    },
+    {
+      "path": "src/circuit.rs.int-p3.2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 17748,
+      "sha256": "2d1f65116f6a00338711b684a2592ddfe08c4735eee9490cc944fd7d1283dbc2"
+    },
+    {
+      "path": "src/circuit.rs.int-p5.2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 17912,
+      "sha256": "20e3614fefc448929f5f40bed89fdb4b3cb58f9df56ea20cf7ba33cad236b14e"
+    },
+    {
+      "path": "src/curriculum.rs.cpf-i02.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 24761,
+      "sha256": "ec7212531dee910dc72ffa3e94087e96095bfb606bd369713efe4acd33b298ec"
+    },
+    {
+      "path": "src/curriculum.rs.pre_e5_r2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 36075,
+      "sha256": "4bfbb60b14806d6fd94569721e3f9f0aaa011476816622a7313cc0f801881589"
+    },
+    {
+      "path": "src/dendrite.rs.d44c4.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 6318,
+      "sha256": "1a9bfd0bb33db42d599b6760d8fb4bd30ea689ab3bdb33bd9fe55fb4a3972254"
+    },
+    {
+      "path": "src/engine.rs.d44d2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 14193,
+      "sha256": "7302acbf3e7e3d57864da4521e3e24236ad55dbf4e3e5f56a8b3c120cf48260c"
+    },
+    {
+      "path": "src/integration/acquisition/tests.rs",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 21837,
+      "sha256": "4e91ba0a1dbbd5cf6da08d019ffc357d7800903a7ba04b00f8460d0a96f06edc"
+    },
+    {
+      "path": "src/integration/associative.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 1272,
+      "sha256": "0d00e00835327b2d4089c4c779b92761a7d185c9ee5c570300c816b4e4d8b3ac"
+    },
+    {
+      "path": "src/integration/cognitive_coordination.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 11694,
+      "sha256": "f5283805772ce1224cc69da0344f15b8a3faae80101e1941a0e8a8ca3c3874e8"
+    },
+    {
+      "path": "src/integration/cognitive_coordination.rs.cpf-i01.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 11476,
+      "sha256": "143f7afe7838ab23e237cee704e113be1ab87e75f2697af78b1426ceeb231ffa"
+    },
+    {
+      "path": "src/integration/concepts/tests.rs",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 22273,
+      "sha256": "00ce7823eaede0e94404cae4414001b9b4a433fc192bb987d8677b14ff8a138b"
+    },
+    {
+      "path": "src/integration/development/discrimination/neural_priority.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 48368,
+      "sha256": "13c251db859b9afd85eb1a6c04c479a51564104b193e191a9f011cab292a4e61"
+    },
+    {
+      "path": "src/integration/e13_bundle.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 3072,
+      "sha256": "5e5985d4e6a59b66853913d56514bbb7393cc932b51d33bd484145736d74ec86"
+    },
+    {
+      "path": "src/integration/e13_storage.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 7787,
+      "sha256": "dbb9586e564778d18b9b6d1a0d12ffd582776613ec273de003952a3b37b4594e"
+    },
+    {
+      "path": "src/integration/query/tests.rs",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 23210,
+      "sha256": "2cfe00650a93e56b8b749263c1a15a843f4f17a2ddf1cc0ea56ff6712b0006cd"
+    },
+    {
+      "path": "src/integration/synaptic.rs.pre-compat-v1",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 25883,
+      "sha256": "2b766cc6db38be99b4d9bd805ac930841cbbcb3a36e504851f3cffe9e4241da2"
+    },
+    {
+      "path": "src/integration/synaptic.rs.pre-exp-neuro-001",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 22104,
+      "sha256": "b4296a7c948ec6dd1af103d6512853efb9fb7bfea7e7bef603da6e330a9c0b1f"
+    },
+    {
+      "path": "src/integration/synaptic.rs.pre-exp-neuro-001-v2",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 25036,
+      "sha256": "cbaf6eb3e8f87dd9826e7f7041888789c3e12d0cd9dd8090e68112b8eb3cf572"
+    },
+    {
+      "path": "src/lib.rs.int-p5.2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 538,
+      "sha256": "459274f169ec16b53335339863c692885316dfe3ce3e2ee77228dea2ce2bcac8"
+    },
+    {
+      "path": "src/neuron.rs.d44c2.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 3488,
+      "sha256": "0c8f8548c910115567b0841d93bee79259e9d5326d98e96676ccc5b4886e9552"
+    },
+    {
+      "path": "src/neuron.rs.d44c2.fix.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 4104,
+      "sha256": "ddcbf70e56f0b972865d4f6fc0c3941c5cd4cf484581b6edb28887c897d45614"
+    },
+    {
+      "path": "src/neuron.rs.d44c2.maperr.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 4212,
+      "sha256": "083c13954fd18e2d3a8220e1e0890d9a72ddb601e04324697bcd5a752b834f5c"
+    },
+    {
+      "path": "src/neuron.rs.int-p6.5.3.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 4268,
+      "sha256": "c5f4f25325a8012e90d3fe886215d6feced87ff4271b62e4ccc52824ae0fe8dd"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/tests.rs",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 24471,
+      "sha256": "83fc9c9dc3b1e32c289468598994c42468c0f9ec7ca0ad4acb4899182d55372b"
+    },
+    {
+      "path": "src/protocol_verification/tests.rs",
+      "status": "??",
+      "group": "custodia_protocolos_revisao_especifica",
+      "size": 22268,
+      "sha256": "64c54c4e7f84aa9dce406f8cea02f49fa700c3522250ff49e65126682cddca32"
+    },
+    {
+      "path": "src/session/conversation.rs",
+      "status": "??",
+      "group": "interface_conversacional",
+      "size": 8032,
+      "sha256": "6670b2404283f6a7e13862e0d71f2f6e88f3f47c5f0c5c01ba62a176436bab83"
+    },
+    {
+      "path": "src/session/intent.rs",
+      "status": "??",
+      "group": "interface_conversacional",
+      "size": 4210,
+      "sha256": "36fbc00fb26e527aad33a9e786666c7117bff01e900b9697696a6e15f8ef0d52"
+    },
+    {
+      "path": "src/session/runtime.rs.pifi001-pre-diagnostics.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 45761,
+      "sha256": "e8eb514ddd89103cc1473bcfa02997f741ef5291c9b3c91e6729f0536b7a0612"
+    },
+    {
+      "path": "src/session/runtime.rs.pifi001-pre-epistemic-diagnostic.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 46176,
+      "sha256": "a2157a065d8fe4419f35a0ff40735d9c9447c33125113b76aba9539af52b21b4"
+    },
+    {
+      "path": "src/session/runtime.rs.pifi001-pre-revision-cli.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 47131,
+      "sha256": "3767ecccaec5558f5b6950c6f1c854dbcd2b15b616273e0394f4172a5b4a0960"
+    },
+    {
+      "path": "tests/axn_001_isolated.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 2689,
+      "sha256": "e7911d5c91a8bdad751f4b8a7bfc6695eadc7dc2243040eff9485696b53091d7"
+    },
+    {
+      "path": "tests/axn_002_functional_distribution.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3178,
+      "sha256": "fd19de48693d50b41d8a0dd053f4974825fbbf57560bdf3a8a39088b8a7c3761"
+    },
+    {
+      "path": "tests/axn_comp001_extended_baseline.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4298,
+      "sha256": "be06d4d293500dfea39ebf73c03a8dbae0a1d2320e279cf764f28293702901c4"
+    },
+    {
+      "path": "tests/axn_eq01_legacy_baseline.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3934,
+      "sha256": "bc1808d78e79e7551fc9facee25ba1787a082f824ae4e0ae38c9a896862d2ae6"
+    },
+    {
+      "path": "tests/axn_int_p1_comparison.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 5116,
+      "sha256": "258101edf0ec0d9ee395190e8a1ab36de6702d67ac33f959021b8c420ac36660"
+    },
+    {
+      "path": "tests/axn_int_p2_topology.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4141,
+      "sha256": "6ae70f9142741b071ac82e77a9e9bece9f44674459d2bb3a9c0d9c2e1479de38"
+    },
+    {
+      "path": "tests/axn_int_p4_operational.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 7057,
+      "sha256": "05d32aed73c43d06cde8979cc76f2cd471b682f84e4310234c4d77259c717633"
+    },
+    {
+      "path": "tests/axn_int_p654_temporal_equivalence.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3666,
+      "sha256": "32e98628b5fb0117eca92d602ead61e017238bf1a6efb91415587b49ec0563e4"
+    },
+    {
+      "path": "tests/axn_int_p65_conducted_emission.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 2105,
+      "sha256": "fb2d4e1ccc168eb0f83c33c6fa2941a1f43c54504e32bd4c263bf5b38cdf41b9"
+    },
+    {
+      "path": "tests/axn_int_p65_temporal_transform.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 2481,
+      "sha256": "bd23779c8e0f99e8f84ca473d0e9770864c59622556937149f25df7ddcd7c27b"
+    },
+    {
+      "path": "tests/axn_int_p6631_legacy_equivalence.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3502,
+      "sha256": "d2bb384f8f3b9249379e05e294a7e6d816b4abcb4a016308557f2c895767f598"
+    },
+    {
+      "path": "tests/axn_int_p6632_consolidation.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 8340,
+      "sha256": "3986cec4aa967614fd6618319a6dd90052f3b9174608331f8297f7026ca95e68"
+    },
+    {
+      "path": "tests/axn_int_p6632_dendritic_contracts.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4353,
+      "sha256": "bbb5a6a5cbc43cba403f723dac399b3567e95fa7e51ee5881c44fb389525fadb"
+    },
+    {
+      "path": "tests/axn_int_p6632_differential.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4720,
+      "sha256": "588feebae35806d42f395cfbafad804e71fcf37b1e18777c26138bb0b5c85e17"
+    },
+    {
+      "path": "tests/axn_int_p6632_experimental_executor.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 5733,
+      "sha256": "10f65ba72b70185caa14fb321f0b2e8dc6906370f4fec84f19f2ce82325f4d29"
+    },
+    {
+      "path": "tests/axn_int_p6632_legacy_reference.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4473,
+      "sha256": "c69f5b0a7a6e9456db429d13ac116dfd69d03bb382201e582ab36c3c339a90a9"
+    },
+    {
+      "path": "tests/axn_int_p6633_adapter.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3351,
+      "sha256": "82702200cffd06aaee244c1bc6e25824dd3debc4c9bfd63263a0afb85740847b"
+    },
+    {
+      "path": "tests/axn_int_p6633_contract_matrix.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 5874,
+      "sha256": "967b98ee0adabdfbab86675db927053935074d7d8d55bea466d8fbce91748ece"
+    },
+    {
+      "path": "tests/axn_int_p66_policy.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 4200,
+      "sha256": "966c83b585395946392a5bf08d66c1c6115bb2e82c0f7bcd7664c6723d30dd33"
+    },
+    {
+      "path": "tests/axn_int_p6_branch_conduction.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3435,
+      "sha256": "96a596439f58e21f4e1c689a8f9add15e815a9c92ac34bd367118b889471792e"
+    },
+    {
+      "path": "tests/axn_int_p6_conduction.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 1691,
+      "sha256": "073aab75de28153c8667edcb06e185f274c03a2884661b937f2c8d09216df372"
+    },
+    {
+      "path": "tests/axn_int_p6_real_synapse.rs",
+      "status": "??",
+      "group": "axonal_nucleo_dependencias",
+      "size": 3444,
+      "sha256": "d1ba6443732f2539a69f77d99a3d766a14fe8de3ed73cfdc83e868aae0c59d02"
+    },
+    {
+      "path": "tests/cnf04_associative_api.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 5636,
+      "sha256": "d5e76cbcb695c783e8f4ddd97fdcd9ef0fa579331a16507c97421f0c6c948274"
+    },
+    {
+      "path": "tests/cnf04_associative_compatibility.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 5691,
+      "sha256": "ad0e9b6fcdd5ca0f5c715ed8e5a72e07c1bdbe17687f76f0fd63df0eb63442b4"
+    },
+    {
+      "path": "tests/cnf04_associative_learning.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 2284,
+      "sha256": "d10e1f244d03db089407dbe379e64f30d76ae034d4a0b7035ea70ff9af02530d"
+    },
+    {
+      "path": "tests/cnf04_dendritic_associative.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 2198,
+      "sha256": "413826d31713bfecc0bc5716d274816c60865620040f8f8844c49396cbef9e18"
+    },
+    {
+      "path": "tests/cnf04_operational_compatibility.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 4326,
+      "sha256": "8cf32927c3d46fed7163a225ab7619655a96b9fcbb3f79f63bc318b7d586128f"
+    },
+    {
+      "path": "tests/conversation_clarification.rs",
+      "status": "??",
+      "group": "interface_conversacional",
+      "size": 2189,
+      "sha256": "08720ed986e2e87c3a68c44e14fb26372b6fa566a39747795674dd62b15434dd"
+    },
+    {
+      "path": "tests/conversation_cli.rs",
+      "status": "??",
+      "group": "interface_conversacional",
+      "size": 1705,
+      "sha256": "c7236a04b5c4a4cdc7170492130edf90434e26e4461d23e4947a6480ce2e64fa"
+    },
+    {
+      "path": "tests/conversation_integrated.rs",
+      "status": "??",
+      "group": "interface_conversacional",
+      "size": 9837,
+      "sha256": "912b1879126b244f28d2747153cec14cd625aa33ead44dcc72de0fb53ec2fc0e"
+    },
+    {
+      "path": "tests/cpf_i01_operational_progress.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 621,
+      "sha256": "b4ad977009ae20b78f476ebaceb1615ddc23de388fe1a1d3ef3fe86903fba716"
+    },
+    {
+      "path": "tests/cpf_i03_generalization.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 27093,
+      "sha256": "9bdb198a7476d5d6f0c301b51a5723d59d708ab7355b7234fafc158b5e701ce6"
+    },
+    {
+      "path": "tests/cpf_i03_generalization.rs.cpf-i03-c3.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 8315,
+      "sha256": "d5f33e22f862200524add62cdd94f020beeccf7c02d04ad5059e83c3ab68ddfb"
+    },
+    {
+      "path": "tests/e13_bundle.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 4640,
+      "sha256": "38ae39d6238eb2158ae2d7a41d46f69b426c31ea38a98b2410781c83bb2c7de8"
+    },
+    {
+      "path": "tests/e13_cooperative_continuity.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 3061,
+      "sha256": "8d8c97d2ce2f09031a8d759e686a6a81e3a6002442b7dfe6298d6e0bbef6b3ae"
+    },
+    {
+      "path": "tests/e13_cooperative_coordination.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 1493,
+      "sha256": "1fe7911de50ba6415aab45e330ca4e956b2cfe1c7a3eb05b0f1bf07e841dddf1"
+    },
+    {
+      "path": "tests/e13_cooperative_execution.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 4099,
+      "sha256": "daffe9600a704bed8987e9d3de961c8d8c59c07a70958b5d789a3d60d0ca15bb"
+    },
+    {
+      "path": "tests/e13_cooperative_recovery.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 4971,
+      "sha256": "4ea7a1f78f48848f523aca567766edf407475a500b7147eeb42ecdfaefd9ab36"
+    },
+    {
+      "path": "tests/e13_cooperative_snapshot.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 9885,
+      "sha256": "ecf6083985c73782f4c5505ffbb5dfcfd9e05590d519c19c989a7aefe228ddfc"
+    },
+    {
+      "path": "tests/e13_runtime_integration.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 3356,
+      "sha256": "2ab9971515e6de43c4c06d6d4409718c66d7e791984f990641ec78526ad4b7a6"
+    },
+    {
+      "path": "tests/e13_storage.rs",
+      "status": "??",
+      "group": "coordenacao_e13_proposta",
+      "size": 5741,
+      "sha256": "8b1efd774e22109e2adbc45dfe3cada7af955a3190a2dd71de224a8151939346"
+    },
+    {
+      "path": "tests/ec10_revision_r3.rs.pre-extension.bak",
+      "status": "??",
+      "group": "copias_historicas_preservar",
+      "size": 11256,
+      "sha256": "ef7586ac47515209b6f78ee1ac30a16d69fc7c0d27849b7a763b45f81162bdbf"
+    },
+    {
+      "path": "tests/edf01_logic.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 5122,
+      "sha256": "43caf7fb10e5108502d25e18b63c6a33e240be436b079330c72d7cf7ab9af9b4"
+    },
+    {
+      "path": "tests/edf01_r1_paired.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 5210,
+      "sha256": "ab04dab1f75bd2eb9858c110f954df8023b53e17fedfd7eeeb21fb9052935e0f"
+    },
+    {
+      "path": "tests/edf01_r2_logic.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 7202,
+      "sha256": "ca189e2f5b3eb756b7c08aa7431c1a84b7dc6d87a8fb797b3bb30c916be75d07"
+    },
+    {
+      "path": "tests/edf01_r2c_discrimination.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 7205,
+      "sha256": "96eb88e3c60ef832b642758b3f3e6b6f38641a824e6a996e59d992a156046b15"
+    },
+    {
+      "path": "tests/edf01_r2d_incremental.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 8962,
+      "sha256": "3107b1233eeec4b9a1d5b6532bc5b259ca813de634391929741338b14cb17514"
+    },
+    {
+      "path": "tests/edf01_r2e_causal.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 9345,
+      "sha256": "8415576739e37274308df2df7cd95568c85afd65118c7f497b46ed8842407899"
+    },
+    {
+      "path": "tests/edf01_r2e_contradiction.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 10552,
+      "sha256": "b3db62d82f26e9fc28d27a208ef259ca0f397491192228040ae6dc58377fe709"
+    },
+    {
+      "path": "tests/edf01_r2e_generalization.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 10801,
+      "sha256": "84a01fe4273c6b2641f8cc9549932cf627ed5b5f11d7d402f2d76ecee000590e"
+    },
+    {
+      "path": "tests/edf01_r2e_interference.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 11425,
+      "sha256": "5167cf14f88635b731fdc9587272d18ff2167082cb6f2055cddfd9227feae26a"
+    },
+    {
+      "path": "tests/edf01_r2e_retention.rs",
+      "status": "??",
+      "group": "edf_experimental",
+      "size": 9247,
+      "sha256": "fb8158144926bab34a05a6a18f07f054c4a36af20dbc92ab0ca93852fea2757a"
+    },
+    {
+      "path": "tests/m3_neural_concept_causality.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 41343,
+      "sha256": "0eb25db5869f599864b05b5af06a76af0b6475834fff75f6d41b401a5501cb43"
+    },
+    {
+      "path": "tests/support/ec10_r3_extended_candidate.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 14743,
+      "sha256": "875f47f7bad0ef09ea2279c2d2dc6a3fa531c1d7a1c4b45d50af9f955f0d43c6"
+    },
+    {
+      "path": "tests/support/ec10_r3_extended_control.rs",
+      "status": "??",
+      "group": "integracao_cpf_associativa_runtime_revisar",
+      "size": 2705,
+      "sha256": "d65178a5863d5de3e163832c13b53831aa49a4859f2d58686e2816c8e87e85e3"
+    }
+  ],
+  "large_files": [
+    "docs/protocolos/CIC-I6-P7_matriz_impactos_dependencias.json",
+    "docs/protocolos/CIC-I6-RC01_rastreabilidade_integrada.json",
+    "docs/protocolos/resultados/CIC-I6-P6_documentary_20261107T090736_586624Z/preservation.json",
+    "docs/protocolos/resultados/CIC-I6-P7_documentary_20261107T231703_261565Z/preservation.json",
+    "docs/protocolos/resultados/CIC-I6-RC01_documentary_20261108T015758_661244Z/preservation.json"
+  ],
+  "note": "Metadados e hashes; nao certifica conteudo, autoria, seguranca ou autorizacao de publicacao. Capturado antes de novos artefatos C0.",
+  "classification_note": "Agrupamento primario por caminho; nao substitui revisao por hunk. Dependencias compartilhadas exigem separacao adicional.",
+  "publication_exclusions": [
+    "tests/ec10_revision_r3.rs",
+    "tests/support/ec10_r3_extended_candidate.rs",
+    "tests/support/ec10_r3_extended_control.rs",
+    "custodia_protocolos_revisao_especifica",
+    "copias_historicas_preservar",
+    "coordenacao_e13_proposta"
+  ],
+  "security_triage": {
+    "scope": "Somente alteracoes publicas selecionadas; excluidos custodia, backups e EC10 R3/suportes. Triagem por padroes, nao auditoria de segredos completa. Valores nao impressos.",
+    "scanned_count": 82,
+    "scanned_paths": [
+      "NEURONS_PIFI_001_PROGRESSO.md",
+      "src/circuit.rs",
+      "src/curriculum.rs",
+      "src/engine.rs",
+      "src/integration.rs",
+      "src/integration/development/discrimination.rs",
+      "src/lib.rs",
+      "src/main.rs",
+      "src/neuron.rs",
+      "src/session.rs",
+      "src/session/runtime.rs",
+      "tests/concept_goal_supervision.rs",
+      "tests/development_runtime.rs",
+      "tests/runtime_cli.rs",
+      "NEURONS_CONSOLIDACAO_ARQUITETURAL_2026-11-21.md",
+      "NEURONS_CONTROLE_MESTRE.md",
+      "NEURONS_PIFI_001_v1.0.md",
+      "src/axon.rs",
+      "src/axon_branch_conduction.rs",
+      "src/axon_conducted_emission.rs",
+      "src/axon_conduction.rs",
+      "src/axon_identity_contract_tests.rs",
+      "src/axon_outcome_adapter.rs",
+      "src/axon_transmission_policy.rs",
+      "src/integration/associative.rs",
+      "src/integration/cognitive_coordination.rs",
+      "src/integration/development/discrimination/neural_priority.rs",
+      "src/integration/e13_bundle.rs",
+      "src/integration/e13_storage.rs",
+      "src/session/conversation.rs",
+      "src/session/intent.rs",
+      "tests/axn_001_isolated.rs",
+      "tests/axn_002_functional_distribution.rs",
+      "tests/axn_comp001_extended_baseline.rs",
+      "tests/axn_eq01_legacy_baseline.rs",
+      "tests/axn_int_p1_comparison.rs",
+      "tests/axn_int_p2_topology.rs",
+      "tests/axn_int_p4_operational.rs",
+      "tests/axn_int_p654_temporal_equivalence.rs",
+      "tests/axn_int_p65_conducted_emission.rs",
+      "tests/axn_int_p65_temporal_transform.rs",
+      "tests/axn_int_p6631_legacy_equivalence.rs",
+      "tests/axn_int_p6632_consolidation.rs",
+      "tests/axn_int_p6632_dendritic_contracts.rs",
+      "tests/axn_int_p6632_differential.rs",
+      "tests/axn_int_p6632_experimental_executor.rs",
+      "tests/axn_int_p6632_legacy_reference.rs",
+      "tests/axn_int_p6633_adapter.rs",
+      "tests/axn_int_p6633_contract_matrix.rs",
+      "tests/axn_int_p66_policy.rs",
+      "tests/axn_int_p6_branch_conduction.rs",
+      "tests/axn_int_p6_conduction.rs",
+      "tests/axn_int_p6_real_synapse.rs",
+      "tests/cnf04_associative_api.rs",
+      "tests/cnf04_associative_compatibility.rs",
+      "tests/cnf04_associative_learning.rs",
+      "tests/cnf04_dendritic_associative.rs",
+      "tests/cnf04_operational_compatibility.rs",
+      "tests/conversation_clarification.rs",
+      "tests/conversation_cli.rs",
+      "tests/conversation_integrated.rs",
+      "tests/cpf_i01_operational_progress.rs",
+      "tests/cpf_i03_generalization.rs",
+      "tests/e13_bundle.rs",
+      "tests/e13_cooperative_continuity.rs",
+      "tests/e13_cooperative_coordination.rs",
+      "tests/e13_cooperative_execution.rs",
+      "tests/e13_cooperative_recovery.rs",
+      "tests/e13_cooperative_snapshot.rs",
+      "tests/e13_runtime_integration.rs",
+      "tests/e13_storage.rs",
+      "tests/edf01_logic.rs",
+      "tests/edf01_r1_paired.rs",
+      "tests/edf01_r2_logic.rs",
+      "tests/edf01_r2c_discrimination.rs",
+      "tests/edf01_r2d_incremental.rs",
+      "tests/edf01_r2e_causal.rs",
+      "tests/edf01_r2e_contradiction.rs",
+      "tests/edf01_r2e_generalization.rs",
+      "tests/edf01_r2e_interference.rs",
+      "tests/edf01_r2e_retention.rs",
+      "tests/m3_neural_concept_causality.rs"
+    ],
+    "findings": []
+  },
+  "timeline_commits": [
+    {
+      "hash": "afe2bd58c52eeacdbcfe4f39d39ab48a1bc98d8a",
+      "author_date": "2026-11-08T21:45:24-03:00",
+      "commit_date": "2026-11-08T21:45:24-03:00",
+      "subject": "feat(f1): entrega sessão cognitiva local limitada aceita com ressalvas"
+    },
+    {
+      "hash": "68dfd7746dba2ffb7e0f03a0f110a9be7ca45128",
+      "author_date": "2026-11-08T23:22:02-03:00",
+      "commit_date": "2026-11-08T23:22:02-03:00",
+      "subject": "feat(mp06): amplia inferencia limitada com provas verificaveis"
+    },
+    {
+      "hash": "ee4388d92c5b7a32f78a4cae4b91b7b3f91d4bc1",
+      "author_date": "2026-11-09T00:22:46-03:00",
+      "commit_date": "2026-11-09T00:22:46-03:00",
+      "subject": "feat(mp05): integra adaptacao sinaptica assistida e persistente"
+    },
+    {
+      "hash": "ae00e8e5ba3e2ae43eacd5adbfce7113c8452c4d",
+      "author_date": "2026-11-09T01:41:59-03:00",
+      "commit_date": "2026-11-09T01:41:59-03:00",
+      "subject": "feat(mp07): integra investigacao supervisionada com fonte local"
+    },
+    {
+      "hash": "b63361d38f2197283ae6031b55a5f79b0c0c4041",
+      "author_date": "2026-11-09T03:30:53-03:00",
+      "commit_date": "2026-11-09T03:30:53-03:00",
+      "subject": "feat(mp08): integra autorregulacao metacognitiva supervisionada"
+    },
+    {
+      "hash": "ab23612e6d06b49ea95096cc95406dd3211e957e",
+      "author_date": "2026-11-09T05:27:14-03:00",
+      "commit_date": "2026-11-09T05:27:14-03:00",
+      "subject": "feat(mp09): integra aprendizagem conceitual supervisionada"
+    },
+    {
+      "hash": "cc63baa3b3bf665360f5a2b081a46b901d3be527",
+      "author_date": "2026-11-09T06:37:05-03:00",
+      "commit_date": "2026-11-09T06:37:05-03:00",
+      "subject": "feat(f2): integrate supervised conceptual goal resolution"
+    },
+    {
+      "hash": "ef275bde3f6e563d70dd240c6dd04677b3b3dc8e",
+      "author_date": "2026-11-10T13:13:42-03:00",
+      "commit_date": "2026-11-10T13:13:42-03:00",
+      "subject": "feat(f2): integrate supervised conceptual-relational queries"
+    },
+    {
+      "hash": "7c12e22fa74b1239858a467544008bf44e9a940f",
+      "author_date": "2026-11-10T14:38:07-03:00",
+      "commit_date": "2026-11-10T14:38:07-03:00",
+      "subject": "test(f2): validate supervised conceptual transfer and retention"
+    },
+    {
+      "hash": "94ff720ee036895df1bba94029f10932e3dbc55d",
+      "author_date": "2026-11-13T14:11:06-03:00",
+      "commit_date": "2026-11-13T14:11:06-03:00",
+      "subject": "docs(f2): define completion contract and composed goal roadmap"
+    },
+    {
+      "hash": "3d8c774dd1f57db321ca513e55ba8cad8d0e6266",
+      "author_date": "2026-11-13T14:58:20-03:00",
+      "commit_date": "2026-11-13T14:58:20-03:00",
+      "subject": "feat(f2): supervise bounded composed cognitive goals"
+    },
+    {
+      "hash": "10c898314427a4f7b02cd70c1ed22d34091f3273",
+      "author_date": "2026-11-13T19:56:35-03:00",
+      "commit_date": "2026-11-13T19:56:35-03:00",
+      "subject": "feat(f2): expose composed goal supervision through session cli"
+    },
+    {
+      "hash": "60dcad1d8fdde4209e4ccf5abf2f64483b1338f9",
+      "author_date": "2026-11-13T20:40:55-03:00",
+      "commit_date": "2026-11-13T20:40:55-03:00",
+      "subject": "docs(f2): record formal acceptance with caveats"
+    },
+    {
+      "hash": "f5bcbeb1ec40520018a515a3503e738b9ef72560",
+      "author_date": "2026-11-13T21:09:36-03:00",
+      "commit_date": "2026-11-13T21:09:36-03:00",
+      "subject": "docs(f3): preregister initial scientific contract and experiment"
+    },
+    {
+      "hash": "dc330ae44d76fc5f6f4db2556b7f3337d32618e4",
+      "author_date": "2026-11-14T01:14:50-03:00",
+      "commit_date": "2026-11-14T01:14:50-03:00",
+      "subject": "feat(neurons): accept F3-01 composed two-premise query"
+    },
+    {
+      "hash": "e4898f8d2272e42fb54f75aaedb278150d273069",
+      "author_date": "2026-11-14T03:02:15-03:00",
+      "commit_date": "2026-11-14T03:02:15-03:00",
+      "subject": "docs(neurons): publish approved strategic vision v1.1"
+    },
+    {
+      "hash": "ead419fb5416bac9914bd2cb00031792a805d5d4",
+      "author_date": "2026-11-14T06:19:48-03:00",
+      "commit_date": "2026-11-14T06:19:48-03:00",
+      "subject": "feat(cognition): integrate supervised experiential learning cycle"
+    },
+    {
+      "hash": "1087c8ec0c752531366254f514a4b2b9fb4c6cd2",
+      "author_date": "2026-11-14T20:35:39-03:00",
+      "commit_date": "2026-11-14T20:35:39-03:00",
+      "subject": "feat(cognition): checkpoint integrated predictive learning runtime"
+    },
+    {
+      "hash": "2743f90da546a05ec2979ffefdc507ae5c94f651",
+      "author_date": "2026-11-14T20:48:02-03:00",
+      "commit_date": "2026-11-14T20:48:02-03:00",
+      "subject": "feat(memory): retrieve contextual evidence across cognitive episodes"
+    },
+    {
+      "hash": "485dd846414ac171e6441d1935ad8ade8dc9adf5",
+      "author_date": "2026-11-14T20:53:49-03:00",
+      "commit_date": "2026-11-14T20:53:49-03:00",
+      "subject": "feat(memory): qualify recovered proofs by episode origin"
+    },
+    {
+      "hash": "eccce0293b32c4d3d61695868a159c38410d88d0",
+      "author_date": "2026-11-14T22:06:46-03:00",
+      "commit_date": "2026-11-14T22:06:46-03:00",
+      "subject": "feat(memory): select indexed evidence with explicit coverage limits"
+    },
+    {
+      "hash": "fc9a5dc026d34cf899ec991167e49e481e3433e0",
+      "author_date": "2026-11-14T22:20:50-03:00",
+      "commit_date": "2026-11-14T22:20:50-03:00",
+      "subject": "feat(cognition): resume recovered plans after bounded relearning"
+    },
+    {
+      "hash": "8244b3207ba7b54bc193ea5813a09e648fbefd6e",
+      "author_date": "2026-11-14T22:48:29-03:00",
+      "commit_date": "2026-11-14T22:48:29-03:00",
+      "subject": "feat(memory): coalesce identical episodic snapshots without losing provenance"
+    },
+    {
+      "hash": "930d176a0440887823e386b57172875a6f635d63",
+      "author_date": "2026-11-14T23:13:40-03:00",
+      "commit_date": "2026-11-14T23:13:40-03:00",
+      "subject": "feat(memory): consolidate observations across overlapping snapshots"
+    },
+    {
+      "hash": "b7263597ec7524735126a9caf725c03cbad4077c",
+      "author_date": "2026-11-14T23:19:54-03:00",
+      "commit_date": "2026-11-14T23:19:54-03:00",
+      "subject": "feat(cognition): integrate observed outcome feedback with concept revision"
+    },
+    {
+      "hash": "96450647475a4caeb66a4e212edd08ff217c77e2",
+      "author_date": "2026-11-14T23:42:05-03:00",
+      "commit_date": "2026-11-14T23:42:05-03:00",
+      "subject": "feat(cognition): recover epistemic limits from persistent counterexamples"
+    },
+    {
+      "hash": "5435f946cad0e0204d559bfc6333c628281c3c92",
+      "author_date": "2026-11-14T23:49:24-03:00",
+      "commit_date": "2026-11-14T23:49:24-03:00",
+      "subject": "feat(cognition): revise recovered evidence and plan around refuted models"
+    },
+    {
+      "hash": "295b6b50b184936db883b7e0e33bf0297b77edc7",
+      "author_date": "2026-11-15T01:27:35-03:00",
+      "commit_date": "2026-11-15T01:27:35-03:00",
+      "subject": "feat(cognition): investigate competing concept predictions with authorized experience"
+    },
+    {
+      "hash": "272dee30aa2c31060517c7350f975cb946022f4b",
+      "author_date": "2026-11-18T20:49:46-03:00",
+      "commit_date": "2026-11-18T20:49:46-03:00",
+      "subject": "test(cognition): validate investigation transfer into novel multistep goals"
+    },
+    {
+      "hash": "1130fea693c3f416d5e9360fd842b1944e5d4ae5",
+      "author_date": "2026-11-18T21:15:36-03:00",
+      "commit_date": "2026-11-18T21:15:36-03:00",
+      "subject": "fix(cognition): validate source and context bindings before observation"
+    },
+    {
+      "hash": "c49519aa1aa4f0a4912c577d92e4710747ade9ae",
+      "author_date": "2026-11-18T21:58:42-03:00",
+      "commit_date": "2026-11-18T21:58:42-03:00",
+      "subject": "feat(memory): recover models by observed entity conditions"
+    },
+    {
+      "hash": "05045c09d2edcff5f13056b47ae3bc30df6af7e0",
+      "author_date": "2026-11-18T22:32:19-03:00",
+      "commit_date": "2026-11-18T22:32:19-03:00",
+      "subject": "test(cognition): investigate discovery of relevant conditions"
+    },
+    {
+      "hash": "b6431c08f95852adb67887b26c20a49a3d03431e",
+      "author_date": "2026-11-18T23:48:48-03:00",
+      "commit_date": "2026-11-18T23:48:48-03:00",
+      "subject": "test(cognition): investigate observable contextual distinctions"
+    },
+    {
+      "hash": "232724dddc5da202c7ad1041e7f549a017f05f8e",
+      "author_date": "2026-11-19T00:07:41-03:00",
+      "commit_date": "2026-11-19T00:07:41-03:00",
+      "subject": "feat(cognition): integrate bounded discriminating probe selection"
+    },
+    {
+      "hash": "fa593877e49982a9265af803c4d27704b42af259",
+      "author_date": "2026-11-19T00:31:38-03:00",
+      "commit_date": "2026-11-19T00:31:38-03:00",
+      "subject": "feat(cognition): resume bounded probes and assess real offers"
+    },
+    {
+      "hash": "4ff2705bd23e094a0673b14b58b7043d331d99cc",
+      "author_date": "2026-11-19T06:22:11-03:00",
+      "commit_date": "2026-11-19T06:22:11-03:00",
+      "subject": "fix(cognition): guard transfer against refuted experimental equivalence"
+    },
+    {
+      "hash": "4a4ad568c5c629a0c29b59d62939ca212dbb355d",
+      "author_date": "2026-11-19T07:00:10-03:00",
+      "commit_date": "2026-11-19T07:00:10-03:00",
+      "subject": "test(cognition): validate explanatory cycle and inventory MVP readiness"
+    },
+    {
+      "hash": "c13139c8bd74d7f691b67ade739b5b87b2c2cc2b",
+      "author_date": "2026-11-19T19:28:32-03:00",
+      "commit_date": "2026-11-19T19:28:32-03:00",
+      "subject": "feat(cli): expose supervised cognitive runtime session"
+    },
+    {
+      "hash": "b9a4d1d1feef13f206583a116afa183094faac15",
+      "author_date": "2026-11-20T14:50:48-03:00",
+      "commit_date": "2026-11-20T14:50:48-03:00",
+      "subject": "feat(dendrites): integrate dendritic circuits and v2 persistence"
+    },
+    {
+      "hash": "bc42f236e508906fd37f31f18ca263f7bf1cc836",
+      "author_date": "2026-11-20T16:46:33-03:00",
+      "commit_date": "2026-11-20T16:46:33-03:00",
+      "subject": "fix(synaptic): finalize dendritic learning and MP05 compatibility"
+    }
+  ],
+  "normative_sha256": {
+    "NEURONS_CONTROLE_MESTRE.md": "01928d528b3addcc0cec4d2900ca1f802d3b66fb89064ee28cd41f6fe7cb3288",
+    "NEURONS_PLANO_MESTRE.md": "dbbf2d1eb95c5f75023ce2f03229e439aec2cbcbb62093321271a86c6d0adf96",
+    "NEURONS_PIFI_001_v1.0.md": "175cd6c110d6b2b239f4d9ad6e3666988a138534f77a3619c685100c30d37d45",
+    "docs/visao-estrategica/NEURONS-VISAO-001_v1.1_REGISTRO_APROVACAO.md": "b909cc16b615cea7b635b94eba5db70d038c8eb86d8e2dc7986459f01353f076",
+    "docs/visao-estrategica/NEURONS-VISAO-001_v1.1_APROVADA.md": "7c36fc55f55a168ccb657636835d1c4fed1c7a1f192725289899d77f0d72cb23"
+  }
+}
