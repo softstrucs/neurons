@@ -1,0 +1,27 @@
+--- a/src/curriculum.rs
++++ b/src/curriculum.rs
+@@ -489,9 +489,15 @@
+-        let initial = self.initial.as_ref().filter(|q| q.goal == self.goal);
+-        let final_query = self
+-            .final_query
+-            .as_ref()
+-            .filter(|q| q.goal == self.goal);
+-
+-        let supported = final_query
+-            .or(initial)
+-            .is_some_and(|q| goal_supported(&q.report));
++        let matches_goal = |q: &GoalQuery| {
++            q.goal == self.goal
++                && q.report.observation == self.goal.observation
++                && q.report.scope == self.goal.scope
++        };
++        let initial = self.initial.as_ref().filter(|q| matches_goal(q));
++        let final_query = self.final_query.as_ref().filter(|q| matches_goal(q));
++
++        // Uma consulta final presente e invalida nao permite fallback silencioso.
++        let knowledge_query = if self.final_query.is_some() {
++            final_query
++        } else {
++            initial
++        };
++        let supported = knowledge_query.is_some_and(|q| goal_supported(&q.report));

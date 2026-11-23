@@ -1,0 +1,727 @@
+PHASE before
+EXECUTION {"command": ["cargo", "test", "--offline", "--locked", "--test", "cpf_evidence_conformance", "--", "--nocapture", "--test-threads=1"], "cwd": "/tmp/neurons-ncm001-c2-p1/working-isolated", "returncode": 101, "elapsed_seconds": 9.704056582064368}
+   Compiling neurons v0.1.0 (/tmp/neurons-ncm001-c2-p1/working-isolated)
+warning: variants `WrongSource` and `DuplicateTerminal` are never constructed
+  --> src/axon.rs:10:5
+   |
+9  | pub enum AxonError {
+   |          --------- variants in this enum
+10 |     WrongSource { expected: NodeId, actual: NodeId },
+   |     ^^^^^^^^^^^
+11 |     DuplicateTerminal(SynapseId),
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AxonError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `synapse_id` is never used
+  --> src/axon.rs:20:12
+   |
+19 | impl AxonTerminal {
+   | ----------------- method in this implementation
+20 |     pub fn synapse_id(&self) -> SynapseId {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `source`, `terminals`, `add_terminal`, and `distribute` are never used
+  --> src/axon.rs:44:12
+   |
+31 | impl Axon {
+   | --------- associated items in this implementation
+...
+44 |     pub fn new(source: NodeId) -> Self {
+   |            ^^^
+...
+51 |     pub fn source(&self) -> NodeId {
+   |            ^^^^^^
+...
+55 |     pub fn terminals(&self) -> &[AxonTerminal] {
+   |            ^^^^^^^^^
+...
+59 |     pub fn add_terminal(&mut self, synapse_id: SynapseId) -> Result<(), AxonError> {
+   |            ^^^^^^^^^^^^
+...
+72 |     pub fn distribute(&self, emission: Emission) -> Result<Vec<SynapseId>, AxonError> {
+   |            ^^^^^^^^^^
+
+warning: function `measurement_from_experience` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:170:15
+    |
+170 | pub(super) fn measurement_from_experience(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralOffer` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:216:19
+    |
+216 | pub(super) struct NeuralOffer {
+    |                   ^^^^^^^^^^^
+
+warning: struct `NeuralMeasurement` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:224:19
+    |
+224 | pub(super) struct NeuralMeasurement {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `select` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:230:15
+    |
+230 | pub(super) fn select(
+    |               ^^^^^^
+
+warning: struct `NeuralCausalEvidence` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:281:19
+    |
+281 | pub(super) struct NeuralCausalEvidence {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_with_causal_evidence` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:286:15
+    |
+286 | pub(super) fn select_with_causal_evidence(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralCounterfactualResult` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:340:19
+    |
+340 | pub(super) struct NeuralCounterfactualResult {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:346:15
+    |
+346 | pub(super) fn verify_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_from_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:408:15
+    |
+408 | pub(super) fn select_from_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `neurons` (lib) generated 12 warnings
+    Finished `test` profile [unoptimized] target(s) in 9.51s
+     Running tests/cpf_evidence_conformance.rs (/tmp/neurons-ncm001-c2-p1/target-working/debug/deps/cpf_evidence_conformance-89757e4308939ce7)
+
+running 26 tests
+test control_already_supported ... CASE|control_already_supported|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test control_no_teaching ... CASE|control_no_teaching|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test control_original_after_mutations ... CASE|control_original_after_mutations|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=true
+ok
+test fallback_final_goal ... CASE|fallback_final_goal|knowledge=true|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'fallback_final_goal' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: fallback_final_goal
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test fallback_final_observation ... CASE|fallback_final_observation|knowledge=true|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'fallback_final_observation' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: fallback_final_observation
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test fallback_final_scope ... CASE|fallback_final_scope|knowledge=true|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'fallback_final_scope' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: fallback_final_scope
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test final_catalog ... CASE|final_catalog|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'final_catalog' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: final_catalog
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test final_context ... CASE|final_context|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'final_context' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: final_context
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test final_observation ... CASE|final_observation|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'final_observation' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: final_observation
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test final_rule_id ... CASE|final_rule_id|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'final_rule_id' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: final_rule_id
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test final_rule_version ... CASE|final_rule_version|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'final_rule_version' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: final_rule_version
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test final_validity ... CASE|final_validity|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'final_validity' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: final_validity
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test guard_execution ... CASE|guard_execution|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_final_goal_id ... CASE|guard_final_goal_id|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_initial_goal_id ... CASE|guard_initial_goal_id|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test guard_outcome ... CASE|guard_outcome|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_revision ... CASE|guard_revision|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_catalog ... CASE|initial_catalog|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=false
+
+thread 'initial_catalog' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: initial_catalog
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test initial_context ... CASE|initial_context|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=false
+
+thread 'initial_context' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: initial_context
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test initial_observation ... CASE|initial_observation|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=false
+
+thread 'initial_observation' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: initial_observation
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test initial_rule_id ... CASE|initial_rule_id|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=false
+
+thread 'initial_rule_id' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: initial_rule_id
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test initial_rule_version ... CASE|initial_rule_version|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=false
+
+thread 'initial_rule_version' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: initial_rule_version
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test initial_validity ... CASE|initial_validity|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=false
+
+thread 'initial_validity' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: initial_validity
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: true, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test positive_taught ... CASE|positive_taught|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=true
+ok
+test real_other_context ... CASE|real_other_context|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'real_other_context' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: real_other_context
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+test real_other_observation ... CASE|real_other_observation|knowledge=true|learning=true|competence=false|expected_knowledge=false|expected_learning=false
+
+thread 'real_other_observation' panicked at tests/cpf_evidence_conformance.rs:230:5:
+assertion `left == right` failed: vinculo de evidencia incorreto: real_other_observation
+  left: CpfEvidence { knowledge_supported: true, learning_evidenced: true, competence_demonstrated: false }
+ right: CpfEvidence { knowledge_supported: false, learning_evidenced: false, competence_demonstrated: false }
+FAILED
+
+failures:
+
+failures:
+    fallback_final_goal
+    fallback_final_observation
+    fallback_final_scope
+    final_catalog
+    final_context
+    final_observation
+    final_rule_id
+    final_rule_version
+    final_validity
+    initial_catalog
+    initial_context
+    initial_observation
+    initial_rule_id
+    initial_rule_version
+    initial_validity
+    real_other_context
+    real_other_observation
+
+test result: FAILED. 9 passed; 17 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test cpf_evidence_conformance`
+
+PHASE after
+EXECUTION {"phase": "after", "command": ["cargo", "test", "--offline", "--locked", "--test", "cpf_evidence_conformance", "--", "--nocapture", "--test-threads=1"], "cwd": "/tmp/neurons-ncm001-c2-p1/working-isolated", "returncode": 0, "elapsed_seconds": 10.150884557049721}
+   Compiling neurons v0.1.0 (/tmp/neurons-ncm001-c2-p1/working-isolated)
+warning: variants `WrongSource` and `DuplicateTerminal` are never constructed
+  --> src/axon.rs:10:5
+   |
+9  | pub enum AxonError {
+   |          --------- variants in this enum
+10 |     WrongSource { expected: NodeId, actual: NodeId },
+   |     ^^^^^^^^^^^
+11 |     DuplicateTerminal(SynapseId),
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AxonError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `synapse_id` is never used
+  --> src/axon.rs:20:12
+   |
+19 | impl AxonTerminal {
+   | ----------------- method in this implementation
+20 |     pub fn synapse_id(&self) -> SynapseId {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `source`, `terminals`, `add_terminal`, and `distribute` are never used
+  --> src/axon.rs:44:12
+   |
+31 | impl Axon {
+   | --------- associated items in this implementation
+...
+44 |     pub fn new(source: NodeId) -> Self {
+   |            ^^^
+...
+51 |     pub fn source(&self) -> NodeId {
+   |            ^^^^^^
+...
+55 |     pub fn terminals(&self) -> &[AxonTerminal] {
+   |            ^^^^^^^^^
+...
+59 |     pub fn add_terminal(&mut self, synapse_id: SynapseId) -> Result<(), AxonError> {
+   |            ^^^^^^^^^^^^
+...
+72 |     pub fn distribute(&self, emission: Emission) -> Result<Vec<SynapseId>, AxonError> {
+   |            ^^^^^^^^^^
+
+warning: function `measurement_from_experience` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:170:15
+    |
+170 | pub(super) fn measurement_from_experience(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralOffer` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:216:19
+    |
+216 | pub(super) struct NeuralOffer {
+    |                   ^^^^^^^^^^^
+
+warning: struct `NeuralMeasurement` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:224:19
+    |
+224 | pub(super) struct NeuralMeasurement {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `select` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:230:15
+    |
+230 | pub(super) fn select(
+    |               ^^^^^^
+
+warning: struct `NeuralCausalEvidence` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:281:19
+    |
+281 | pub(super) struct NeuralCausalEvidence {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_with_causal_evidence` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:286:15
+    |
+286 | pub(super) fn select_with_causal_evidence(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralCounterfactualResult` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:340:19
+    |
+340 | pub(super) struct NeuralCounterfactualResult {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:346:15
+    |
+346 | pub(super) fn verify_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_from_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:408:15
+    |
+408 | pub(super) fn select_from_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `neurons` (lib) generated 12 warnings
+    Finished `test` profile [unoptimized] target(s) in 9.98s
+     Running tests/cpf_evidence_conformance.rs (/tmp/neurons-ncm001-c2-p1/target-working/debug/deps/cpf_evidence_conformance-89757e4308939ce7)
+
+running 26 tests
+test control_already_supported ... CASE|control_already_supported|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test control_no_teaching ... CASE|control_no_teaching|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test control_original_after_mutations ... CASE|control_original_after_mutations|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=true
+ok
+test fallback_final_goal ... CASE|fallback_final_goal|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test fallback_final_observation ... CASE|fallback_final_observation|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test fallback_final_scope ... CASE|fallback_final_scope|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_catalog ... CASE|final_catalog|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_context ... CASE|final_context|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_observation ... CASE|final_observation|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_rule_id ... CASE|final_rule_id|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_rule_version ... CASE|final_rule_version|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_validity ... CASE|final_validity|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_execution ... CASE|guard_execution|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_final_goal_id ... CASE|guard_final_goal_id|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_initial_goal_id ... CASE|guard_initial_goal_id|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test guard_outcome ... CASE|guard_outcome|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_revision ... CASE|guard_revision|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_catalog ... CASE|initial_catalog|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_context ... CASE|initial_context|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_observation ... CASE|initial_observation|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_rule_id ... CASE|initial_rule_id|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_rule_version ... CASE|initial_rule_version|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_validity ... CASE|initial_validity|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test positive_taught ... CASE|positive_taught|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=true
+ok
+test real_other_context ... CASE|real_other_context|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test real_other_observation ... CASE|real_other_observation|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+PHASE public
+EXECUTION {"phase": "public", "command": ["python3", "scripts/test_public.py", "--build", "--target", "runtime_cli", "--target", "concept_goal_supervision", "--target", "development_runtime", "--target-dir", "/tmp/neurons-ncm001-c2-p1/target-working"], "cwd": "/tmp/neurons-ncm001-c2-p1/working-isolated", "returncode": 0, "elapsed_seconds": 3.3305898379767314}
+COMMAND ["cargo", "build", "--offline", "--locked", "--lib", "--bin", "neurons"]
+warning: variants `WrongSource` and `DuplicateTerminal` are never constructed
+  --> src/axon.rs:10:5
+   |
+9  | pub enum AxonError {
+   |          --------- variants in this enum
+10 |     WrongSource { expected: NodeId, actual: NodeId },
+   |     ^^^^^^^^^^^
+11 |     DuplicateTerminal(SynapseId),
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AxonError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `synapse_id` is never used
+  --> src/axon.rs:20:12
+   |
+19 | impl AxonTerminal {
+   | ----------------- method in this implementation
+20 |     pub fn synapse_id(&self) -> SynapseId {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `source`, `terminals`, `add_terminal`, and `distribute` are never used
+  --> src/axon.rs:44:12
+   |
+31 | impl Axon {
+   | --------- associated items in this implementation
+...
+44 |     pub fn new(source: NodeId) -> Self {
+   |            ^^^
+...
+51 |     pub fn source(&self) -> NodeId {
+   |            ^^^^^^
+...
+55 |     pub fn terminals(&self) -> &[AxonTerminal] {
+   |            ^^^^^^^^^
+...
+59 |     pub fn add_terminal(&mut self, synapse_id: SynapseId) -> Result<(), AxonError> {
+   |            ^^^^^^^^^^^^
+...
+72 |     pub fn distribute(&self, emission: Emission) -> Result<Vec<SynapseId>, AxonError> {
+   |            ^^^^^^^^^^
+
+warning: function `measurement_from_experience` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:170:15
+    |
+170 | pub(super) fn measurement_from_experience(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralOffer` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:216:19
+    |
+216 | pub(super) struct NeuralOffer {
+    |                   ^^^^^^^^^^^
+
+warning: struct `NeuralMeasurement` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:224:19
+    |
+224 | pub(super) struct NeuralMeasurement {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `select` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:230:15
+    |
+230 | pub(super) fn select(
+    |               ^^^^^^
+
+warning: struct `NeuralCausalEvidence` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:281:19
+    |
+281 | pub(super) struct NeuralCausalEvidence {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_with_causal_evidence` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:286:15
+    |
+286 | pub(super) fn select_with_causal_evidence(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralCounterfactualResult` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:340:19
+    |
+340 | pub(super) struct NeuralCounterfactualResult {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:346:15
+    |
+346 | pub(super) fn verify_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_from_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:408:15
+    |
+408 | pub(super) fn select_from_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `neurons` (lib) generated 12 warnings
+    Finished `dev` profile [unoptimized] target(s) in 0.02s
+COMMAND ["cargo", "test", "--offline", "--locked", "--quiet", "--test", "runtime_cli", "--test", "concept_goal_supervision", "--test", "development_runtime", "--", "--skip", "bounded_update_probe", "--skip", "bounded_cost_probe_for_activation_and_communication"]
+warning: variants `WrongSource` and `DuplicateTerminal` are never constructed
+  --> src/axon.rs:10:5
+   |
+9  | pub enum AxonError {
+   |          --------- variants in this enum
+10 |     WrongSource { expected: NodeId, actual: NodeId },
+   |     ^^^^^^^^^^^
+11 |     DuplicateTerminal(SynapseId),
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `AxonError` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `synapse_id` is never used
+  --> src/axon.rs:20:12
+   |
+19 | impl AxonTerminal {
+   | ----------------- method in this implementation
+20 |     pub fn synapse_id(&self) -> SynapseId {
+   |            ^^^^^^^^^^
+
+warning: associated items `new`, `source`, `terminals`, `add_terminal`, and `distribute` are never used
+  --> src/axon.rs:44:12
+   |
+31 | impl Axon {
+   | --------- associated items in this implementation
+...
+44 |     pub fn new(source: NodeId) -> Self {
+   |            ^^^
+...
+51 |     pub fn source(&self) -> NodeId {
+   |            ^^^^^^
+...
+55 |     pub fn terminals(&self) -> &[AxonTerminal] {
+   |            ^^^^^^^^^
+...
+59 |     pub fn add_terminal(&mut self, synapse_id: SynapseId) -> Result<(), AxonError> {
+   |            ^^^^^^^^^^^^
+...
+72 |     pub fn distribute(&self, emission: Emission) -> Result<Vec<SynapseId>, AxonError> {
+   |            ^^^^^^^^^^
+
+warning: function `measurement_from_experience` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:170:15
+    |
+170 | pub(super) fn measurement_from_experience(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralOffer` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:216:19
+    |
+216 | pub(super) struct NeuralOffer {
+    |                   ^^^^^^^^^^^
+
+warning: struct `NeuralMeasurement` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:224:19
+    |
+224 | pub(super) struct NeuralMeasurement {
+    |                   ^^^^^^^^^^^^^^^^^
+
+warning: function `select` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:230:15
+    |
+230 | pub(super) fn select(
+    |               ^^^^^^
+
+warning: struct `NeuralCausalEvidence` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:281:19
+    |
+281 | pub(super) struct NeuralCausalEvidence {
+    |                   ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_with_causal_evidence` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:286:15
+    |
+286 | pub(super) fn select_with_causal_evidence(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `NeuralCounterfactualResult` is never constructed
+   --> src/integration/development/discrimination/neural_priority.rs:340:19
+    |
+340 | pub(super) struct NeuralCounterfactualResult {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `verify_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:346:15
+    |
+346 | pub(super) fn verify_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `select_from_direct_counterfactual` is never used
+   --> src/integration/development/discrimination/neural_priority.rs:408:15
+    |
+408 | pub(super) fn select_from_direct_counterfactual(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+running 20 tests
+....................
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+
+running 29 tests
+.............................
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 33 tests
+.................................
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.39s
+
+PUBLIC_RESULT {"passed": 82, "failed": 0, "ignored": 0, "filtered": 0}
+
+PHASE clean-conformance
+EXECUTION {"phase": "clean-conformance", "command": ["cargo", "test", "--offline", "--locked", "--test", "cpf_evidence_conformance", "--", "--nocapture", "--test-threads=1"], "cwd": "/tmp/neurons-ncm001-c2-p1/clean-isolated", "returncode": 0, "elapsed_seconds": 9.559490152983926}
+   Compiling neurons v0.1.0 (/tmp/neurons-ncm001-c2-p1/clean-isolated)
+    Finished `test` profile [unoptimized] target(s) in 9.40s
+     Running tests/cpf_evidence_conformance.rs (/tmp/neurons-ncm001-c2-p1/target-clean/debug/deps/cpf_evidence_conformance-89757e4308939ce7)
+
+running 26 tests
+test control_already_supported ... CASE|control_already_supported|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test control_no_teaching ... CASE|control_no_teaching|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test control_original_after_mutations ... CASE|control_original_after_mutations|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=true
+ok
+test fallback_final_goal ... CASE|fallback_final_goal|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test fallback_final_observation ... CASE|fallback_final_observation|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test fallback_final_scope ... CASE|fallback_final_scope|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_catalog ... CASE|final_catalog|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_context ... CASE|final_context|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_observation ... CASE|final_observation|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_rule_id ... CASE|final_rule_id|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_rule_version ... CASE|final_rule_version|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test final_validity ... CASE|final_validity|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_execution ... CASE|guard_execution|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_final_goal_id ... CASE|guard_final_goal_id|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_initial_goal_id ... CASE|guard_initial_goal_id|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test guard_outcome ... CASE|guard_outcome|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test guard_revision ... CASE|guard_revision|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_catalog ... CASE|initial_catalog|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_context ... CASE|initial_context|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_observation ... CASE|initial_observation|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_rule_id ... CASE|initial_rule_id|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_rule_version ... CASE|initial_rule_version|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test initial_validity ... CASE|initial_validity|knowledge=true|learning=false|competence=false|expected_knowledge=true|expected_learning=false
+ok
+test positive_taught ... CASE|positive_taught|knowledge=true|learning=true|competence=false|expected_knowledge=true|expected_learning=true
+ok
+test real_other_context ... CASE|real_other_context|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+test real_other_observation ... CASE|real_other_observation|knowledge=false|learning=false|competence=false|expected_knowledge=false|expected_learning=false
+ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+
+PHASE clean-public
+EXECUTION {"phase": "clean-public", "command": ["python3", "scripts/test_public.py", "--build", "--target", "runtime_cli", "--target", "concept_goal_supervision", "--target", "development_runtime", "--target-dir", "/tmp/neurons-ncm001-c2-p1/target-clean"], "cwd": "/tmp/neurons-ncm001-c2-p1/clean-isolated", "returncode": 0, "elapsed_seconds": 2.849587389966473}
+COMMAND ["cargo", "build", "--offline", "--locked", "--lib", "--bin", "neurons"]
+    Finished `dev` profile [unoptimized] target(s) in 0.02s
+COMMAND ["cargo", "test", "--offline", "--locked", "--quiet", "--test", "runtime_cli", "--test", "concept_goal_supervision", "--test", "development_runtime", "--", "--skip", "bounded_update_probe", "--skip", "bounded_cost_probe_for_activation_and_communication"]
+
+running 17 tests
+.................
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 28 tests
+............................
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+
+running 30 tests
+..............................
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+
+PUBLIC_RESULT {"passed": 75, "failed": 0, "ignored": 0, "filtered": 0}

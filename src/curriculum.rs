@@ -466,6 +466,72 @@ pub struct ConceptGoalReport {
     pub history: Vec<String>,
     pub reason: String,
 }
+/// CPF-I02: classificação conservadora de evidências pedagógicas.
+/// Não representa certificação externa de competência.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct CpfEvidence {
+    pub knowledge_supported: bool,
+    pub learning_evidenced: bool,
+    pub competence_demonstrated: bool,
+}
+
+impl ConceptGoalReport {
+    /// Consulta somente os resultados existentes; não modifica o cérebro.
+    pub fn cpf_evidence(&self) -> CpfEvidence {
+        use crate::metacognition::concepts::ConceptStrategy;
+
+        if self.execution != ConceptExecution::Completed
+            || self.outcome != ConceptGoalResult::Resolved
+        {
+            return CpfEvidence::default();
+        }
+
+        let matches_goal = |q: &GoalQuery| {
+            q.goal == self.goal
+                && q.report.observation == self.goal.observation
+                && q.report.scope == self.goal.scope
+        };
+        let initial = self.initial.as_ref().filter(|q| matches_goal(q));
+        let final_query = self.final_query.as_ref().filter(|q| matches_goal(q));
+
+        // Uma consulta final presente e invalida nao permite fallback silencioso.
+        let knowledge_query = if self.final_query.is_some() {
+            final_query
+        } else {
+            initial
+        };
+        let supported = knowledge_query.is_some_and(|q| goal_supported(&q.report));
+
+        let revised = match (initial, final_query) {
+            (Some(before), Some(after)) => {
+                match (&before.report.version, &after.report.version) {
+                    (Some(a), Some(b)) => b.number > a.number,
+                    _ => false,
+                }
+            }
+            _ => false,
+        };
+
+        let admitted = self.lessons.iter().any(|l| {
+            l.goal == self.goal
+                && l.record.admitted
+                && l.record.revision.is_some()
+        });
+
+        let learning = self.strategy == ConceptStrategy::TeachOnce
+            && initial.is_some_and(|q| !goal_supported(&q.report))
+            && final_query.is_some_and(|q| goal_supported(&q.report))
+            && revised
+            && admitted;
+
+        CpfEvidence {
+            knowledge_supported: supported,
+            learning_evidenced: supported && learning,
+            competence_demonstrated: false,
+        }
+    }
+}
+
 fn goal_supported(r: &ConceptReport) -> bool {
     matches!(
         r.decision,

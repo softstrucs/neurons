@@ -1,0 +1,1354 @@
+{
+  "checkpoint": "NCM-001/C2-P1",
+  "head_initial": "651567553cb4b23b9edd48f55c53bc08364144cc",
+  "package_p0_sha256": "5310218514b66402039febc1d70c82295b76dcd7d66442a743b7190f4edd0445",
+  "preregistration": {
+    "head": "651567553cb4b23b9edd48f55c53bc08364144cc",
+    "new_test": "tests/cpf_evidence_conformance.rs",
+    "new_test_sha256": "7ae949b6c705f10cbf9dcf53654554078febc3bcfddb05784b56799a3cda7bed",
+    "safe": "dados publicos sinteticos, Session/MP09 e consultas imutaveis; sem E/S/rede/subprocessos no alvo novo; nenhum import/include do diagnostico P0",
+    "expected_tests": 26,
+    "expected_before": {
+      "passed": 9,
+      "failed": 17
+    },
+    "expected_after": {
+      "passed": 26,
+      "failed": 0
+    },
+    "expected_defects_before": "14 contraexemplos P0 e 3 fallback; falhas devem ser assert_eq de CpfEvidence, nao compilacao ou montagem",
+    "sources": [
+      {
+        "path": "Cargo.lock",
+        "sha256": "91de8856cddf8c036410042b3d70b2038f5c8c04c386fe1b0d77a332a0056931",
+        "bytes": 151,
+        "tracked": true
+      },
+      {
+        "path": "Cargo.toml",
+        "sha256": "1d0dd589aeb345312a2e755d4dce0f9fe28c521731325757b3e9389a4259b860",
+        "bytes": 176,
+        "tracked": true
+      },
+      {
+        "path": "scripts/test_public.py",
+        "sha256": "96993613b5ea077122380b99d87993fe013c586791ef5b1abdcb991a8f707de5",
+        "bytes": 4182,
+        "tracked": true
+      },
+      {
+        "path": "src/axon.rs",
+        "sha256": "e144d857a8d9aea465dd23baaad4c57c5e762d3731415d16a6e338af07bb37ec",
+        "bytes": 2079,
+        "tracked": false
+      },
+      {
+        "path": "src/circuit.rs",
+        "sha256": "7683ef076cabed54fc8fc66755827269310d9011629db97bbda7af25299baf65",
+        "bytes": 17727,
+        "tracked": true
+      },
+      {
+        "path": "src/circuit_persistence.rs",
+        "sha256": "6d154bec551e220f1c8af15310f391f0355ef505da1f16a59e7a0071e6a6a98d",
+        "bytes": 9779,
+        "tracked": true
+      },
+      {
+        "path": "src/cognition.rs",
+        "sha256": "f38174625ec63ba4615f0891adaa1931b649685bb996782c7f8a6771a8f5d2d3",
+        "bytes": 9310,
+        "tracked": true
+      },
+      {
+        "path": "src/cognition/bounded.rs",
+        "sha256": "f0f2cf0ef5b2bde030ee499860d850dec0720787ab20d72816b0794bbd3c2745",
+        "bytes": 4408,
+        "tracked": true
+      },
+      {
+        "path": "src/cognition/concepts.rs",
+        "sha256": "0a6bcab7fc000f56cefb3eb96e488bb7adbd803b311e731c67b9cdcee74b6b20",
+        "bytes": 6915,
+        "tracked": true
+      },
+      {
+        "path": "src/cognitive_contracts.rs",
+        "sha256": "b0dfa68dc79c3ccb4e37c7c0d6875ea1211c0d17836d4bc634f8326e47320c91",
+        "bytes": 27140,
+        "tracked": true
+      },
+      {
+        "path": "src/curriculum.rs",
+        "sha256": "4146573134cd02b596b52a5e2f999646ec6912b22b25c2162d9aec36092dbdd3",
+        "bytes": 36747,
+        "tracked": true
+      },
+      {
+        "path": "src/dendrite.rs",
+        "sha256": "5115ae6b7b1686c7aa859f6b444d788b476bdcb8611bf7a29f0f8692437a6115",
+        "bytes": 7372,
+        "tracked": true
+      },
+      {
+        "path": "src/engine.rs",
+        "sha256": "4d72c74155f1e8aa7cc956c957822f863513ea93034ea1a6a46bdba0d2a5e420",
+        "bytes": 14937,
+        "tracked": true
+      },
+      {
+        "path": "src/engram.rs",
+        "sha256": "f9bcd93b9f2894f6d3bdf68d9eaa2be9d93f6b94eb40bce3396195d26dfb9c3d",
+        "bytes": 6336,
+        "tracked": true
+      },
+      {
+        "path": "src/event.rs",
+        "sha256": "e998ad1e290f85c9e9b4266ae19d461898735c02aabf40f51d6864ffaeacf4d5",
+        "bytes": 1782,
+        "tracked": true
+      },
+      {
+        "path": "src/integration.rs",
+        "sha256": "2674070c017670a4e7574a6226c91530fc1d6d7846b68f5c412c0e7223c2883d",
+        "bytes": 2736,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/acquisition.rs",
+        "sha256": "6b0497cb71053335808600f8682a501013d8dc7528b6ae2121143d1738642e87",
+        "bytes": 21534,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/associative.rs",
+        "sha256": "0d00e00835327b2d4089c4c779b92761a7d185c9ee5c570300c816b4e4d8b3ac",
+        "bytes": 1272,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/cognitive_coordination.rs",
+        "sha256": "f5283805772ce1224cc69da0344f15b8a3faae80101e1941a0e8a8ca3c3874e8",
+        "bytes": 11694,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/composed.rs",
+        "sha256": "778ac558efa3ef2295a3fb17840bfac1cb773148f9937c1301ed1c548664f5b2",
+        "bytes": 35109,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/composed_two.rs",
+        "sha256": "04b218504d24003497c7ad0c6d5f37e4677319f41529a30a52cb14678518ca8d",
+        "bytes": 10426,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/concepts.rs",
+        "sha256": "d7bb0b6478d93feb6f90abc558fe5c8953206a4134d6fec31a2a50650254fc22",
+        "bytes": 19051,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development.rs",
+        "sha256": "4393161868f1b1cd479a97cee0f5059baaceaba1f6a4434b7f6987c2e4355863",
+        "bytes": 34524,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/actions.rs",
+        "sha256": "4d41472927f601f8d39648a3dc1bbe30186581a2226ec56ac3df50f0f4faabbc",
+        "bytes": 31691,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/archive.rs",
+        "sha256": "90b9c18a176316d5fd0926c0a3017d440b840ee1854f33e0eca7137ba89a8c33",
+        "bytes": 27384,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/archive/selective.rs",
+        "sha256": "6aa67ecd5fd0bec40182bfed27dffd83c6432c5c5276997d43406c4b8bd3d075",
+        "bytes": 38304,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/checkpoint.rs",
+        "sha256": "fb38ea6a3d56c9266a8af093433fa08db594531f71c4e9f98551029e6150f097",
+        "bytes": 24164,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/consequences.rs",
+        "sha256": "d66f2f53eab503183161638ba611978992c2c055e09e765781e152288ac0d0d6",
+        "bytes": 16314,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/discrimination.rs",
+        "sha256": "577fed79422bbc9a72cf0308c20feb3cdffcb03f77169478ec4785a017942f5d",
+        "bytes": 19196,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/discrimination/neural_priority.rs",
+        "sha256": "13c251db859b9afd85eb1a6c04c479a51564104b193e191a9f011cab292a4e61",
+        "bytes": 48368,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/development/discrimination/search.rs",
+        "sha256": "ab2bc116f36d6ff34e84dca9295baafe71c78f37427955626028d6a737c48e05",
+        "bytes": 19032,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/epistemic.rs",
+        "sha256": "02f87c795787cdfce67c15df33d138498f028c49b62517100b1fed321cf10c45",
+        "bytes": 15137,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/development/predictive.rs",
+        "sha256": "7643b98eca62ecc68b33636ef10bbdcc779c47f35995c11e82011989affa99b2",
+        "bytes": 25173,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/e13_bundle.rs",
+        "sha256": "5e5985d4e6a59b66853913d56514bbb7393cc932b51d33bd484145736d74ec86",
+        "bytes": 3072,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/e13_storage.rs",
+        "sha256": "dbb9586e564778d18b9b6d1a0d12ffd582776613ec273de003952a3b37b4594e",
+        "bytes": 7787,
+        "tracked": false
+      },
+      {
+        "path": "src/integration/experiential.rs",
+        "sha256": "84496663b9d89eaff9a7b97298780bcb0697413be4f7687db851bcca9a5f96c9",
+        "bytes": 14660,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/investigation.rs",
+        "sha256": "e2de2e5d722c53a196075ebf4546853b9a08674ea649f3e61664cdf14aa98d23",
+        "bytes": 28084,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/query.rs",
+        "sha256": "28dd134212341acc0d24fbbe15356e1988471cd97dc67ab05dd7281948d9dee8",
+        "bytes": 22343,
+        "tracked": true
+      },
+      {
+        "path": "src/integration/synaptic.rs",
+        "sha256": "6a464a00fef1c76717ccd6cd0751db827664307dc3fd1cfa9144a8e2f878b0f6",
+        "bytes": 26186,
+        "tracked": true
+      },
+      {
+        "path": "src/languages.rs",
+        "sha256": "726dff0be9ee7ffa85335c614e1370ce1a26239322581bc9dde90030324705db",
+        "bytes": 13734,
+        "tracked": true
+      },
+      {
+        "path": "src/languages/contextual.rs",
+        "sha256": "9005bda6c0b3d56c36e40639c9c61565e82b7111a75da4803106b90a2668b2a5",
+        "bytes": 13109,
+        "tracked": true
+      },
+      {
+        "path": "src/languages/sentences.rs",
+        "sha256": "554eeda26e884a0d01f440307835c978ee5ce22cd4fc020ec8640460c630bf1f",
+        "bytes": 10093,
+        "tracked": true
+      },
+      {
+        "path": "src/learning.rs",
+        "sha256": "ff31dcc8273148a605e6cad4e68e4f53cd6f02aaa988314c934ba957a7a66de1",
+        "bytes": 3367,
+        "tracked": true
+      },
+      {
+        "path": "src/learning/concepts.rs",
+        "sha256": "3f67b8e7a443e4775622df1b0ef56aa266539561a4d722b3dd09b1a1bac2e535",
+        "bytes": 2065,
+        "tracked": true
+      },
+      {
+        "path": "src/lib.rs",
+        "sha256": "78770e397f4b61f98f0dc703fddbfb546c9bd453a70d53d0b38946035ea224a0",
+        "bytes": 548,
+        "tracked": true
+      },
+      {
+        "path": "src/main.rs",
+        "sha256": "362c326c07f6af30d80e520daf87cea8c832ec84e9ae6059b6fcb94a79e9d824",
+        "bytes": 3805,
+        "tracked": true
+      },
+      {
+        "path": "src/metacognition.rs",
+        "sha256": "bd3c6f5d9cc5937d7082f7445c579a4b2c456104e5095c7af0e253f9af01a8f7",
+        "bytes": 16201,
+        "tracked": true
+      },
+      {
+        "path": "src/metacognition/concepts.rs",
+        "sha256": "317b3ecf0f526e951abccfe6056d1c0a6fb1ea97f52a770cc77d71959643269b",
+        "bytes": 4551,
+        "tracked": true
+      },
+      {
+        "path": "src/neuron.rs",
+        "sha256": "513fa4f06c6a5af6466fbd525112eb1bee5659efcade738b4cffdf0657f15e1c",
+        "bytes": 4572,
+        "tracked": true
+      },
+      {
+        "path": "src/persistence.rs",
+        "sha256": "db66f7c680b800735fdc4cca8e57cdb5165fc8c9b52ea2b2cf7763ab03e5f918",
+        "bytes": 12635,
+        "tracked": true
+      },
+      {
+        "path": "src/personality.rs",
+        "sha256": "1b3cc6af1bce2b8f1a104292e54f145b35a8b9cb8f5cfca31ff54bef559e426b",
+        "bytes": 755,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/audit.rs",
+        "sha256": "b6eeb50b25b4e654a2283548b41eb1991c1b99a9a7cb6972eaf43d98e99d06c6",
+        "bytes": 19372,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/controls.rs",
+        "sha256": "380e9b0def256ca6df51d34df5bbb2d8c8055dfad2cf582cc89329a878c8e5f2",
+        "bytes": 6988,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/custody.rs",
+        "sha256": "9a18e44e820fa5109d631c0154f54b904e5ecbd9b4b8b12e4952fd67e13851ee",
+        "bytes": 7083,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/mod.rs",
+        "sha256": "fee6b9d742e90c329ece80febdb689d5c642957fbd6f02ded8bc96a80700b5fb",
+        "bytes": 3302,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/plan.rs",
+        "sha256": "cf611cfb0965a271a61ef053f9ff320ba38b26b59f233c6f929fae357bc0b2f3",
+        "bytes": 8180,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/conceptual/recording.rs",
+        "sha256": "f3d1f3cf853de7fde2db4ff16f9536c3d72ae980fe6543fd973eda313f0ca349",
+        "bytes": 3001,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/controls.rs",
+        "sha256": "3ee72c712b72f62d186b0d2018eb020d8276a98ca3014b9905395bea0ee7cac1",
+        "bytes": 11094,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/evaluator.rs",
+        "sha256": "3aa4279b2c61bbaab42c36700ab8b9f5c57addde5317f2bdc0a471216e50050a",
+        "bytes": 28458,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/fixtures.rs",
+        "sha256": "347259bd00c22e3690670e5ad4d0e05c2a6a28aa8da44e060195306aec70e4a9",
+        "bytes": 6877,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/history.rs",
+        "sha256": "1ed4a178003bca5ee6fc97bd7f42f648812cfc189c82eb8afc86c04f1c1593e0",
+        "bytes": 9920,
+        "tracked": true
+      },
+      {
+        "path": "src/protocol_verification/mod.rs",
+        "sha256": "229cda58db3b6b2628ffd89c20a31a86840e1f1700733c85cd72778d9d33560c",
+        "bytes": 2786,
+        "tracked": true
+      },
+      {
+        "path": "src/session.rs",
+        "sha256": "102ed5b3ac3c5a5c443416cad70a2b6eddc2f2b5a32bd024a9833060b319f644",
+        "bytes": 4895,
+        "tracked": true
+      },
+      {
+        "path": "src/session/conversation.rs",
+        "sha256": "6670b2404283f6a7e13862e0d71f2f6e88f3f47c5f0c5c01ba62a176436bab83",
+        "bytes": 8032,
+        "tracked": false
+      },
+      {
+        "path": "src/session/f1.rs",
+        "sha256": "bcf6053e4b2b02ef8e1df64f89e30d0b064f683782b3dc14f6ac93d8832910e8",
+        "bytes": 75170,
+        "tracked": true
+      },
+      {
+        "path": "src/session/f1/composed.rs",
+        "sha256": "98393b0d44382283bc129c636a5b1148cdce59d0d82f069fba83adccc08704f1",
+        "bytes": 12029,
+        "tracked": true
+      },
+      {
+        "path": "src/session/intent.rs",
+        "sha256": "36fbc00fb26e527aad33a9e786666c7117bff01e900b9697696a6e15f8ef0d52",
+        "bytes": 4210,
+        "tracked": false
+      },
+      {
+        "path": "src/session/runtime.rs",
+        "sha256": "7087ad2c8527aed034692dd91e7f290eb487e12af14b440f514d62438e4f11be",
+        "bytes": 49206,
+        "tracked": true
+      },
+      {
+        "path": "src/session/synaptic.rs",
+        "sha256": "4e977740d1716c9ec813f10b112f0b4365e3bda7c4443a870bf1b00cdc68f6ac",
+        "bytes": 2901,
+        "tracked": true
+      },
+      {
+        "path": "src/synapse.rs",
+        "sha256": "f25daf865e74950666cd8656fd6baa118b0fb9f52c8f7755463c3f7d6ad117bd",
+        "bytes": 2665,
+        "tracked": true
+      },
+      {
+        "path": "tests/concept_goal_supervision.rs",
+        "sha256": "69bb4761fc29bf54814d5d3e7bdf1213dbd1723303a22e094e9fb0339a340f69",
+        "bytes": 26977,
+        "tracked": true
+      },
+      {
+        "path": "tests/development_runtime.rs",
+        "sha256": "543902b17d6a1d91ec2031af2d2f0872487ebc59c2c5bd853d848b5ae03b734d",
+        "bytes": 40415,
+        "tracked": true
+      },
+      {
+        "path": "tests/runtime_cli.rs",
+        "sha256": "d62c0da765115d8f49258a53a4d590dbc25d970c03fe0794ef3914f352d6ab64",
+        "bytes": 25082,
+        "tracked": true
+      }
+    ]
+  },
+  "new_test_sha256_before_after": "7ae949b6c705f10cbf9dcf53654554078febc3bcfddb05784b56799a3cda7bed",
+  "logs": [
+    {
+      "phase": "before",
+      "sha256": "1884a45ae937af1bf4cf1f0b0d1dfccb2de5d5659a8c6bf4ff56eb554dbb844b",
+      "bytes": 14978,
+      "execution": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "cpf_evidence_conformance",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "cwd": "/tmp/neurons-ncm001-c2-p1/working-isolated",
+        "returncode": 101,
+        "elapsed_seconds": 9.704056582064368
+      }
+    },
+    {
+      "phase": "after",
+      "sha256": "c9cf7106fca6d4790c570a13afd459f75ae3c5fbb98b3763838aad4d0fe83a26",
+      "bytes": 7869,
+      "execution": {
+        "phase": "after",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "cpf_evidence_conformance",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "cwd": "/tmp/neurons-ncm001-c2-p1/working-isolated",
+        "returncode": 0,
+        "elapsed_seconds": 10.150884557049721
+      }
+    },
+    {
+      "phase": "public",
+      "sha256": "45df9abd8186d9e9026247899115d10da27b5c2afdf1241baed1a17996c1f1b0",
+      "bytes": 7965,
+      "execution": {
+        "phase": "public",
+        "command": [
+          "python3",
+          "scripts/test_public.py",
+          "--build",
+          "--target",
+          "runtime_cli",
+          "--target",
+          "concept_goal_supervision",
+          "--target",
+          "development_runtime",
+          "--target-dir",
+          "/tmp/neurons-ncm001-c2-p1/target-working"
+        ],
+        "cwd": "/tmp/neurons-ncm001-c2-p1/working-isolated",
+        "returncode": 0,
+        "elapsed_seconds": 3.3305898379767314
+      }
+    },
+    {
+      "phase": "clean-conformance",
+      "sha256": "8172fe9e0b491b8d23a4d1c2c56531a3bc46939c840d358508ff7184626abf3e",
+      "bytes": 4310,
+      "execution": {
+        "phase": "clean-conformance",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "cpf_evidence_conformance",
+          "--",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "cwd": "/tmp/neurons-ncm001-c2-p1/clean-isolated",
+        "returncode": 0,
+        "elapsed_seconds": 9.559490152983926
+      }
+    },
+    {
+      "phase": "clean-public",
+      "sha256": "24cd42c44beba57b722dfcf1edcbb4db9287605652d718a4a824aba48722976d",
+      "bytes": 895,
+      "execution": {
+        "phase": "clean-public",
+        "command": [
+          "python3",
+          "scripts/test_public.py",
+          "--build",
+          "--target",
+          "runtime_cli",
+          "--target",
+          "concept_goal_supervision",
+          "--target",
+          "development_runtime",
+          "--target-dir",
+          "/tmp/neurons-ncm001-c2-p1/target-clean"
+        ],
+        "cwd": "/tmp/neurons-ncm001-c2-p1/clean-isolated",
+        "returncode": 0,
+        "elapsed_seconds": 2.849587389966473
+      }
+    }
+  ],
+  "matrix": [
+    {
+      "id": "control_already_supported",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "control_no_teaching",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "control_original_after_mutations",
+      "knowledge": true,
+      "learning": true,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": true
+    },
+    {
+      "id": "fallback_final_goal",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "fallback_final_observation",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "fallback_final_scope",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "final_catalog",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "final_context",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "final_observation",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "final_rule_id",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "final_rule_version",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "final_validity",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "guard_execution",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "guard_final_goal_id",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "guard_initial_goal_id",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "guard_outcome",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "guard_revision",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "initial_catalog",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "initial_context",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "initial_observation",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "initial_rule_id",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "initial_rule_version",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "initial_validity",
+      "knowledge": true,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": false
+    },
+    {
+      "id": "positive_taught",
+      "knowledge": true,
+      "learning": true,
+      "competence": false,
+      "expected_knowledge": true,
+      "expected_learning": true
+    },
+    {
+      "id": "real_other_context",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    },
+    {
+      "id": "real_other_observation",
+      "knowledge": false,
+      "learning": false,
+      "competence": false,
+      "expected_knowledge": false,
+      "expected_learning": false
+    }
+  ],
+  "results": {
+    "before": {
+      "passed": 9,
+      "failed": 17,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "after": {
+      "passed": 26,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "public_working": {
+      "runtime_cli": 33,
+      "concept_goal_supervision": 20,
+      "development_runtime": 29,
+      "passed": 82,
+      "failed": 0
+    },
+    "clean_versioned_candidate": {
+      "conformance": 26,
+      "runtime_cli": 30,
+      "concept_goal_supervision": 17,
+      "development_runtime": 28,
+      "passed": 101,
+      "failed": 0
+    },
+    "remaining_false_learning": 0,
+    "remaining_original_false_knowledge": 0,
+    "remaining_fallback_false_knowledge": 0,
+    "competence_true": 0
+  },
+  "productive_source": {
+    "path": "src/curriculum.rs",
+    "before_sha256": "4146573134cd02b596b52a5e2f999646ec6912b22b25c2162d9aec36092dbdd3",
+    "working_after_sha256": "5943f3e34ef52485f443e1cecda671d5feaa872b2cfcf3125f6833edf42b038b",
+    "head_sha256": "ec7212531dee910dc72ffa3e94087e96095bfb606bd369713efe4acd33b298ec",
+    "index_candidate_sha256": "fdbe38a1948f0a52046684b4a690e19566b2d1c30b7e625260b426dd173094d3",
+    "publication_scope": "Only reviewed CpfEvidence declaration and corrected impl; preexisting CPF-I03 verifier excluded; worktree retains it unchanged."
+  },
+  "clean_sources": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "91de8856cddf8c036410042b3d70b2038f5c8c04c386fe1b0d77a332a0056931",
+      "origin": "HEAD"
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "1d0dd589aeb345312a2e755d4dce0f9fe28c521731325757b3e9389a4259b860",
+      "origin": "HEAD"
+    },
+    {
+      "path": "scripts/test_public.py",
+      "sha256": "96993613b5ea077122380b99d87993fe013c586791ef5b1abdcb991a8f707de5",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/circuit.rs",
+      "sha256": "2d1f65116f6a00338711b684a2592ddfe08c4735eee9490cc944fd7d1283dbc2",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/circuit_persistence.rs",
+      "sha256": "6d154bec551e220f1c8af15310f391f0355ef505da1f16a59e7a0071e6a6a98d",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/cognition.rs",
+      "sha256": "f38174625ec63ba4615f0891adaa1931b649685bb996782c7f8a6771a8f5d2d3",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/cognition/bounded.rs",
+      "sha256": "f0f2cf0ef5b2bde030ee499860d850dec0720787ab20d72816b0794bbd3c2745",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/cognition/concepts.rs",
+      "sha256": "0a6bcab7fc000f56cefb3eb96e488bb7adbd803b311e731c67b9cdcee74b6b20",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/cognitive_contracts.rs",
+      "sha256": "b0dfa68dc79c3ccb4e37c7c0d6875ea1211c0d17836d4bc634f8326e47320c91",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/curriculum.rs",
+      "sha256": "fdbe38a1948f0a52046684b4a690e19566b2d1c30b7e625260b426dd173094d3",
+      "origin": "HEAD + reviewed CPF evidence block only"
+    },
+    {
+      "path": "src/dendrite.rs",
+      "sha256": "5115ae6b7b1686c7aa859f6b444d788b476bdcb8611bf7a29f0f8692437a6115",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/engine.rs",
+      "sha256": "243fdb45e543fa820e552ff9bffecefabc325f893dabf59a204641541baba4b7",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/engram.rs",
+      "sha256": "f9bcd93b9f2894f6d3bdf68d9eaa2be9d93f6b94eb40bce3396195d26dfb9c3d",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/event.rs",
+      "sha256": "e998ad1e290f85c9e9b4266ae19d461898735c02aabf40f51d6864ffaeacf4d5",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration.rs",
+      "sha256": "04f189ac082209af4a30936d6fc21de883998df4613cf2dd632fd60cb5ec8f1c",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/acquisition.rs",
+      "sha256": "6b0497cb71053335808600f8682a501013d8dc7528b6ae2121143d1738642e87",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/composed.rs",
+      "sha256": "778ac558efa3ef2295a3fb17840bfac1cb773148f9937c1301ed1c548664f5b2",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/composed_two.rs",
+      "sha256": "04b218504d24003497c7ad0c6d5f37e4677319f41529a30a52cb14678518ca8d",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/concepts.rs",
+      "sha256": "d7bb0b6478d93feb6f90abc558fe5c8953206a4134d6fec31a2a50650254fc22",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development.rs",
+      "sha256": "4393161868f1b1cd479a97cee0f5059baaceaba1f6a4434b7f6987c2e4355863",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/actions.rs",
+      "sha256": "4d41472927f601f8d39648a3dc1bbe30186581a2226ec56ac3df50f0f4faabbc",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/archive.rs",
+      "sha256": "90b9c18a176316d5fd0926c0a3017d440b840ee1854f33e0eca7137ba89a8c33",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/archive/selective.rs",
+      "sha256": "6aa67ecd5fd0bec40182bfed27dffd83c6432c5c5276997d43406c4b8bd3d075",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/checkpoint.rs",
+      "sha256": "fb38ea6a3d56c9266a8af093433fa08db594531f71c4e9f98551029e6150f097",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/consequences.rs",
+      "sha256": "d66f2f53eab503183161638ba611978992c2c055e09e765781e152288ac0d0d6",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/discrimination.rs",
+      "sha256": "dd16160e674ad0f9e2e9601cd35bb7147cb576b95a3ac5ac304a5b3ba702d912",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/discrimination/search.rs",
+      "sha256": "ab2bc116f36d6ff34e84dca9295baafe71c78f37427955626028d6a737c48e05",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/epistemic.rs",
+      "sha256": "02f87c795787cdfce67c15df33d138498f028c49b62517100b1fed321cf10c45",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/development/predictive.rs",
+      "sha256": "7643b98eca62ecc68b33636ef10bbdcc779c47f35995c11e82011989affa99b2",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/experiential.rs",
+      "sha256": "84496663b9d89eaff9a7b97298780bcb0697413be4f7687db851bcca9a5f96c9",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/investigation.rs",
+      "sha256": "e2de2e5d722c53a196075ebf4546853b9a08674ea649f3e61664cdf14aa98d23",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/query.rs",
+      "sha256": "28dd134212341acc0d24fbbe15356e1988471cd97dc67ab05dd7281948d9dee8",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/integration/synaptic.rs",
+      "sha256": "6a464a00fef1c76717ccd6cd0751db827664307dc3fd1cfa9144a8e2f878b0f6",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/languages.rs",
+      "sha256": "726dff0be9ee7ffa85335c614e1370ce1a26239322581bc9dde90030324705db",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/languages/contextual.rs",
+      "sha256": "9005bda6c0b3d56c36e40639c9c61565e82b7111a75da4803106b90a2668b2a5",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/languages/sentences.rs",
+      "sha256": "554eeda26e884a0d01f440307835c978ee5ce22cd4fc020ec8640460c630bf1f",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/learning.rs",
+      "sha256": "ff31dcc8273148a605e6cad4e68e4f53cd6f02aaa988314c934ba957a7a66de1",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/learning/concepts.rs",
+      "sha256": "3f67b8e7a443e4775622df1b0ef56aa266539561a4d722b3dd09b1a1bac2e535",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "459274f169ec16b53335339863c692885316dfe3ce3e2ee77228dea2ce2bcac8",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/main.rs",
+      "sha256": "33d6249989e7812bfc3923f7f2cbc0d856eba680de8fdd1d6ff90ca1005048fa",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/metacognition.rs",
+      "sha256": "bd3c6f5d9cc5937d7082f7445c579a4b2c456104e5095c7af0e253f9af01a8f7",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/metacognition/concepts.rs",
+      "sha256": "317b3ecf0f526e951abccfe6056d1c0a6fb1ea97f52a770cc77d71959643269b",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/neuron.rs",
+      "sha256": "c5f4f25325a8012e90d3fe886215d6feced87ff4271b62e4ccc52824ae0fe8dd",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/persistence.rs",
+      "sha256": "db66f7c680b800735fdc4cca8e57cdb5165fc8c9b52ea2b2cf7763ab03e5f918",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/personality.rs",
+      "sha256": "1b3cc6af1bce2b8f1a104292e54f145b35a8b9cb8f5cfca31ff54bef559e426b",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/audit.rs",
+      "sha256": "b6eeb50b25b4e654a2283548b41eb1991c1b99a9a7cb6972eaf43d98e99d06c6",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/controls.rs",
+      "sha256": "380e9b0def256ca6df51d34df5bbb2d8c8055dfad2cf582cc89329a878c8e5f2",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/custody.rs",
+      "sha256": "9a18e44e820fa5109d631c0154f54b904e5ecbd9b4b8b12e4952fd67e13851ee",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/mod.rs",
+      "sha256": "fee6b9d742e90c329ece80febdb689d5c642957fbd6f02ded8bc96a80700b5fb",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/plan.rs",
+      "sha256": "cf611cfb0965a271a61ef053f9ff320ba38b26b59f233c6f929fae357bc0b2f3",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/conceptual/recording.rs",
+      "sha256": "f3d1f3cf853de7fde2db4ff16f9536c3d72ae980fe6543fd973eda313f0ca349",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/controls.rs",
+      "sha256": "3ee72c712b72f62d186b0d2018eb020d8276a98ca3014b9905395bea0ee7cac1",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/evaluator.rs",
+      "sha256": "3aa4279b2c61bbaab42c36700ab8b9f5c57addde5317f2bdc0a471216e50050a",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/fixtures.rs",
+      "sha256": "347259bd00c22e3690670e5ad4d0e05c2a6a28aa8da44e060195306aec70e4a9",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/history.rs",
+      "sha256": "1ed4a178003bca5ee6fc97bd7f42f648812cfc189c82eb8afc86c04f1c1593e0",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/protocol_verification/mod.rs",
+      "sha256": "229cda58db3b6b2628ffd89c20a31a86840e1f1700733c85cd72778d9d33560c",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/session.rs",
+      "sha256": "a65b1e475449252181ccdcbbc459cc38d242697ed6e143dc658bb37c5e7507f3",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/session/f1.rs",
+      "sha256": "bcf6053e4b2b02ef8e1df64f89e30d0b064f683782b3dc14f6ac93d8832910e8",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/session/f1/composed.rs",
+      "sha256": "98393b0d44382283bc129c636a5b1148cdce59d0d82f069fba83adccc08704f1",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/session/runtime.rs",
+      "sha256": "e8eb514ddd89103cc1473bcfa02997f741ef5291c9b3c91e6729f0536b7a0612",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/session/synaptic.rs",
+      "sha256": "4e977740d1716c9ec813f10b112f0b4365e3bda7c4443a870bf1b00cdc68f6ac",
+      "origin": "HEAD"
+    },
+    {
+      "path": "src/synapse.rs",
+      "sha256": "f25daf865e74950666cd8656fd6baa118b0fb9f52c8f7755463c3f7d6ad117bd",
+      "origin": "HEAD"
+    },
+    {
+      "path": "tests/concept_goal_supervision.rs",
+      "sha256": "256a1a52e2a0c7197226350be2c467fc71361bcfd345ea3c626721ffbeb7d16e",
+      "origin": "HEAD"
+    },
+    {
+      "path": "tests/development_runtime.rs",
+      "sha256": "70034bfd653175e721e406f50897b1754ee714c8192f2d86bdbaae3f29ad043e",
+      "origin": "HEAD"
+    },
+    {
+      "path": "tests/runtime_cli.rs",
+      "sha256": "af780f9a6918f4e842648babaaa7df3af87f4e8e3d44fc08d49a6afa7adc6251",
+      "origin": "HEAD"
+    },
+    {
+      "path": "tests/cpf_evidence_conformance.rs",
+      "sha256": "7ae949b6c705f10cbf9dcf53654554078febc3bcfddb05784b56799a3cda7bed",
+      "origin": "new C2-P1 conformance test"
+    }
+  ],
+  "integrity_before_documentation": {
+    "files_verified": 902,
+    "allowed_changed": [
+      "src/curriculum.rs"
+    ],
+    "historical_p0_unchanged": true,
+    "new_tests_frozen": true
+  },
+  "safety": "new target synthethic public and pure Session/MP09; three C1 targets and HEAD variants reviewed; no reserved tests, global suite, EC10 R3, E13 execution, AXN temporal or onedell",
+  "reproduction": "Working selection = 73 C1 sources + new test, only curriculum changed. Versioned clean candidate = clean_sources[] sourced entirely from HEAD plus reviewed CPF evidence insertion and new test; no eight untracked production sources. Logs distinguish 82 current local versus 75 preexisting published regression tests. Do not add counts as independent samples.",
+  "warnings": {
+    "working": "12 distinct dead_code diagnostics (3 axon, 9 neural_priority), repeated by builds",
+    "clean": "no warnings observed in the selected commands"
+  },
+  "patch_format": "Productive patches have zero context for archive whitespace; check source preimage hash and use git apply --unidiff-zero only in appropriate isolated copy. Operational patch uses one context line.",
+  "operational_updates": [
+    {
+      "path": "NEURONS_CONTROLE_MESTRE.md",
+      "before_sha256": "5b8748177e21a381dd0d19f3f8d63c16e1e8b3afd25370c3c746c6be680e704d",
+      "after_sha256": "86bceff82ff3d5fad8b081ddea0fc1eea41beaa3deccd1fc955f085086fbaa68",
+      "append_only": true,
+      "whole_file_publication": false
+    },
+    {
+      "path": "NEURONS_PIFI_001_PROGRESSO.md",
+      "before_sha256": "f33948bdb02608e1363e8654c9dc6489aedd03433d53eaf93ae03e86b3c6f4be",
+      "after_sha256": "fa502b3e2a199721f654e251b68895d956518725b69b84ff9cc89e9975adae64",
+      "append_only": true,
+      "whole_file_publication": false
+    }
+  ],
+  "working_rust_dependencies": [
+    "src/axon.rs",
+    "src/circuit.rs",
+    "src/circuit_persistence.rs",
+    "src/cognition.rs",
+    "src/cognition/bounded.rs",
+    "src/cognition/concepts.rs",
+    "src/cognitive_contracts.rs",
+    "src/curriculum.rs",
+    "src/dendrite.rs",
+    "src/engine.rs",
+    "src/engram.rs",
+    "src/event.rs",
+    "src/integration.rs",
+    "src/integration/acquisition.rs",
+    "src/integration/associative.rs",
+    "src/integration/cognitive_coordination.rs",
+    "src/integration/composed.rs",
+    "src/integration/composed_two.rs",
+    "src/integration/concepts.rs",
+    "src/integration/development.rs",
+    "src/integration/development/actions.rs",
+    "src/integration/development/archive.rs",
+    "src/integration/development/archive/selective.rs",
+    "src/integration/development/checkpoint.rs",
+    "src/integration/development/consequences.rs",
+    "src/integration/development/discrimination.rs",
+    "src/integration/development/discrimination/neural_priority.rs",
+    "src/integration/development/discrimination/search.rs",
+    "src/integration/development/epistemic.rs",
+    "src/integration/development/predictive.rs",
+    "src/integration/e13_bundle.rs",
+    "src/integration/e13_storage.rs",
+    "src/integration/experiential.rs",
+    "src/integration/investigation.rs",
+    "src/integration/query.rs",
+    "src/integration/synaptic.rs",
+    "src/languages.rs",
+    "src/languages/contextual.rs",
+    "src/languages/sentences.rs",
+    "src/learning.rs",
+    "src/learning/concepts.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/metacognition.rs",
+    "src/metacognition/concepts.rs",
+    "src/neuron.rs",
+    "src/persistence.rs",
+    "src/personality.rs",
+    "src/protocol_verification/conceptual/audit.rs",
+    "src/protocol_verification/conceptual/controls.rs",
+    "src/protocol_verification/conceptual/custody.rs",
+    "src/protocol_verification/conceptual/mod.rs",
+    "src/protocol_verification/conceptual/plan.rs",
+    "src/protocol_verification/conceptual/recording.rs",
+    "src/protocol_verification/controls.rs",
+    "src/protocol_verification/evaluator.rs",
+    "src/protocol_verification/fixtures.rs",
+    "src/protocol_verification/history.rs",
+    "src/protocol_verification/mod.rs",
+    "src/session.rs",
+    "src/session/conversation.rs",
+    "src/session/f1.rs",
+    "src/session/f1/composed.rs",
+    "src/session/intent.rs",
+    "src/session/runtime.rs",
+    "src/session/synaptic.rs",
+    "src/synapse.rs",
+    "tests/concept_goal_supervision.rs",
+    "tests/cpf_evidence_conformance.rs",
+    "tests/development_runtime.rs",
+    "tests/runtime_cli.rs"
+  ],
+  "clean_rust_dependencies": [
+    "src/circuit.rs",
+    "src/circuit_persistence.rs",
+    "src/cognition.rs",
+    "src/cognition/bounded.rs",
+    "src/cognition/concepts.rs",
+    "src/cognitive_contracts.rs",
+    "src/curriculum.rs",
+    "src/dendrite.rs",
+    "src/engine.rs",
+    "src/engram.rs",
+    "src/event.rs",
+    "src/integration.rs",
+    "src/integration/acquisition.rs",
+    "src/integration/composed.rs",
+    "src/integration/composed_two.rs",
+    "src/integration/concepts.rs",
+    "src/integration/development.rs",
+    "src/integration/development/actions.rs",
+    "src/integration/development/archive.rs",
+    "src/integration/development/archive/selective.rs",
+    "src/integration/development/checkpoint.rs",
+    "src/integration/development/consequences.rs",
+    "src/integration/development/discrimination.rs",
+    "src/integration/development/discrimination/search.rs",
+    "src/integration/development/epistemic.rs",
+    "src/integration/development/predictive.rs",
+    "src/integration/experiential.rs",
+    "src/integration/investigation.rs",
+    "src/integration/query.rs",
+    "src/integration/synaptic.rs",
+    "src/languages.rs",
+    "src/languages/contextual.rs",
+    "src/languages/sentences.rs",
+    "src/learning.rs",
+    "src/learning/concepts.rs",
+    "src/lib.rs",
+    "src/main.rs",
+    "src/metacognition.rs",
+    "src/metacognition/concepts.rs",
+    "src/neuron.rs",
+    "src/persistence.rs",
+    "src/personality.rs",
+    "src/protocol_verification/conceptual/audit.rs",
+    "src/protocol_verification/conceptual/controls.rs",
+    "src/protocol_verification/conceptual/custody.rs",
+    "src/protocol_verification/conceptual/mod.rs",
+    "src/protocol_verification/conceptual/plan.rs",
+    "src/protocol_verification/conceptual/recording.rs",
+    "src/protocol_verification/controls.rs",
+    "src/protocol_verification/evaluator.rs",
+    "src/protocol_verification/fixtures.rs",
+    "src/protocol_verification/history.rs",
+    "src/protocol_verification/mod.rs",
+    "src/session.rs",
+    "src/session/f1.rs",
+    "src/session/f1/composed.rs",
+    "src/session/runtime.rs",
+    "src/session/synaptic.rs",
+    "src/synapse.rs",
+    "tests/concept_goal_supervision.rs",
+    "tests/cpf_evidence_conformance.rs",
+    "tests/development_runtime.rs",
+    "tests/runtime_cli.rs"
+  ],
+  "publication_scope": [
+    "src/curriculum.rs",
+    "tests/cpf_evidence_conformance.rs",
+    "docs/referencia/NCM-001_C2-P1_atualizacoes_operacionais_2026-11-23.patch",
+    "docs/referencia/NCM-001_C2-P1_diff_aplicado_2026-11-23.patch",
+    "docs/referencia/NCM-001_C2-P1_diff_publicacao_2026-11-23.patch",
+    "docs/referencia/NCM-001_C2-P1_manifesto_2026-11-23.json",
+    "docs/referencia/NCM-001_C2-P1_matriz_2026-11-23.csv",
+    "docs/referencia/NCM-001_C2-P1_relatorio_2026-11-23.md",
+    "docs/referencia/NCM-001_C2-P1_validacao_2026-11-23.log"
+  ],
+  "evidence_sha256": {
+    "tests/cpf_evidence_conformance.rs": "7ae949b6c705f10cbf9dcf53654554078febc3bcfddb05784b56799a3cda7bed",
+    "docs/referencia/NCM-001_C2-P1_atualizacoes_operacionais_2026-11-23.patch": "5763639f9bb61714894d7dc858ef84108e357caf87421c17c42ba580b1c69b84",
+    "docs/referencia/NCM-001_C2-P1_diff_aplicado_2026-11-23.patch": "b28c2460744e5fd404596b253675f896bce350a5ae26d29f4b91207b2e7981b8",
+    "docs/referencia/NCM-001_C2-P1_diff_publicacao_2026-11-23.patch": "4a26fb949149e5502249a426891ebaab7fc5e1f1b452633a733b24ddb96c7b6e",
+    "docs/referencia/NCM-001_C2-P1_matriz_2026-11-23.csv": "c43ac9edde3207e466314365a9a089ae422ada6d271136626e8ac53f2c2eb195",
+    "docs/referencia/NCM-001_C2-P1_relatorio_2026-11-23.md": "b684862183df2bfc60e0589c6d70aed26944a1d02d1a627e883718f3c3f9308e",
+    "docs/referencia/NCM-001_C2-P1_validacao_2026-11-23.log": "bb058f9a45f0a7f45ba47e6e7b2f3fec71b34a3cbf2a04f0665a183adf10e67a"
+  },
+  "git_source_staging": "git apply --cached on exclusive HEAD->candidate patch, verified exact candidate hash; never add mixed worktree curriculum wholesale.",
+  "publication_checks": {
+    "matrix_normalization": "Primeira checagem do indice rejeitou CRLF do CSV como whitespace; somente matriz nova normalizada para LF, campos e valores identicos; codigo/teste nao alterados.",
+    "git_apply_cached_retry": "Primeira tentativa bloqueada por filesystem somente leitura em .git; repetida com permissao escalada para staging exclusivo do recorte validado."
+  }
+}
